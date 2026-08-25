@@ -1,0 +1,138 @@
+/**
+ * ============================================================
+ * 设计规范变量（Design Tokens）
+ * 全局唯一的设计来源：所有组件/页面样式必须优先复用此处变量
+ * 新增/修改设计规范时，请同步更新 src/config/antdTheme.ts
+ * ============================================================
+ */
+
+/* ===== 品牌色 / 功能色 ===== */
+@color-primary: #27866b; // 主品牌色
+@color-primary-dark: #185d4c; // 强调与悬停
+@color-primary-light: #e8f4f0; // 成功 / 品牌浅底色
+@color-info: #3478f6; // 信息与链接
+@color-warning: #f3b56a; // 提醒
+@color-danger: #f45b4f; // 风险与退款
+
+/* ===== 中性色 ===== */
+@color-bg-page: #f5f7f5; // 页面背景（取自设计稿）
+@color-bg-card: #ffffff; // 卡片表面
+@color-text-primary: #1f2d2a; // 主文字
+@color-text-secondary: #66736f; // 次级文字
+@color-border: #ebedea; // 边框 / 分割线
+
+/* ===== 字体 ===== */
+@font-family-base: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+  'PingFang SC', 'Microsoft YaHei', sans-serif;
+
+/* ===== 侧边栏（深绿配色，取自设计稿） ===== */
+@color-sider-bg: #075544; // 侧边栏背景
+@color-sider-selected: #097d63; // 选中项背景
+@color-sider-text: #c0dcd3; // 菜单文字
+@color-sider-icon: #57a694; // 菜单图标
+@color-sider-group: #6bab9b; // 分组标题文字
+
+/* ===== 登录 / 找回密码 / 选择机构（取自设计稿） ===== */
+@color-login-panel-start: #0b4130; // 左侧品牌面板渐变起点
+@color-login-panel-end: #276551; // 左侧品牌面板渐变终点
+@color-login-deco: rgba(255, 255, 255, 0.05); // 品牌面板装饰圆
+@color-login-feature-bg: rgba(255, 255, 255, 0.08); // 品牌面板特性卡片
+@color-login-feature-icon: #acd7c2; // 特性卡片图标底色
+@color-login-text-on-dark: #b0cfc1; // 深底辅助文字
+@color-login-footer-on-dark: #689885; // 深底页脚文字
+@color-login-cta: #16856b; // 登录 / 进入机构主按钮
+@color-login-tip-bg: #eaf5f1; // 提示框 / 获取验证码按钮底色
+@color-login-tip-text: #3e9a84; // 提示框 / 获取验证码文字
+@color-org-banner-bg: #e5f7ed; // 选择机构提示横幅
+@color-org-selected-border: #197a59; // 机构卡片选中边框
+@color-org-scope-bg: #f6f8f7; // 机构卡片数据范围区块
+
+/* ===== 健康档案（取自设计稿） ===== */
+@color-risk-high: #d4380d; // 高风险文字
+@color-risk-high-bg: #fdf0ec; // 高风险标签底色
+@color-risk-mid: #c47f1a; // 中风险文字
+@color-risk-mid-bg: #fdf6e3; // 中风险标签底色
+@color-risk-low: #27866b; // 低风险文字
+@color-risk-low-bg: #e8f4f0; // 低风险标签底色
+@color-disease-tag: #3478f6; // 病种标签文字
+@color-disease-tag-bg: #eaf1f8; // 病种标签底色
+@color-health-banner-bg: #eaf5f1; // 成功提示横幅底色
+@color-health-note-bg: #fdf6e3; // 处理说明提示底色
+
+/* ===== 工作台（取自设计稿） ===== */
+@color-wb-banner-bg: #fdf6e3; // 告警横幅底色
+@color-wb-quick-bg: #edf4f0; // 快捷入口默认底色
+@color-wb-quick-warn-bg: #fdf6e3; // 快捷入口警示底色
+@color-wb-quick-info-bg: #eaf1f8; // 快捷入口专业信息底色（审核医生）
+@color-wb-quick-info-text: #4a7dc2; // 快捷入口专业信息文字色
+@color-wb-trend-bar: #b7d6c9; // 趋势图柱条
+@color-wb-trend-bar-active: #16856b; // 趋势图当前柱条
+
+/* ===== 字号 / 行高 / 字重 ===== */
+// 页面主标题
+@font-size-title-page: 28px;
+@line-height-title-page: 40px;
+@font-weight-title-page: 700;
+
+// 模块标题
+@font-size-title-module: 20px;
+@line-height-title-module: 28px;
+@font-weight-title-module: 700;
+
+// 卡片标题
+@font-size-title-card: 16px;
+@line-height-title-card: 24px;
+@font-weight-title-card: 500;
+
+// 正文与表格内容
+@font-size-body: 14px;
+@line-height-body: 22px;
+@font-weight-body: 400;
+
+// 强调正文
+@font-size-body-medium: 14px;
+@line-height-body-medium: 22px;
+@font-weight-body-medium: 500;
+
+// 辅助说明
+@font-size-auxiliary: 12px;
+@line-height-auxiliary: 18px;
+@font-weight-auxiliary: 400;
+
+// 标签与字段名
+@font-size-label: 13px;
+@line-height-label: 20px;
+@font-weight-label: 500;
+
+// 经营指标
+@font-size-metric: 28px;
+@line-height-metric: 36px;
+@font-weight-metric: 700;
+
+/* ===== 间距 ===== */
+@spacing-2xs: 4px;
+@spacing-xs: 8px;
+@spacing-sm: 12px;
+@spacing-md: 16px;
+@spacing-lg: 20px;
+@spacing-xl: 24px;
+@spacing-2xl: 32px;
+@spacing-3xl: 40px;
+@spacing-touch-min: 44px;
+@spacing-button-large: 48px;
+
+/* ===== 圆角 / 阴影 ===== */
+@radius-xs: 4px;
+@radius-sm: 8px;
+@radius-md: 12px;
+@radius-lg: 16px;
+@radius-xl: 20px;
+@radius-full: 999px;
+
+// 卡片阴影（默认层级）
+@shadow-card: 0 1px 2px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.04);
+
+/* ===== 布局尺寸 ===== */
+@sider-width: 220px;
+@sider-width-collapsed: 64px;
+@header-height: 56px;

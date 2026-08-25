@@ -1,0 +1,331 @@
+/**
+ * 登录页样式（设计稿：左右分栏，左品牌面板深绿渐变，右表单区白底）
+ */
+
+.login-page {
+  display: flex;
+  min-height: 100vh;
+
+  /* ===== 右侧表单区 ===== */
+  &__panel {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    background: @color-bg-card;
+    padding: 120px @spacing-3xl @spacing-3xl;
+  }
+
+  &__form {
+    width: 100%;
+    max-width: 400px;
+  }
+}
+
+/* ===== 左侧品牌面板 ===== */
+.login-brand {
+  position: relative;
+  flex: 0 0 55%;
+  overflow: hidden;
+  padding: @spacing-2xl @spacing-3xl;
+  background: linear-gradient(135deg, @color-login-panel-start 0%, @color-login-panel-end 100%);
+  display: flex;
+  flex-direction: column;
+
+  // 装饰圆
+  &__deco {
+    position: absolute;
+    border-radius: @radius-full;
+    background: @color-login-deco;
+    pointer-events: none;
+
+    &--tr {
+      width: 480px;
+      height: 480px;
+      top: -160px;
+      right: -120px;
+    }
+
+    &--bl {
+      width: 380px;
+      height: 380px;
+      bottom: -140px;
+      left: -100px;
+    }
+  }
+
+  &__header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: @spacing-sm;
+  }
+
+  &__logo {
+    width: 40px;
+    height: 40px;
+    border-radius: @radius-sm;
+    background: @color-bg-card;
+    color: @color-login-cta;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__name {
+    color: #fff;
+    font-size: @font-size-title-card;
+    font-weight: @font-weight-title-card;
+    line-height: @line-height-title-card;
+  }
+
+  &__slogan {
+    color: @color-login-text-on-dark;
+    font-size: @font-size-auxiliary;
+    line-height: @line-height-auxiliary;
+  }
+
+  &__headline {
+    position: relative;
+    margin: 96px 0 0;
+    color: #fff;
+    font-size: 34px;
+    line-height: 48px;
+    font-weight: 700;
+  }
+
+  &__desc {
+    position: relative;
+    margin: @spacing-md 0 0;
+    color: @color-login-text-on-dark;
+    font-size: @font-size-body;
+    line-height: 26px;
+  }
+
+  &__features {
+    position: relative;
+    display: flex;
+    gap: @spacing-md;
+    margin-top: 72px;
+  }
+
+  &__feature {
+    flex: 1;
+    padding: @spacing-lg;
+    border-radius: @radius-md;
+    background: @color-login-feature-bg;
+  }
+
+  &__feature-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: @radius-sm;
+    background: @color-login-feature-icon;
+    color: @color-login-panel-start;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__feature-title {
+    margin-top: @spacing-sm;
+    color: #fff;
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+    line-height: @line-height-body;
+  }
+
+  &__feature-desc {
+    margin-top: @spacing-2xs;
+    color: @color-login-text-on-dark;
+    font-size: @font-size-auxiliary;
+    line-height: @line-height-auxiliary;
+  }
+
+  &__footer {
+    position: relative;
+    margin-top: auto;
+    padding-top: @spacing-2xl;
+    color: @color-login-footer-on-dark;
+    font-size: @font-size-auxiliary;
+    line-height: @line-height-auxiliary;
+  }
+}
+
+/* ===== 登录 / 找回密码表单 ===== */
+.login-form {
+  &__title {
+    margin: 0;
+    .text-title-page();
+    font-size: 24px;
+    line-height: 34px;
+  }
+
+  &__subtitle {
+    margin: @spacing-xs 0 @spacing-xl;
+    .text-auxiliary();
+    font-size: @font-size-body;
+  }
+
+  &__forgot {
+    display: flex;
+    justify-content: flex-end;
+    margin: -@spacing-xs 0 @spacing-md;
+
+    .ant-btn {
+      padding: 0;
+      height: auto;
+      color: @color-login-cta;
+      font-size: @font-size-auxiliary;
+    }
+  }
+
+  &__code-row {
+    display: flex;
+    gap: @spacing-sm;
+
+    .ant-input {
+      flex: 1;
+    }
+  }
+
+  &__code-btn {
+    flex: 0 0 auto;
+    border: none;
+    background: @color-login-tip-bg;
+    color: @color-login-tip-text;
+
+    &:hover:not(:disabled) {
+      background: @color-login-tip-bg;
+      color: @color-login-cta;
+    }
+  }
+
+  &__helper {
+    margin: -@spacing-xs 0 @spacing-md;
+    .text-auxiliary();
+  }
+
+  &__submit {
+    height: 46px;
+    border-radius: @radius-sm;
+    font-size: 15px;
+    font-weight: @font-weight-body-medium;
+    background: @color-login-cta;
+    border-color: @color-login-cta;
+
+    &:hover:not(:disabled) {
+      background: @color-org-selected-border;
+      border-color: @color-org-selected-border;
+    }
+  }
+
+  &__ghost {
+    height: 46px;
+    margin-top: @spacing-sm;
+    border-radius: @radius-sm;
+    color: @color-login-cta;
+    border-color: @color-login-cta;
+  }
+
+  &__tip {
+    margin-top: @spacing-md;
+    padding: @spacing-sm @spacing-md;
+    border-radius: @radius-sm;
+    background: @color-login-tip-bg;
+    color: @color-login-tip-text;
+    font-size: @font-size-auxiliary;
+    line-height: @line-height-auxiliary;
+  }
+}
+
+/* ===== 找回密码 ===== */
+.forgot-form {
+  &__steps {
+    display: flex;
+    gap: @spacing-2xl;
+    margin-bottom: @spacing-xl;
+    border-bottom: 1px solid @color-border;
+  }
+
+  &__step {
+    padding-bottom: @spacing-sm;
+    color: @color-text-secondary;
+    font-size: @font-size-body;
+    line-height: @line-height-body;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+
+    &--active {
+      color: @color-login-cta;
+      font-weight: @font-weight-body-medium;
+      border-bottom-color: @color-login-cta;
+    }
+  }
+
+  &__note {
+    margin: @spacing-md 0 0;
+    .text-auxiliary();
+  }
+
+  &__rule {
+    margin: 0 0 @spacing-md;
+    padding: @spacing-sm @spacing-md;
+    border-radius: @radius-sm;
+    background: @color-login-tip-bg;
+    color: @color-login-tip-text;
+    font-size: @font-size-auxiliary;
+    line-height: @line-height-auxiliary;
+
+    p {
+      margin: 0;
+    }
+  }
+
+  &__rule-checks {
+    display: flex;
+    gap: @spacing-md;
+    margin-top: @spacing-2xs;
+  }
+
+  &__success {
+    text-align: center;
+    padding-top: @spacing-2xl;
+
+    &-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto;
+      border-radius: @radius-full;
+      background: @color-login-tip-bg;
+      color: @color-login-cta;
+      font-size: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    &-title {
+      margin-top: @spacing-md;
+      .text-title-card();
+      font-size: @font-size-title-module;
+    }
+
+    &-desc {
+      margin: @spacing-xs 0 @spacing-xl;
+      .text-auxiliary();
+    }
+  }
+}
+
+/* ===== 窄屏适配：隐藏品牌面板 ===== */
+@media (max-width: 960px) {
+  .login-brand {
+    display: none;
+  }
+
+  .login-page__panel {
+    padding-top: 80px;
+  }
+}

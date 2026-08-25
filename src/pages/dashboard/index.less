@@ -1,0 +1,30 @@
+.metric-card {
+  .card-surface();
+
+  &__label {
+    .text-label();
+    margin-bottom: @spacing-sm;
+  }
+
+  &__value {
+    .text-metric();
+    color: @color-primary;
+  }
+
+  &__suffix {
+    margin-left: @spacing-xs;
+    font-size: @font-size-body;
+    font-weight: @font-weight-body;
+    color: @color-text-secondary;
+  }
+
+  &__placeholder {
+    height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: @color-text-secondary;
+    background: @color-bg-page;
+    border-radius: @radius-md;
+  }
+}

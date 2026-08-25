@@ -1,0 +1,283 @@
+/**
+ * 选择机构页样式（设计稿：白顶栏 + 浅灰绿内容区 + 机构卡片网格）
+ */
+
+.select-org {
+  min-height: 100vh;
+  background: @color-bg-page;
+  display: flex;
+  flex-direction: column;
+
+  /* ===== 顶部导航 ===== */
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    padding: 0 @spacing-2xl;
+    background: @color-bg-card;
+    box-shadow: 0 1px 4px rgba(31, 45, 42, 0.06);
+  }
+
+  &__brand {
+    display: flex;
+    align-items: center;
+    gap: @spacing-sm;
+  }
+
+  &__logo {
+    width: 36px;
+    height: 36px;
+    border-radius: @radius-sm;
+    background: @color-login-cta;
+    color: #fff;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__brand-name {
+    .text-title-card();
+  }
+
+  &__brand-sub {
+    .text-auxiliary();
+  }
+
+  &__user {
+    display: flex;
+    align-items: center;
+    gap: @spacing-sm;
+  }
+
+  &__avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: @radius-full;
+    background: @color-login-tip-bg;
+    color: @color-login-cta;
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__user-name {
+    .text-body-medium();
+  }
+
+  &__user-account {
+    .text-auxiliary();
+  }
+
+  &__logout {
+    color: @color-login-cta;
+  }
+
+  /* ===== 内容区 ===== */
+  &__body {
+    flex: 1;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: @spacing-3xl @spacing-xl;
+  }
+
+  &__title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: @spacing-xl;
+  }
+
+  &__title {
+    margin: 0;
+    .text-title-page();
+  }
+
+  &__subtitle {
+    margin: @spacing-xs 0 0;
+    .text-auxiliary();
+    font-size: @font-size-body;
+  }
+
+  &__search {
+    width: 280px;
+    flex: 0 0 auto;
+  }
+
+  &__banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: @spacing-md;
+    margin-top: @spacing-xl;
+    padding: @spacing-sm @spacing-md;
+    border-radius: @radius-sm;
+    background: @color-org-banner-bg;
+    color: @color-login-cta;
+    font-size: @font-size-auxiliary;
+    line-height: @line-height-auxiliary;
+  }
+
+  &__banner-filter {
+    display: flex;
+    align-items: center;
+    gap: @spacing-xs;
+    white-space: nowrap;
+  }
+
+  /* ===== 机构卡片 ===== */
+  &__cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: @spacing-xl;
+    margin-top: @spacing-xl;
+  }
+
+  /* ===== 底部操作 ===== */
+  &__footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: @spacing-md;
+    margin-top: @spacing-2xl;
+  }
+
+  &__enter {
+    width: 260px;
+    height: 46px;
+    border-radius: @radius-sm;
+    font-size: 15px;
+    font-weight: @font-weight-body-medium;
+    background: @color-login-cta;
+    border-color: @color-login-cta;
+
+    &:hover:not(:disabled) {
+      background: @color-org-selected-border;
+      border-color: @color-org-selected-border;
+    }
+  }
+
+  &__note {
+    margin: 0;
+    .text-auxiliary();
+  }
+}
+
+/* ===== 机构卡片 ===== */
+.org-card {
+  position: relative;
+  padding: @spacing-xl;
+  border: 1px solid @color-border;
+  border-radius: @radius-md;
+  background: @color-bg-card;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    border-color: @color-org-selected-border;
+  }
+
+  &--selected {
+    border: 2px solid @color-org-selected-border;
+    padding: calc(@spacing-xl - 1px);
+  }
+
+  &__badge {
+    position: absolute;
+    top: @spacing-md;
+    right: @spacing-md;
+    padding: 2px @spacing-xs;
+    border-radius: @radius-xs;
+    background: @color-org-banner-bg;
+    color: @color-org-selected-border;
+    font-size: @font-size-auxiliary;
+    line-height: @line-height-auxiliary;
+  }
+
+  &__icon {
+    width: 48px;
+    height: 48px;
+    border-radius: @radius-sm;
+    background: @color-login-tip-bg;
+    color: @color-login-cta;
+    font-size: @font-size-title-module;
+    font-weight: @font-weight-title-module;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__name {
+    margin-top: @spacing-md;
+    .text-title-card();
+    font-size: 18px;
+    line-height: 26px;
+  }
+
+  &__tags {
+    margin-top: @spacing-sm;
+    display: flex;
+    gap: @spacing-xs;
+  }
+
+  &__tag {
+    margin-inline-end: 0;
+    border: none;
+    border-radius: @radius-xs;
+
+    &--type {
+      background: #eaf2fc;
+      color: #4a7dc2;
+    }
+
+    &--role {
+      background: @color-org-banner-bg;
+      color: @color-org-selected-border;
+    }
+  }
+
+  &__scope {
+    margin-top: @spacing-md;
+    padding: @spacing-sm @spacing-md;
+    border-radius: @radius-sm;
+    background: @color-org-scope-bg;
+  }
+
+  &__scope-label {
+    .text-auxiliary();
+  }
+
+  &__scope-main {
+    margin-top: @spacing-2xs;
+    .text-body-medium();
+  }
+
+  &__scope-detail {
+    margin-top: @spacing-2xs;
+    .text-auxiliary();
+  }
+
+  &__visit {
+    margin-top: @spacing-md;
+    .text-auxiliary();
+  }
+
+  &__action {
+    margin-top: @spacing-xs;
+  }
+
+  &__pick {
+    color: @color-login-cta;
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__current {
+    color: @color-text-secondary;
+    font-size: @font-size-body;
+  }
+}

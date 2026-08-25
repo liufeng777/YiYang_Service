@@ -1,0 +1,117 @@
+.basic-layout {
+  min-height: 100vh;
+
+  &__sider {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: auto;
+    background: @color-sider-bg;
+
+    // 菜单分组标题（客户与健康管理 / 服务履约 等）配色取自设计稿
+    .ant-menu-item-group-title {
+      color: @color-sider-group;
+      font-size: @font-size-auxiliary;
+      padding: @spacing-md @spacing-lg @spacing-xs;
+    }
+
+    // 菜单图标配色
+    .ant-menu-item .anticon {
+      color: @color-sider-icon;
+    }
+  }
+
+  &__logo {
+    min-height: @header-height;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding: @spacing-xs @spacing-lg;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  &__logo-title {
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 24px;
+  }
+
+  &__logo-sub {
+    color: @color-sider-text;
+    font-size: @font-size-auxiliary;
+    line-height: @line-height-auxiliary;
+  }
+
+  &__main {
+    min-width: 0;
+    background: @color-bg-page;
+  }
+
+  &__content {
+    min-height: calc(100vh - @header-height);
+    overflow: auto;
+  }
+}
+
+.layout-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 @spacing-md;
+  box-shadow: 0 1px 4px rgba(31, 45, 42, 0.06);
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: @spacing-sm;
+  }
+
+  &__trigger {
+    font-size: 16px;
+  }
+
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: @spacing-lg;
+  }
+
+  &__field-label {
+    display: block;
+    .text-auxiliary();
+    font-size: 11px;
+    line-height: 16px;
+  }
+
+  &__org {
+    cursor: pointer;
+    text-align: left;
+  }
+
+  &__org-name {
+    display: block;
+    .text-body-medium();
+    color: @color-login-cta;
+    line-height: 20px;
+  }
+
+  &__search {
+    .ant-input-affix-wrapper,
+    .ant-input {
+      width: 160px;
+    }
+  }
+
+  &__user {
+    cursor: pointer;
+    padding: 0 @spacing-sm;
+    color: @color-text-primary;
+    font-size: @font-size-body;
+  }
+}

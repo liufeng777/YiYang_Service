@@ -1,0 +1,299 @@
+/**
+ * 工作台样式（六个岗位模板共用，配色变量见 variables.less @color-wb-*）
+ */
+
+.workbench-page {
+  &__panels {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: @spacing-md;
+    margin-top: @spacing-md;
+  }
+}
+
+/* ===== 告警横幅 ===== */
+.wb-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: @spacing-md;
+  padding: @spacing-md @spacing-lg;
+  border-radius: @radius-md;
+  background: @color-wb-banner-bg;
+
+  &__title {
+    color: @color-danger;
+    font-size: @font-size-title-card;
+    font-weight: @font-weight-title-card;
+    line-height: @line-height-title-card;
+  }
+
+  &__count {
+    margin-left: @spacing-2xs;
+  }
+
+  &__desc {
+    margin-top: @spacing-2xs;
+    .text-auxiliary();
+    font-size: @font-size-label;
+  }
+
+  &__action {
+    flex: 0 0 auto;
+    color: @color-login-cta;
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+  }
+}
+
+/* ===== 指标卡片 ===== */
+.wb-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: @spacing-md;
+  margin-top: @spacing-md;
+}
+
+.wb-metric {
+  position: relative;
+  padding: @spacing-lg;
+  .card-surface();
+  min-height: 108px;
+
+  &__label {
+    .text-label();
+  }
+
+  &__value {
+    margin-top: @spacing-sm;
+    .text-metric();
+
+    &--danger {
+      color: @color-danger;
+    }
+  }
+
+  &__suffix {
+    margin-left: @spacing-2xs;
+    font-size: @font-size-body;
+    font-weight: @font-weight-body;
+  }
+
+  &__link {
+    position: absolute;
+    right: @spacing-lg;
+    bottom: @spacing-md;
+    color: @color-login-cta;
+    font-size: @font-size-auxiliary;
+    line-height: @line-height-auxiliary;
+  }
+}
+
+/* ===== 通用面板 ===== */
+.wb-panel {
+  padding: @spacing-lg;
+  .card-surface();
+
+  &__title {
+    .text-title-card();
+    margin-bottom: @spacing-sm;
+  }
+}
+
+/* ===== 列表面板 ===== */
+.wb-list {
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: @spacing-md;
+    padding: @spacing-md 0;
+    border-bottom: 1px solid @color-border;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__left {
+    flex: 0 0 220px;
+    display: flex;
+    align-items: center;
+    gap: @spacing-sm;
+    min-width: 0;
+  }
+
+  &__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: @radius-full;
+    background: @color-primary;
+    flex: 0 0 auto;
+
+    &--danger {
+      background: @color-danger;
+    }
+  }
+
+  &__title {
+    .text-body-medium();
+    .ellipsis();
+  }
+
+  &__info {
+    flex: 1;
+    .text-auxiliary();
+    font-size: @font-size-label;
+    .ellipsis();
+  }
+
+  &__tag {
+    flex: 0 0 auto;
+    font-size: @font-size-label;
+    line-height: @line-height-label;
+
+    &--danger {
+      color: @color-danger;
+      font-weight: @font-weight-body-medium;
+    }
+
+    &--success {
+      color: @color-login-cta;
+      font-weight: @font-weight-body-medium;
+    }
+
+    &--muted {
+      color: @color-text-secondary;
+    }
+  }
+}
+
+/* ===== 统计面板 ===== */
+.wb-stats {
+  &__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: @spacing-md 0;
+    border-bottom: 1px solid @color-border;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  &__label {
+    .text-auxiliary();
+    font-size: @font-size-label;
+  }
+
+  &__value {
+    .text-title-module();
+
+    &--danger {
+      color: @color-danger;
+    }
+  }
+}
+
+/* ===== 趋势面板 ===== */
+.wb-trend {
+  &__bars {
+    display: flex;
+    align-items: flex-end;
+    gap: @spacing-sm;
+    height: 140px;
+    padding: @spacing-md;
+    border-radius: @radius-sm;
+    background: @color-org-scope-bg;
+  }
+
+  &__bar {
+    flex: 1;
+    border-radius: @radius-xs @radius-xs 0 0;
+    background: @color-wb-trend-bar;
+
+    &--active {
+      background: @color-wb-trend-bar-active;
+    }
+  }
+
+  &__stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: @spacing-md;
+    margin-top: @spacing-md;
+  }
+
+  &__stat-label {
+    .text-auxiliary();
+  }
+
+  &__stat-value {
+    margin-top: @spacing-2xs;
+    .text-metric();
+    font-size: @font-size-title-module;
+    line-height: @line-height-title-module;
+
+    &--danger {
+      color: @color-danger;
+    }
+  }
+
+  &__footnote {
+    margin-top: @spacing-md;
+    .text-auxiliary();
+    font-size: @font-size-label;
+  }
+}
+
+/* ===== 快捷入口 ===== */
+.wb-quick {
+  margin-top: @spacing-md;
+
+  &__links {
+    display: flex;
+    gap: @spacing-md;
+    flex-wrap: wrap;
+  }
+
+  &__link {
+    min-width: 150px;
+    padding: @spacing-md @spacing-lg;
+    border-radius: @radius-sm;
+    background: @color-wb-quick-bg;
+    color: @color-text-primary;
+    text-align: center;
+    font-size: @font-size-body;
+    line-height: @line-height-body;
+    transition: opacity 0.2s;
+
+    &:hover {
+      opacity: 0.85;
+      color: @color-text-primary;
+    }
+
+    &--warn {
+      background: @color-wb-quick-warn-bg;
+    }
+
+    &--info {
+      background: @color-wb-quick-info-bg;
+      color: @color-wb-quick-info-text;
+
+      &:hover {
+        color: @color-wb-quick-info-text;
+      }
+    }
+  }
+}
+
+/* ===== 窄屏适配 ===== */
+@media (max-width: 1200px) {
+  .wb-metrics {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .workbench-page__panels {
+    grid-template-columns: 1fr;
+  }
+}
