@@ -1,0 +1,539 @@
+/**
+ * 团队管理模块样式（团队列表 / 新建团队 / 团队详情 / 待分配患者 / 批量分配）
+ */
+
+.team-page {
+  width: 100%;
+}
+
+/* ===== 通用 ===== */
+.team-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px @spacing-xs;
+  border-radius: @radius-xs;
+  font-size: @font-size-auxiliary;
+  line-height: @line-height-auxiliary;
+  font-weight: @font-weight-label;
+
+  &--green {
+    background: @color-risk-low-bg;
+    color: @color-risk-low;
+  }
+
+  &--blue {
+    background: @color-disease-tag-bg;
+    color: @color-disease-tag;
+  }
+
+  &--orange {
+    background: @color-risk-mid-bg;
+    color: @color-risk-mid;
+  }
+
+  &--red {
+    background: @color-risk-high-bg;
+    color: @color-risk-high;
+  }
+
+  &--teal {
+    background: @color-primary-light;
+    color: @color-login-cta;
+  }
+}
+
+.team-text--danger {
+  color: @color-risk-high;
+}
+
+.team-text--link {
+  color: @color-primary;
+  cursor: pointer;
+}
+
+.team-text--muted {
+  color: @color-text-secondary;
+}
+
+.team-text--blue {
+  color: @color-disease-tag;
+}
+
+.team-text--green {
+  color: @color-risk-low;
+}
+
+.team-text--orange {
+  color: @color-risk-mid;
+}
+
+.team-text--red {
+  color: @color-risk-high;
+}
+
+.team-required {
+  color: @color-risk-high;
+}
+
+.team-note {
+  .text-auxiliary();
+  margin-top: @spacing-md;
+
+  &--green {
+    background: @color-health-banner-bg;
+    color: @color-login-cta;
+    border-radius: @radius-sm;
+    padding: @spacing-sm @spacing-md;
+  }
+}
+
+.team-card {
+  .card-surface();
+  padding: @spacing-lg @spacing-xl;
+  margin-top: @spacing-md;
+
+  &__sub {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+}
+
+.team-section__title {
+  font-size: @font-size-title-card;
+  line-height: @line-height-title-card;
+  font-weight: @font-weight-body-medium;
+  margin-bottom: @spacing-md;
+}
+
+.team-field {
+  margin-bottom: @spacing-lg;
+
+  &__label {
+    font-size: @font-size-label;
+    line-height: @line-height-label;
+    font-weight: @font-weight-label;
+    margin-bottom: @spacing-xs;
+  }
+
+  &__switch {
+    display: flex;
+    align-items: center;
+    gap: @spacing-sm;
+    font-size: @font-size-body;
+    height: 32px;
+  }
+
+  .ant-select,
+  .ant-picker {
+    width: 100%;
+  }
+}
+
+/* ===== 列表页 ===== */
+.team-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: @spacing-md;
+
+  &--3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.team-stat {
+  .card-surface();
+  padding: @spacing-lg @spacing-xl;
+
+  &--link {
+    cursor: pointer;
+  }
+
+  &__label {
+    .text-auxiliary();
+    font-size: @font-size-label;
+  }
+
+  &__body {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: @spacing-2xs;
+  }
+
+  &__value {
+    .text-metric();
+
+    &--orange {
+      color: @color-risk-mid;
+    }
+  }
+
+  &__note {
+    .text-auxiliary();
+
+    &--green {
+      color: @color-risk-low;
+    }
+
+    &--blue {
+      color: @color-info;
+    }
+
+    &--orange {
+      color: @color-risk-mid;
+    }
+
+    &--red {
+      color: @color-risk-high;
+    }
+  }
+}
+
+.team-filters {
+  .card-surface();
+  margin-top: @spacing-md;
+  padding: @spacing-lg @spacing-xl;
+  display: flex;
+  gap: @spacing-md;
+  flex-wrap: wrap;
+  align-items: flex-end;
+
+  &__item {
+    flex: 1;
+    min-width: 180px;
+
+    .ant-select,
+    .ant-input-affix-wrapper,
+    .ant-input {
+      width: 100%;
+    }
+  }
+
+  &__label {
+    .text-auxiliary();
+    margin-bottom: @spacing-2xs;
+  }
+
+  &__actions {
+    display: flex;
+    gap: @spacing-sm;
+  }
+
+  &--inline {
+    align-items: center;
+  }
+}
+
+.team-list {
+  .card-surface();
+  margin-top: @spacing-md;
+  padding: @spacing-sm @spacing-xl @spacing-lg;
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .text-auxiliary();
+    padding-top: @spacing-md;
+  }
+}
+
+.team-row {
+  &__name {
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__sub {
+    .text-auxiliary();
+  }
+}
+
+/* ===== 新建团队 ===== */
+.team-form__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0 @spacing-md;
+}
+
+.team-role {
+  display: flex;
+  align-items: center;
+  gap: @spacing-lg;
+  border: 1px solid @color-border;
+  border-radius: @radius-sm;
+  padding: @spacing-md @spacing-lg;
+
+  & + & {
+    margin-top: @spacing-md;
+  }
+
+  &__badge {
+    width: 44px;
+    height: 44px;
+    border-radius: @radius-full;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+    flex-shrink: 0;
+
+    &--doctor {
+      background: @color-disease-tag-bg;
+      color: @color-disease-tag;
+    }
+
+    &--nurse {
+      background: @color-risk-low-bg;
+      color: @color-risk-low;
+    }
+
+    &--manager {
+      background: @color-risk-mid-bg;
+      color: @color-risk-mid;
+    }
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__desc {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+
+  &__selected-label {
+    .text-auxiliary();
+  }
+
+  &__selected-names {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+    margin-top: @spacing-2xs;
+  }
+}
+
+.team-create__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: @spacing-sm;
+  margin-top: @spacing-lg;
+}
+
+/* ===== 抽屉 ===== */
+.team-drawer {
+  &__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: @spacing-md;
+  }
+
+  &__title {
+    font-size: @font-size-title-card;
+    font-weight: @font-weight-title-module;
+  }
+
+  &__sub {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__footer-actions {
+    display: flex;
+    gap: @spacing-sm;
+  }
+
+  &__tabs {
+    display: flex;
+    gap: @spacing-sm;
+    margin-bottom: @spacing-md;
+  }
+
+  &__search {
+    margin-bottom: @spacing-md;
+  }
+
+  &__count {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+    margin-bottom: @spacing-sm;
+  }
+
+  &__patient-bar {
+    display: flex;
+    align-items: center;
+    gap: @spacing-sm;
+    margin: @spacing-md 0;
+  }
+}
+
+.team-candidate {
+  display: flex;
+  align-items: center;
+  gap: @spacing-md;
+  border: 1px solid @color-border;
+  border-radius: @radius-sm;
+  padding: @spacing-md @spacing-lg;
+  cursor: pointer;
+
+  & + & {
+    margin-top: @spacing-sm;
+  }
+
+  &--checked {
+    background: @color-health-banner-bg;
+    border-color: @color-primary;
+  }
+
+  &__avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: @radius-full;
+    background: @color-primary-light;
+    flex-shrink: 0;
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__meta {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+
+  &__check {
+    width: 18px;
+    height: 18px;
+    border: 1px solid @color-border;
+    border-radius: @radius-xs;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 12px;
+    flex-shrink: 0;
+
+    &--on {
+      background: @color-primary;
+      border-color: @color-primary;
+    }
+  }
+}
+
+.team-patient {
+  display: flex;
+  align-items: center;
+  gap: @spacing-md;
+  border: 1px solid @color-border;
+  border-radius: @radius-sm;
+  padding: @spacing-md @spacing-lg;
+
+  & + & {
+    margin-top: @spacing-sm;
+  }
+
+  &__avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: @radius-full;
+    background: @color-primary-light;
+    flex-shrink: 0;
+  }
+
+  &__info {
+    min-width: 90px;
+  }
+
+  &__name {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__meta {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+
+  &__diseases {
+    flex: 1;
+    font-size: @font-size-body;
+  }
+
+  &__side {
+    text-align: right;
+  }
+}
+
+/* ===== 批量分配 ===== */
+.team-assign {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: @spacing-md;
+  align-items: start;
+
+  &__patient {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: @spacing-md;
+    border: 1px solid @color-border;
+    border-radius: @radius-sm;
+    padding: @spacing-md @spacing-lg;
+
+    & + & {
+      margin-top: @spacing-sm;
+    }
+  }
+
+  &__loads {
+    display: flex;
+    flex-direction: column;
+    gap: @spacing-sm;
+  }
+
+  &__load {
+    display: flex;
+    gap: @spacing-md;
+    font-size: @font-size-body;
+  }
+
+  &__suggest {
+    background: @color-health-banner-bg;
+    border-radius: @radius-sm;
+    padding: @spacing-sm @spacing-md;
+    margin-top: @spacing-md;
+
+    &-title {
+      font-size: @font-size-body;
+      font-weight: @font-weight-body-medium;
+      color: @color-login-cta;
+    }
+
+    &-desc {
+      .text-auxiliary();
+      color: @color-login-cta;
+      margin-top: @spacing-2xs;
+    }
+  }
+}

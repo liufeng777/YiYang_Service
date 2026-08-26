@@ -1,0 +1,505 @@
+/**
+ * 机构管理模块样式（机构列表 / 新增机构 / 机构详情）
+ */
+
+.org-page {
+  width: 100%;
+}
+
+/* ===== 通用 ===== */
+.org-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px @spacing-xs;
+  border-radius: @radius-xs;
+  font-size: @font-size-auxiliary;
+  line-height: @line-height-auxiliary;
+  font-weight: @font-weight-label;
+
+  &--green {
+    background: @color-risk-low-bg;
+    color: @color-risk-low;
+  }
+
+  &--blue {
+    background: @color-disease-tag-bg;
+    color: @color-disease-tag;
+  }
+
+  &--orange {
+    background: @color-risk-mid-bg;
+    color: @color-risk-mid;
+  }
+
+  &--red {
+    background: @color-risk-high-bg;
+    color: @color-risk-high;
+  }
+}
+
+.org-text--danger {
+  color: @color-risk-high;
+}
+
+.org-text--link {
+  color: @color-primary;
+  cursor: pointer;
+}
+
+.org-required {
+  color: @color-risk-high;
+}
+
+.org-card {
+  .card-surface();
+  padding: @spacing-lg @spacing-xl;
+
+  & + & {
+    margin-top: @spacing-md;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: @spacing-sm;
+    margin-bottom: @spacing-md;
+  }
+
+  &__title {
+    .text-title-card();
+  }
+}
+
+.org-field {
+  margin-bottom: @spacing-lg;
+
+  &__label {
+    font-size: @font-size-label;
+    line-height: @line-height-label;
+    font-weight: @font-weight-label;
+    margin-bottom: @spacing-xs;
+  }
+
+  .ant-select,
+  .ant-picker {
+    width: 100%;
+  }
+}
+
+.org-section__title {
+  font-size: @font-size-title-card;
+  line-height: @line-height-title-card;
+  font-weight: @font-weight-body-medium;
+  margin: @spacing-xl 0 @spacing-md;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.org-note {
+  .text-auxiliary();
+  margin-top: @spacing-sm;
+
+  &--green {
+    background: @color-health-banner-bg;
+    color: @color-login-cta;
+    border-radius: @radius-sm;
+    padding: @spacing-sm @spacing-md;
+  }
+
+  &--warn {
+    background: @color-risk-mid-bg;
+    color: @color-risk-mid;
+    border-radius: @radius-sm;
+    padding: @spacing-sm @spacing-md;
+    margin-top: @spacing-md;
+  }
+}
+
+.org-rail__gap {
+  margin-top: @spacing-md;
+}
+
+.org-kv {
+  display: flex;
+  align-items: baseline;
+  font-size: @font-size-body;
+  padding: @spacing-2xs 0;
+
+  &__label {
+    color: @color-text-secondary;
+    min-width: 72px;
+    margin-right: @spacing-md;
+  }
+
+  &__value {
+    font-weight: @font-weight-body-medium;
+  }
+}
+
+/* ===== 机构列表 ===== */
+.org-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: @spacing-md;
+}
+
+.org-stat {
+  .card-surface();
+  padding: @spacing-lg @spacing-xl;
+
+  &__label {
+    .text-auxiliary();
+    font-size: @font-size-label;
+  }
+
+  &__body {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: @spacing-2xs;
+  }
+
+  &__value {
+    .text-metric();
+  }
+
+  &__note {
+    .text-auxiliary();
+
+    &--green {
+      color: @color-risk-low;
+    }
+
+    &--blue {
+      color: @color-info;
+    }
+
+    &--orange {
+      color: @color-risk-mid;
+    }
+
+    &--red {
+      color: @color-risk-high;
+    }
+  }
+}
+
+.org-filters {
+  .card-surface();
+  margin-top: @spacing-md;
+  padding: @spacing-lg @spacing-xl;
+  display: flex;
+  gap: @spacing-md;
+  flex-wrap: wrap;
+  align-items: flex-end;
+
+  &__item {
+    flex: 1;
+    min-width: 180px;
+
+    .ant-select,
+    .ant-input-affix-wrapper,
+    .ant-input {
+      width: 100%;
+    }
+  }
+
+  &__label {
+    .text-auxiliary();
+    margin-bottom: @spacing-2xs;
+  }
+
+  &__actions {
+    display: flex;
+    gap: @spacing-sm;
+  }
+}
+
+.org-list {
+  .card-surface();
+  margin-top: @spacing-md;
+  padding: @spacing-sm @spacing-xl @spacing-lg;
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .text-auxiliary();
+    padding-top: @spacing-md;
+  }
+}
+
+.org-row {
+  &__name {
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__sub {
+    .text-auxiliary();
+  }
+}
+
+/* ===== 新增机构 ===== */
+.org-create {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: @spacing-md;
+  align-items: start;
+
+  &__rail {
+    .org-card + .org-card {
+      margin-top: @spacing-md;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: @spacing-sm;
+    margin-top: @spacing-lg;
+  }
+}
+
+.org-form__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0 @spacing-md;
+}
+
+.org-services {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: @spacing-sm;
+  font-size: @font-size-body;
+}
+
+.org-sync-scopes {
+  display: flex;
+  flex-direction: column;
+  gap: @spacing-xs;
+  font-size: @font-size-body;
+}
+
+.org-admin-box {
+  background: @color-org-scope-bg;
+  border-radius: @radius-sm;
+  padding: @spacing-sm @spacing-md;
+  font-size: @font-size-body;
+  font-weight: @font-weight-body-medium;
+}
+
+.org-license {
+  display: flex;
+  align-items: center;
+  gap: @spacing-md;
+  border-top: 1px solid @color-border;
+  padding-top: @spacing-md;
+  margin-top: @spacing-lg;
+
+  &--inline {
+    border: 1px solid @color-border;
+    border-radius: @radius-sm;
+    padding: @spacing-sm @spacing-md;
+    margin-top: 0;
+    flex: 1;
+    min-width: 260px;
+  }
+
+  &__name {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+    display: flex;
+    align-items: center;
+    gap: @spacing-xs;
+  }
+
+  &__meta {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+}
+
+.org-geo {
+  &__confirmed {
+    color: @color-risk-low;
+    font-size: @font-size-auxiliary;
+  }
+
+  &__search {
+    display: flex;
+    gap: @spacing-sm;
+    margin-bottom: @spacing-md;
+  }
+
+  &__map {
+    background: @color-primary-light;
+    border-radius: @radius-sm;
+    height: 160px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: @spacing-2xs;
+    color: @color-primary-dark;
+    font-size: @font-size-body;
+
+    &--detail {
+      height: 200px;
+      flex: 1;
+    }
+  }
+
+  &__pin {
+    font-size: 28px;
+    color: @color-primary;
+  }
+
+  &__meta {
+    .text-auxiliary();
+    margin-top: @spacing-sm;
+  }
+}
+
+/* ===== 机构详情 ===== */
+.org-detail {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: @spacing-md;
+  align-items: start;
+  margin-top: @spacing-md;
+
+  &__extra {
+    display: flex;
+    gap: @spacing-sm;
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__name {
+    font-size: @font-size-title-module;
+    line-height: @line-height-title-module;
+    font-weight: @font-weight-title-module;
+    display: flex;
+    align-items: center;
+    gap: @spacing-sm;
+  }
+
+  &__meta {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+
+  &__sync {
+    background: @color-primary-light;
+    border-radius: @radius-sm;
+    padding: @spacing-sm @spacing-lg;
+    min-width: 180px;
+  }
+
+  &__sync-label {
+    .text-auxiliary();
+  }
+
+  &__sync-value {
+    font-size: @font-size-title-card;
+    font-weight: @font-weight-title-module;
+    color: @color-primary-dark;
+  }
+
+  &__sync-time {
+    .text-auxiliary();
+  }
+
+  &__main {
+    .org-card + .org-card {
+      margin-top: @spacing-md;
+    }
+  }
+
+  &__services {
+    display: flex;
+    gap: @spacing-sm;
+    flex-wrap: wrap;
+    align-items: stretch;
+  }
+
+  &__geo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: @spacing-lg;
+  }
+
+  &__geo-meta {
+    .text-auxiliary();
+    margin-top: @spacing-sm;
+  }
+
+  &__logs {
+    width: 100%;
+    margin-top: @spacing-md;
+  }
+}
+
+.org-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: @spacing-md;
+
+  &__value {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+    margin-top: @spacing-2xs;
+  }
+}
+
+.org-service-tag {
+  background: @color-primary-light;
+  color: @color-login-cta;
+  border-radius: @radius-sm;
+  padding: @spacing-xs @spacing-lg;
+  font-size: @font-size-body;
+}
+
+.org-sync-timeline {
+  &__item + &__item {
+    margin-top: @spacing-md;
+  }
+}
+
+.org-sync-item {
+  display: flex;
+  gap: @spacing-sm;
+
+  &__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: @radius-full;
+    background: @color-primary;
+    margin-top: 6px;
+    flex-shrink: 0;
+
+    &--fail {
+      background: @color-risk-high;
+    }
+  }
+
+  &__time {
+    .text-auxiliary();
+  }
+
+  &__title {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__desc {
+    .text-auxiliary();
+  }
+}

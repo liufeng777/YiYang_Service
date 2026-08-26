@@ -1,0 +1,321 @@
+/**
+ * 预警管理模块样式（预警列表 / 医生处置 / 关闭与回写）
+ */
+
+.wn-page {
+  width: 100%;
+}
+
+/* ===== 通用 ===== */
+.wn-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px @spacing-xs;
+  border-radius: @radius-xs;
+  font-size: @font-size-auxiliary;
+  line-height: @line-height-auxiliary;
+  font-weight: @font-weight-label;
+
+  &--red {
+    background: @color-risk-high-bg;
+    color: @color-risk-high;
+  }
+
+  &--orange {
+    background: @color-risk-mid-bg;
+    color: @color-risk-mid;
+  }
+
+  &--blue {
+    background: @color-disease-tag-bg;
+    color: @color-disease-tag;
+  }
+
+  &--green {
+    background: @color-risk-low-bg;
+    color: @color-risk-low;
+  }
+}
+
+.wn-text--primary {
+  color: @color-primary;
+}
+
+.wn-required {
+  color: @color-risk-high;
+}
+
+.wn-card {
+  .card-surface();
+  padding: @spacing-lg @spacing-xl;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: @spacing-sm;
+    margin-bottom: @spacing-md;
+  }
+
+  &__title {
+    .text-title-card();
+  }
+}
+
+.wn-field {
+  margin-bottom: @spacing-lg;
+
+  &--last {
+    margin-bottom: 0;
+  }
+
+  &__label {
+    font-size: @font-size-label;
+    line-height: @line-height-label;
+    font-weight: @font-weight-label;
+    margin-bottom: @spacing-xs;
+  }
+}
+
+.wn-note-box {
+  background: @color-health-banner-bg;
+  border-radius: @radius-sm;
+  padding: @spacing-sm @spacing-md;
+  margin-top: @spacing-lg;
+
+  &__title {
+    color: @color-login-cta;
+    font-weight: @font-weight-label;
+    font-size: @font-size-body;
+    margin-bottom: @spacing-2xs;
+  }
+
+  &__line {
+    font-size: @font-size-auxiliary;
+    line-height: @line-height-auxiliary;
+    color: @color-text-secondary;
+  }
+}
+
+/* ===== 预警列表 ===== */
+.wn-tabs {
+  display: flex;
+  gap: @spacing-xs;
+
+  &__item {
+    padding: @spacing-xs @spacing-lg;
+    border-radius: @radius-sm;
+    background: @color-bg-card;
+    color: @color-text-secondary;
+    font-size: @font-size-body;
+    cursor: pointer;
+
+    &--active {
+      background: @color-primary;
+      color: #fff;
+      font-weight: @font-weight-label;
+    }
+  }
+}
+
+.wn-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: @spacing-md;
+  margin-top: @spacing-md;
+}
+
+.wn-stat {
+  .card-surface();
+  padding: @spacing-lg @spacing-xl;
+
+  &__label {
+    .text-auxiliary();
+    font-size: @font-size-label;
+  }
+
+  &__body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: @spacing-2xs;
+  }
+
+  &__value {
+    .text-metric();
+  }
+}
+
+.wn-filters {
+  .card-surface();
+  margin-top: @spacing-md;
+  padding: @spacing-lg @spacing-xl;
+  display: flex;
+  gap: @spacing-md;
+  flex-wrap: wrap;
+  align-items: flex-end;
+
+  &__item {
+    flex: 1;
+    min-width: 160px;
+
+    .ant-select,
+    .ant-picker,
+    .ant-input-affix-wrapper,
+    .ant-input {
+      width: 100%;
+    }
+  }
+
+  &__label {
+    .text-auxiliary();
+    margin-bottom: @spacing-2xs;
+  }
+
+  &__actions {
+    display: flex;
+    gap: @spacing-sm;
+  }
+}
+
+.wn-list {
+  .card-surface();
+  margin-top: @spacing-md;
+  padding: @spacing-sm @spacing-xl @spacing-lg;
+}
+
+/* ===== 医生处置 ===== */
+.wn-handle {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: @spacing-md;
+  align-items: start;
+
+  &__metric {
+    background: @color-risk-high-bg;
+    border-radius: @radius-sm;
+    padding: @spacing-md;
+    margin-bottom: @spacing-lg;
+  }
+
+  &__metric-name {
+    color: @color-risk-high;
+    font-size: @font-size-title-card;
+    font-weight: @font-weight-body-medium;
+    margin-right: @spacing-sm;
+  }
+
+  &__metric-value {
+    color: @color-risk-high;
+    font-size: @font-size-title-card;
+    font-weight: @font-weight-title-module;
+  }
+
+  &__metric-meta {
+    .text-auxiliary();
+    margin-top: @spacing-xs;
+  }
+
+  &__verify {
+    font-size: @font-size-body;
+    line-height: @line-height-body;
+    margin-bottom: @spacing-lg;
+  }
+
+  &__close-tip {
+    font-size: @font-size-auxiliary;
+    line-height: @line-height-auxiliary;
+    color: @color-text-secondary;
+    margin-bottom: @spacing-sm;
+  }
+
+  &__conditions {
+    margin: 0;
+    padding-left: @spacing-lg;
+    font-size: @font-size-body;
+    line-height: @line-height-body;
+
+    li + li {
+      margin-top: @spacing-2xs;
+    }
+  }
+
+  &__submit {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: @spacing-lg;
+  }
+}
+
+.wn-pill-radio {
+  .ant-radio-button-wrapper {
+    border-radius: @radius-full;
+    margin-right: @spacing-sm;
+    border-inline-start-width: 1px;
+
+    &::before {
+      display: none;
+    }
+  }
+}
+
+.wn-checks {
+  display: flex;
+  flex-direction: column;
+  gap: @spacing-xs;
+  font-size: @font-size-body;
+}
+
+/* ===== 关闭与回写 ===== */
+.wn-close {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: @spacing-md;
+  align-items: start;
+
+  &__check {
+    display: flex;
+    align-items: center;
+    gap: @spacing-xs;
+    font-size: @font-size-body;
+    color: @color-risk-low;
+    padding: @spacing-xs 0;
+  }
+
+  &__check-icon {
+    color: @color-risk-low;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: @spacing-sm;
+    margin-top: @spacing-lg;
+  }
+
+  &__footer {
+    .text-auxiliary();
+    margin-top: @spacing-md;
+  }
+}
+
+.wn-timeline {
+  margin-bottom: @spacing-lg;
+
+  &__item {
+    display: flex;
+    align-items: baseline;
+    gap: @spacing-md;
+    padding: @spacing-sm 0;
+    font-size: @font-size-body;
+  }
+
+  &__time {
+    background: @color-primary-light;
+    color: @color-primary-dark;
+    border-radius: @radius-xs;
+    padding: 1px @spacing-xs;
+    font-size: @font-size-auxiliary;
+    flex-shrink: 0;
+  }
+}

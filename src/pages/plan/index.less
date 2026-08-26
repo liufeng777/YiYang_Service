@@ -1,0 +1,1055 @@
+/**
+ * 健康管理方案模块样式（方案列表 / AI方案生成 / 方案详情）
+ */
+
+.plan-page {
+  width: 100%;
+}
+
+/* ===== 通用：标签 / 文本 / 卡片 ===== */
+.plan-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px @spacing-xs;
+  border-radius: @radius-xs;
+  font-size: @font-size-auxiliary;
+  line-height: @line-height-auxiliary;
+  font-weight: @font-weight-label;
+
+  &--green,
+  &--active {
+    background: @color-risk-low-bg;
+    color: @color-risk-low;
+  }
+
+  &--blue,
+  &--review {
+    background: @color-disease-tag-bg;
+    color: @color-disease-tag;
+  }
+
+  &--orange,
+  &--pending {
+    background: @color-risk-mid-bg;
+    color: @color-risk-mid;
+  }
+
+  &--purple,
+  &--draft {
+    background: @color-ai-bg;
+    color: @color-ai;
+  }
+}
+
+.plan-text--purple {
+  color: @color-ai;
+}
+
+.plan-text--warn {
+  color: @color-risk-mid;
+}
+
+.plan-card {
+  .card-surface();
+  padding: @spacing-lg @spacing-xl;
+
+  & + & {
+    margin-top: @spacing-md;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: @spacing-sm;
+    margin-bottom: @spacing-md;
+  }
+
+  &__title {
+    .text-title-card();
+  }
+
+  &__sub {
+    .text-auxiliary();
+  }
+}
+
+.plan-field {
+  margin-bottom: @spacing-lg;
+
+  &__label {
+    font-size: @font-size-label;
+    line-height: @line-height-label;
+    font-weight: @font-weight-label;
+    margin-bottom: @spacing-xs;
+  }
+}
+
+/* ===== 会员信息条 ===== */
+.plan-member {
+  .card-surface();
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: @spacing-md @spacing-xl;
+  margin-bottom: @spacing-md;
+
+  &__main {
+    display: flex;
+    align-items: center;
+    gap: @spacing-md;
+  }
+
+  &__name {
+    font-size: @font-size-title-card;
+    line-height: @line-height-title-card;
+    font-weight: @font-weight-body-medium;
+    display: flex;
+    align-items: center;
+    gap: @spacing-xs;
+  }
+
+  &__meta {
+    font-size: @font-size-auxiliary;
+    color: @color-text-secondary;
+    font-weight: @font-weight-body;
+  }
+
+  &__conditions {
+    display: flex;
+    gap: @spacing-xs;
+  }
+
+  &__side {
+    display: flex;
+    gap: @spacing-2xl;
+    font-size: @font-size-body;
+
+    &--wide {
+      gap: @spacing-xl;
+      align-items: center;
+    }
+  }
+
+  &__label {
+    color: @color-text-secondary;
+    margin-right: @spacing-xs;
+  }
+}
+
+/* ===== 方案列表 ===== */
+.plan-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: @spacing-md;
+}
+
+.plan-stat {
+  .card-surface();
+  padding: @spacing-lg @spacing-xl;
+
+  &__label {
+    .text-auxiliary();
+    font-size: @font-size-label;
+  }
+
+  &__value {
+    .text-metric();
+    margin-top: @spacing-2xs;
+
+    &--warn {
+      color: @color-risk-mid;
+    }
+
+    &--purple {
+      color: @color-ai;
+    }
+
+    &--info {
+      color: @color-info;
+    }
+
+    &--success {
+      color: @color-primary;
+    }
+  }
+
+  &__sub {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+}
+
+.plan-filters {
+  .card-surface();
+  margin-top: @spacing-md;
+  padding: @spacing-lg @spacing-xl;
+  display: flex;
+  gap: @spacing-sm;
+  flex-wrap: wrap;
+
+  .ant-select {
+    min-width: 150px;
+  }
+
+  &__search {
+    width: 300px;
+  }
+}
+
+.plan-list {
+  .card-surface();
+  margin-top: @spacing-md;
+  padding: @spacing-sm @spacing-xl @spacing-lg;
+
+  &__header {
+    display: flex;
+    align-items: baseline;
+    gap: @spacing-sm;
+    padding: @spacing-md 0;
+  }
+
+  &__title {
+    .text-title-card();
+  }
+
+  &__sub {
+    .text-auxiliary();
+  }
+}
+
+.plan-row {
+  &__name {
+    font-weight: @font-weight-body-medium;
+    display: flex;
+    align-items: baseline;
+    gap: @spacing-xs;
+  }
+
+  &__sub {
+    .text-auxiliary();
+  }
+
+  &__diseases {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+}
+
+/* ===== AI 方案生成 ===== */
+.plan-design__steps {
+  .card-surface();
+  padding: @spacing-lg @spacing-xl;
+  margin-bottom: @spacing-md;
+}
+
+.plan-generate {
+  &__panels {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: @spacing-md;
+    align-items: start;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: @spacing-sm;
+    margin-top: @spacing-lg;
+  }
+}
+
+.plan-basis {
+  display: flex;
+  align-items: center;
+  gap: @spacing-sm;
+  padding: @spacing-sm 0;
+
+  & + & {
+    border-top: 1px solid @color-border;
+  }
+
+  &__icon {
+    color: @color-primary;
+    font-size: @font-size-title-card;
+  }
+
+  &__body {
+    flex: 1;
+  }
+
+  &__name {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__desc {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+
+  &__meta {
+    .text-auxiliary();
+  }
+}
+
+.plan-modules {
+  display: flex;
+  flex-direction: column;
+  gap: @spacing-xs;
+}
+
+.plan-module {
+  display: flex;
+  align-items: center;
+  gap: @spacing-xs;
+  border: 1px solid @color-border;
+  border-radius: @radius-sm;
+  padding: @spacing-xs @spacing-md;
+  cursor: pointer;
+  font-size: @font-size-body;
+
+  &--active {
+    border-color: @color-primary;
+    background: @color-primary-light;
+  }
+}
+
+.plan-ai-note {
+  background: @color-ai-bg;
+  color: @color-ai;
+  border-radius: @radius-sm;
+  padding: @spacing-sm @spacing-md;
+  font-size: @font-size-auxiliary;
+  line-height: @line-height-auxiliary;
+
+  &--block {
+    margin-top: @spacing-md;
+    font-size: @font-size-body;
+    line-height: @line-height-body;
+  }
+
+  &__title {
+    font-weight: @font-weight-body-medium;
+    margin-bottom: @spacing-xs;
+  }
+
+  &__meta {
+    .text-auxiliary();
+    color: @color-ai;
+    margin-top: @spacing-xs;
+  }
+}
+
+/* 生成进度弹窗 */
+.plan-progress {
+  text-align: center;
+  padding: @spacing-md 0;
+
+  &__icon {
+    color: @color-ai;
+    font-size: @font-size-title-page;
+  }
+
+  &__title {
+    font-size: @font-size-title-module;
+    line-height: @line-height-title-module;
+    font-weight: @font-weight-title-module;
+    margin-top: @spacing-xs;
+  }
+
+  &__sub {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+
+  &__bar {
+    margin: @spacing-lg 0 0;
+  }
+
+  &__percent {
+    color: @color-ai;
+    font-weight: @font-weight-body-medium;
+    margin-top: @spacing-2xs;
+  }
+
+  &__steps {
+    text-align: left;
+    margin: @spacing-lg 0;
+  }
+
+  &__note {
+    .text-auxiliary();
+    margin-bottom: @spacing-md;
+  }
+
+  &__cta {
+    min-width: 200px;
+  }
+}
+
+.plan-progress-step {
+  display: flex;
+  align-items: center;
+  gap: @spacing-sm;
+  padding: @spacing-xs 0;
+  font-size: @font-size-body;
+
+  &__icon {
+    width: 22px;
+    height: 22px;
+    border-radius: @radius-full;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: @font-size-auxiliary;
+    background: @color-org-scope-bg;
+    color: @color-text-secondary;
+    flex-shrink: 0;
+
+    &--done {
+      background: @color-risk-low-bg;
+      color: @color-risk-low;
+    }
+
+    &--doing {
+      background: @color-ai-bg;
+      color: @color-ai;
+    }
+  }
+
+  &__name {
+    flex: 1;
+  }
+
+  &__state {
+    font-size: @font-size-auxiliary;
+    color: @color-text-secondary;
+
+    &--done {
+      color: @color-risk-low;
+    }
+
+    &--doing {
+      color: @color-ai;
+    }
+  }
+}
+
+/* ===== 方案详情 ===== */
+.plan-detail {
+  &__title {
+    display: inline-flex;
+    align-items: center;
+    gap: @spacing-xs;
+  }
+
+  &__back {
+    cursor: pointer;
+    color: @color-text-secondary;
+
+    &:hover {
+      color: @color-primary;
+    }
+  }
+
+  &__panels {
+    display: grid;
+    grid-template-columns: 220px 1fr 300px;
+    gap: @spacing-md;
+    align-items: start;
+  }
+
+  &__completeness {
+    margin-top: @spacing-lg;
+
+    &-value {
+      .text-metric();
+      color: @color-primary;
+    }
+  }
+
+  &__section {
+    font-size: @font-size-label;
+    font-weight: @font-weight-label;
+    margin: @spacing-md 0 @spacing-xs;
+  }
+
+  &__rail {
+    display: flex;
+    flex-direction: column;
+    gap: @spacing-md;
+
+    .plan-card {
+      margin-top: 0;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: @spacing-sm;
+    margin-top: @spacing-lg;
+  }
+}
+
+.plan-nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: @spacing-xs @spacing-sm;
+  border-radius: @radius-sm;
+  cursor: pointer;
+  font-size: @font-size-body;
+
+  & + & {
+    margin-top: @spacing-2xs;
+  }
+
+  &--active {
+    background: @color-login-tip-bg;
+    color: @color-login-cta;
+    font-weight: @font-weight-label;
+  }
+}
+
+.plan-todo-box {
+  background: @color-health-note-bg;
+  border-radius: @radius-sm;
+  padding: @spacing-sm @spacing-md;
+  font-size: @font-size-auxiliary;
+  line-height: @line-height-auxiliary;
+  color: @color-text-secondary;
+  margin-top: @spacing-md;
+
+  &__title {
+    color: @color-risk-mid;
+    font-weight: @font-weight-label;
+    margin-bottom: @spacing-2xs;
+  }
+
+  ul,
+  &__ordered {
+    margin: 0;
+    padding-left: @spacing-md;
+  }
+
+  li + li {
+    margin-top: @spacing-2xs;
+  }
+}
+
+.plan-readonly-box {
+  background: @color-disease-tag-bg;
+  border-radius: @radius-sm;
+  padding: @spacing-sm @spacing-md;
+
+  &__title {
+    font-size: @font-size-label;
+    font-weight: @font-weight-label;
+    color: @color-info;
+  }
+
+  &__body {
+    font-size: @font-size-body;
+    line-height: @line-height-body;
+    margin-top: @spacing-2xs;
+  }
+
+  &__tip {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+}
+
+.plan-module-card {
+  border: 1px solid @color-border;
+  border-radius: @radius-sm;
+  padding: @spacing-sm @spacing-md;
+  position: relative;
+
+  & + & {
+    margin-top: @spacing-sm;
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__title {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__count {
+    .text-auxiliary();
+  }
+
+  &__desc {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+
+  &__status {
+    position: absolute;
+    right: @spacing-md;
+    bottom: @spacing-sm;
+  }
+}
+
+.plan-monitor {
+  display: flex;
+  align-items: center;
+  gap: @spacing-md;
+
+  &__main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: @spacing-xl;
+  }
+
+  &__name {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+    min-width: 96px;
+  }
+
+  &__freq {
+    font-size: @font-size-body;
+  }
+
+  &__time {
+    .text-auxiliary();
+  }
+
+  &__sub {
+    display: flex;
+    flex-direction: column;
+    gap: @spacing-2xs;
+    font-size: @font-size-auxiliary;
+    color: @color-text-secondary;
+  }
+
+  &__add {
+    margin-top: @spacing-sm;
+  }
+}
+
+.plan-data-note {
+  background: @color-health-banner-bg;
+  color: @color-login-cta;
+  border-radius: @radius-sm;
+  padding: @spacing-sm @spacing-md;
+  font-size: @font-size-auxiliary;
+  line-height: @line-height-auxiliary;
+  margin-top: @spacing-md;
+
+  &--blue {
+    background: @color-disease-tag-bg;
+    color: @color-info;
+  }
+}
+
+.plan-rail {
+  &__list {
+    margin: 0;
+    padding-left: @spacing-md;
+
+    li + li {
+      margin-top: @spacing-2xs;
+    }
+  }
+
+  &__gap {
+    margin-top: @spacing-md;
+  }
+
+  &__row {
+    display: flex;
+    justify-content: space-between;
+    font-size: @font-size-body;
+    padding: @spacing-2xs 0;
+  }
+
+  &__label {
+    color: @color-text-secondary;
+  }
+}
+
+/* ===== 指导模块（饮食 / 运动 / 复诊复查） ===== */
+.plan-kv-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: @spacing-md;
+  margin-top: @spacing-xs;
+
+  &__label {
+    .text-auxiliary();
+  }
+
+  &__value {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+    margin-top: @spacing-2xs;
+  }
+}
+
+.plan-quad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: @spacing-sm;
+
+  &--half {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  &__cell {
+    background: @color-org-scope-bg;
+    border-radius: @radius-sm;
+    padding: @spacing-sm @spacing-md;
+  }
+
+  &__label {
+    .text-auxiliary();
+  }
+
+  &__value {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+    margin-top: @spacing-2xs;
+  }
+}
+
+.plan-meal {
+  display: flex;
+  align-items: center;
+  gap: @spacing-md;
+
+  &__name {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+    min-width: 72px;
+  }
+
+  &__body {
+    flex: 1;
+    font-size: @font-size-body;
+  }
+
+  &__note {
+    font-size: @font-size-auxiliary;
+    margin-top: @spacing-2xs;
+  }
+}
+
+.plan-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: @spacing-xs;
+
+  &__cell {
+    border: 1px solid @color-border;
+    border-radius: @radius-sm;
+    padding: @spacing-xs;
+    text-align: center;
+  }
+
+  &__day {
+    font-size: @font-size-label;
+    font-weight: @font-weight-label;
+  }
+
+  &__content {
+    font-size: @font-size-body;
+    margin-top: @spacing-2xs;
+  }
+
+  &__duration {
+    .text-auxiliary();
+  }
+}
+
+.plan-checks {
+  display: flex;
+  flex-direction: column;
+  gap: @spacing-xs;
+  font-size: @font-size-body;
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: @spacing-xs;
+  }
+}
+
+.plan-data-note__title {
+  font-weight: @font-weight-label;
+  margin-bottom: @spacing-2xs;
+}
+
+.plan-required {
+  color: @color-risk-high;
+}
+
+.plan-text--danger {
+  color: @color-risk-high;
+}
+
+.plan-tag--danger {
+  background: @color-risk-high-bg;
+  color: @color-risk-high;
+}
+
+.plan-detail__header-actions {
+  display: flex;
+  gap: @spacing-sm;
+}
+
+/* ===== 医生审核 ===== */
+.plan-audit {
+  display: grid;
+  grid-template-columns: 220px 1fr 300px;
+  gap: @spacing-md;
+  align-items: start;
+
+  &__pass {
+    color: @color-risk-low;
+    font-size: @font-size-auxiliary;
+  }
+
+  &__summary {
+    margin-top: @spacing-lg;
+    border-top: 1px solid @color-border;
+    padding-top: @spacing-md;
+  }
+
+  &__source-first {
+    font-weight: @font-weight-body-medium;
+    margin-bottom: @spacing-2xs;
+  }
+}
+
+.plan-nav-item--warn {
+  background: @color-risk-mid-bg;
+  color: @color-risk-mid;
+  font-weight: @font-weight-label;
+}
+
+.plan-audit-item {
+  border: 1px solid @color-border;
+  border-radius: @radius-sm;
+  padding: @spacing-sm @spacing-md;
+
+  & + & {
+    margin-top: @spacing-sm;
+  }
+
+  &--blue {
+    background: @color-disease-tag-bg;
+    border-color: transparent;
+  }
+
+  &--orange {
+    background: @color-risk-mid-bg;
+    border-color: transparent;
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__title {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__content {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+
+  &__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: @spacing-sm;
+    margin-top: @spacing-xs;
+  }
+
+  &__opinion {
+    .text-auxiliary();
+    flex: 1;
+  }
+
+  &__modify {
+    color: @color-risk-mid;
+    border-color: @color-risk-mid;
+  }
+}
+
+/* ===== 退回 / 返修 ===== */
+.plan-returned {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: @spacing-md;
+  align-items: start;
+
+  &__opinion {
+    background: @color-risk-high-bg;
+    border-radius: @radius-sm;
+    padding: @spacing-sm @spacing-md;
+    font-size: @font-size-body;
+    line-height: @line-height-body;
+
+    p {
+      margin: @spacing-2xs 0 0;
+    }
+  }
+
+  &__opinion-meta {
+    color: @color-risk-high;
+    font-size: @font-size-auxiliary;
+    font-weight: @font-weight-label;
+  }
+
+  &__module {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: @spacing-md;
+  }
+
+  &__versions {
+    .text-auxiliary();
+
+    > div + div {
+      margin-top: @spacing-2xs;
+    }
+  }
+
+  &__flow {
+    font-size: @font-size-body;
+  }
+
+  &__flow-step {
+    display: flex;
+    flex-direction: column;
+    gap: @spacing-2xs;
+  }
+
+  &__flow-node {
+    &--current {
+      color: @color-risk-high;
+      font-weight: @font-weight-body-medium;
+    }
+  }
+
+  &__flow-arrow {
+    .text-auxiliary();
+    padding-left: @spacing-xs;
+  }
+
+  &__assignee {
+    margin-top: @spacing-md;
+  }
+}
+
+.plan-revise {
+  &__version {
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__actions {
+    display: flex;
+    gap: @spacing-sm;
+  }
+}
+
+/* ===== 执行详情 ===== */
+.plan-execution {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: @spacing-md;
+  align-items: start;
+  margin-top: @spacing-md;
+
+  &__rate {
+    background: @color-primary-light;
+    border-radius: @radius-sm;
+    padding: @spacing-md;
+
+    &-label {
+      .text-auxiliary();
+    }
+
+    &-value {
+      font-size: @font-size-title-module;
+      font-weight: @font-weight-title-module;
+      color: @color-primary-dark;
+      margin: @spacing-2xs 0;
+    }
+
+    &-percent {
+      .text-auxiliary();
+      text-align: right;
+    }
+  }
+
+  &__task {
+    display: flex;
+    align-items: center;
+    gap: @spacing-xl;
+
+    &-plan,
+    &-progress,
+    &-note {
+      .text-auxiliary();
+    }
+  }
+}
+
+.plan-metric {
+  border: 1px solid @color-border;
+  border-radius: @radius-sm;
+  padding: @spacing-sm @spacing-md;
+
+  & + & {
+    margin-top: @spacing-sm;
+  }
+
+  &__label {
+    .text-auxiliary();
+  }
+
+  &__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: @spacing-2xs;
+  }
+
+  &__value {
+    font-size: @font-size-title-module;
+    font-weight: @font-weight-title-module;
+  }
+}
+
+.plan-exception {
+  background: @color-risk-high-bg;
+  border-radius: @radius-sm;
+  padding: @spacing-sm @spacing-md;
+  font-size: @font-size-auxiliary;
+  line-height: @line-height-auxiliary;
+  color: @color-risk-high;
+  margin-top: @spacing-md;
+
+  &__title {
+    font-weight: @font-weight-label;
+    margin-bottom: @spacing-2xs;
+  }
+}

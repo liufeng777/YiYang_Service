@@ -1,0 +1,321 @@
+/**
+ * 角色管理模块样式（角色列表 / 新建角色与目录权限配置）
+ */
+
+.role-page {
+  width: 100%;
+}
+
+/* ===== 通用 ===== */
+.role-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px @spacing-xs;
+  border-radius: @radius-xs;
+  font-size: @font-size-auxiliary;
+  line-height: @line-height-auxiliary;
+  font-weight: @font-weight-label;
+
+  &--green {
+    background: @color-risk-low-bg;
+    color: @color-risk-low;
+  }
+
+  &--blue {
+    background: @color-disease-tag-bg;
+    color: @color-disease-tag;
+  }
+
+  &--orange {
+    background: @color-risk-mid-bg;
+    color: @color-risk-mid;
+  }
+
+  &--red {
+    background: @color-risk-high-bg;
+    color: @color-risk-high;
+  }
+
+  &--teal {
+    background: @color-primary-light;
+    color: @color-login-cta;
+  }
+}
+
+.role-text--danger {
+  color: @color-risk-high;
+}
+
+.role-required {
+  color: @color-risk-high;
+}
+
+.role-card {
+  .card-surface();
+  padding: @spacing-lg @spacing-xl;
+  margin-top: @spacing-md;
+
+  &__sub {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+}
+
+.role-note {
+  .text-auxiliary();
+  margin-top: @spacing-md;
+  border-radius: @radius-sm;
+  padding: @spacing-sm @spacing-md;
+
+  &--green {
+    background: @color-health-banner-bg;
+    color: @color-login-cta;
+  }
+
+  &--warn {
+    background: @color-risk-mid-bg;
+    color: @color-risk-mid;
+  }
+}
+
+.role-field {
+  margin-bottom: @spacing-lg;
+
+  &__label {
+    font-size: @font-size-label;
+    line-height: @line-height-label;
+    font-weight: @font-weight-label;
+    margin-bottom: @spacing-xs;
+  }
+
+  .ant-select,
+  .ant-picker {
+    width: 100%;
+  }
+}
+
+.role-section__title {
+  font-size: @font-size-title-card;
+  line-height: @line-height-title-card;
+  font-weight: @font-weight-body-medium;
+  margin: @spacing-xl 0 @spacing-md;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+/* ===== 列表页 ===== */
+.role-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: @spacing-md;
+}
+
+.role-stat {
+  .card-surface();
+  padding: @spacing-lg @spacing-xl;
+
+  &__label {
+    .text-auxiliary();
+    font-size: @font-size-label;
+  }
+
+  &__body {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: @spacing-2xs;
+  }
+
+  &__value {
+    .text-metric();
+  }
+
+  &__note {
+    .text-auxiliary();
+
+    &--green {
+      color: @color-risk-low;
+    }
+
+    &--blue {
+      color: @color-info;
+    }
+
+    &--orange {
+      color: @color-risk-mid;
+    }
+
+    &--red {
+      color: @color-risk-high;
+    }
+  }
+}
+
+.role-filters {
+  .card-surface();
+  margin-top: @spacing-md;
+  padding: @spacing-lg @spacing-xl;
+  display: flex;
+  gap: @spacing-md;
+  flex-wrap: wrap;
+  align-items: flex-end;
+
+  &__item {
+    flex: 1;
+    min-width: 180px;
+
+    .ant-select,
+    .ant-input-affix-wrapper,
+    .ant-input {
+      width: 100%;
+    }
+  }
+
+  &__label {
+    .text-auxiliary();
+    margin-bottom: @spacing-2xs;
+  }
+
+  &__actions {
+    display: flex;
+    gap: @spacing-sm;
+  }
+}
+
+.role-list {
+  .card-surface();
+  margin-top: @spacing-md;
+  padding: @spacing-sm @spacing-xl @spacing-lg;
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .text-auxiliary();
+    padding-top: @spacing-md;
+  }
+}
+
+.role-row {
+  &__name {
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__sub {
+    .text-auxiliary();
+  }
+}
+
+/* ===== 新建角色 ===== */
+.role-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+
+  &__item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: @spacing-sm;
+    padding: @spacing-sm 0;
+    font-size: @font-size-body;
+    color: @color-text-secondary;
+    cursor: pointer;
+
+    &--active,
+    &--done {
+      color: @color-text-primary;
+      font-weight: @font-weight-body-medium;
+
+      .role-steps__no {
+        background: @color-login-cta;
+        border-color: @color-login-cta;
+        color: #fff;
+      }
+    }
+
+    &--done .role-steps__no {
+      background: @color-primary;
+    }
+  }
+
+  &__no {
+    width: 22px;
+    height: 22px;
+    border-radius: @radius-full;
+    border: 1px solid @color-border;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: @font-size-auxiliary;
+    color: @color-text-secondary;
+  }
+}
+
+.role-create {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: @spacing-md;
+  align-items: start;
+
+  &__rail {
+    margin-top: @spacing-md;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: @spacing-sm;
+    margin-top: @spacing-lg;
+  }
+}
+
+.role-form__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0 @spacing-md;
+
+  &--2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.role-catalogs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: @spacing-md;
+  font-size: @font-size-body;
+}
+
+.role-op {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: @spacing-md;
+  border: 1px solid @color-border;
+  border-radius: @radius-sm;
+  padding: @spacing-md @spacing-lg;
+
+  & + & {
+    margin-top: @spacing-md;
+  }
+
+  &__name {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__state {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+
+    &--orange {
+      color: @color-risk-mid;
+    }
+
+    &--muted {
+      color: @color-text-secondary;
+    }
+  }
+}

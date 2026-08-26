@@ -1,0 +1,803 @@
+/**
+ * 人员管理模块样式（人员列表 / 派单资格 / 人员详情 / 新增人员）
+ */
+
+.staff-page {
+  width: 100%;
+}
+
+/* ===== 通用 ===== */
+.staff-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px @spacing-xs;
+  border-radius: @radius-xs;
+  font-size: @font-size-auxiliary;
+  line-height: @line-height-auxiliary;
+  font-weight: @font-weight-label;
+
+  &--green {
+    background: @color-risk-low-bg;
+    color: @color-risk-low;
+  }
+
+  &--blue {
+    background: @color-disease-tag-bg;
+    color: @color-disease-tag;
+  }
+
+  &--orange {
+    background: @color-risk-mid-bg;
+    color: @color-risk-mid;
+  }
+
+  &--red {
+    background: @color-risk-high-bg;
+    color: @color-risk-high;
+  }
+
+  &--teal {
+    background: @color-primary-light;
+    color: @color-login-cta;
+  }
+}
+
+.staff-text--danger {
+  color: @color-risk-high;
+}
+
+.staff-text--ok {
+  color: @color-login-cta;
+}
+
+.staff-text--muted {
+  color: @color-text-secondary;
+}
+
+.staff-required {
+  color: @color-risk-high;
+}
+
+.staff-card {
+  .card-surface();
+  padding: @spacing-lg @spacing-xl;
+  margin-top: @spacing-md;
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: @spacing-sm;
+    margin-bottom: @spacing-md;
+  }
+
+  &__title {
+    .text-title-card();
+  }
+
+  &__sub {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+}
+
+.staff-note {
+  .text-auxiliary();
+  background: @color-health-banner-bg;
+  color: @color-login-cta;
+  border-radius: @radius-sm;
+  padding: @spacing-sm @spacing-md;
+  margin-top: @spacing-lg;
+}
+
+.staff-field {
+  margin-bottom: @spacing-lg;
+
+  &__label {
+    font-size: @font-size-label;
+    line-height: @line-height-label;
+    font-weight: @font-weight-label;
+    margin-bottom: @spacing-xs;
+  }
+
+  &__value {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__switch {
+    display: flex;
+    align-items: center;
+    gap: @spacing-sm;
+    font-size: @font-size-body;
+    height: 32px;
+  }
+
+  .ant-select,
+  .ant-picker {
+    width: 100%;
+  }
+}
+
+.staff-field-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0 @spacing-xl;
+  margin-top: @spacing-md;
+
+  .staff-field {
+    border-bottom: 1px solid @color-border;
+    padding-bottom: @spacing-md;
+    margin-bottom: @spacing-md;
+  }
+}
+
+.staff-section__title {
+  font-size: @font-size-title-card;
+  line-height: @line-height-title-card;
+  font-weight: @font-weight-body-medium;
+  margin: @spacing-xl 0 @spacing-md;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+/* ===== 列表页 ===== */
+.staff-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: @spacing-md;
+}
+
+.staff-stat {
+  .card-surface();
+  padding: @spacing-lg @spacing-xl;
+
+  &__label {
+    .text-auxiliary();
+    font-size: @font-size-label;
+  }
+
+  &__body {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: @spacing-2xs;
+  }
+
+  &__value {
+    .text-metric();
+  }
+
+  &__note {
+    .text-auxiliary();
+
+    &--green {
+      color: @color-risk-low;
+    }
+
+    &--blue {
+      color: @color-info;
+    }
+
+    &--orange {
+      color: @color-risk-mid;
+    }
+
+    &--red {
+      color: @color-risk-high;
+    }
+  }
+}
+
+.staff-filters {
+  .card-surface();
+  margin-top: @spacing-md;
+  padding: @spacing-lg @spacing-xl;
+  display: flex;
+  gap: @spacing-md;
+  flex-wrap: wrap;
+  align-items: flex-end;
+
+  &__item {
+    flex: 1;
+    min-width: 170px;
+
+    .ant-select,
+    .ant-input-affix-wrapper,
+    .ant-input {
+      width: 100%;
+    }
+  }
+
+  &__label {
+    .text-auxiliary();
+    margin-bottom: @spacing-2xs;
+  }
+
+  &__actions {
+    display: flex;
+    gap: @spacing-sm;
+  }
+}
+
+.staff-list {
+  .card-surface();
+  margin-top: @spacing-md;
+  padding: @spacing-sm @spacing-xl @spacing-lg;
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .text-auxiliary();
+    padding-top: @spacing-md;
+  }
+}
+
+.staff-row {
+  &__name {
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__sub {
+    .text-auxiliary();
+  }
+}
+
+/* ===== 人员详情 ===== */
+.staff-detail__tabs {
+  .card-surface();
+  margin-top: @spacing-md;
+  padding: @spacing-xs;
+
+  .ant-segmented {
+    width: 100%;
+  }
+}
+
+.staff-detail__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: @spacing-sm;
+  margin-top: @spacing-lg;
+}
+
+.staff-profile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: @spacing-xl;
+
+  &__main {
+    display: flex;
+    align-items: center;
+    gap: @spacing-md;
+  }
+
+  &__avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: @radius-full;
+    background: @color-primary-light;
+    color: @color-primary;
+    font-size: @font-size-title-module;
+    font-weight: @font-weight-title-module;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__name {
+    font-size: @font-size-title-card;
+    font-weight: @font-weight-title-module;
+    display: flex;
+    align-items: center;
+    gap: @spacing-sm;
+  }
+
+  &__meta {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+
+  &__side {
+    display: flex;
+    align-items: center;
+    gap: @spacing-xl;
+  }
+
+  &__cell-label {
+    .text-auxiliary();
+    margin-bottom: @spacing-2xs;
+  }
+
+  &__cell-note {
+    .text-auxiliary();
+  }
+}
+
+.staff-auth-tags {
+  display: flex;
+  align-items: center;
+  gap: @spacing-sm;
+  flex-wrap: wrap;
+  margin-top: @spacing-xs;
+}
+
+.staff-auth-tag {
+  background: @color-primary-light;
+  color: @color-login-cta;
+  border-radius: @radius-sm;
+  padding: @spacing-xs @spacing-lg;
+  font-size: @font-size-body;
+}
+
+/* ===== 新增人员 ===== */
+.staff-create__type {
+  margin-top: @spacing-md;
+}
+
+.staff-create__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: @spacing-sm;
+  margin-top: @spacing-lg;
+}
+
+.staff-steps {
+  .card-surface();
+  margin-top: @spacing-md;
+  padding: @spacing-xs;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: @spacing-xs;
+
+  &__item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: @spacing-sm;
+    padding: @spacing-sm 0;
+    border-radius: @radius-sm;
+    font-size: @font-size-body;
+    color: @color-text-secondary;
+    cursor: pointer;
+
+    &--active {
+      background: @color-primary-light;
+      color: @color-login-cta;
+      font-weight: @font-weight-body-medium;
+    }
+  }
+
+  &__no {
+    font-size: @font-size-auxiliary;
+  }
+}
+
+.staff-form__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0 @spacing-md;
+
+  &--2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.staff-upload {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: @spacing-md;
+  border: 1px solid @color-border;
+  border-radius: @radius-sm;
+  padding: @spacing-md @spacing-lg;
+
+  & + & {
+    margin-top: @spacing-md;
+  }
+
+  &__name {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__desc {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+}
+
+/* ===== 资质审核队列 ===== */
+.staff-audit-tabs {
+  margin-top: @spacing-md;
+  display: flex;
+  gap: @spacing-sm;
+}
+
+/* ===== 统一审核详情 ===== */
+.staff-flow {
+  display: flex;
+  align-items: center;
+  gap: @spacing-sm;
+
+  &__step {
+    display: flex;
+    align-items: center;
+    gap: @spacing-xs;
+    font-size: @font-size-body;
+    color: @color-text-secondary;
+
+    .anticon {
+      color: @color-primary;
+      font-size: 18px;
+    }
+
+    &--done {
+      color: @color-text-primary;
+      font-weight: @font-weight-body-medium;
+    }
+  }
+
+  &__line {
+    flex: 1;
+    height: 1px;
+    background: @color-border;
+
+    &--done {
+      background: @color-primary;
+    }
+  }
+
+  &__no {
+    width: 18px;
+    height: 18px;
+    border-radius: @radius-full;
+    border: 1px solid @color-border;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: @font-size-auxiliary;
+  }
+}
+
+.staff-audit-detail {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: @spacing-md;
+  align-items: start;
+
+  .staff-card {
+    margin-top: @spacing-md;
+  }
+}
+
+.staff-cred-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: @spacing-md;
+
+  &__name {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__sub {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+}
+
+.staff-kv-list {
+  display: flex;
+  flex-direction: column;
+  gap: @spacing-sm;
+}
+
+.staff-kv {
+  display: flex;
+  align-items: baseline;
+  font-size: @font-size-body;
+
+  &__label {
+    color: @color-text-secondary;
+    min-width: 72px;
+    margin-right: @spacing-md;
+  }
+
+  &__value {
+    font-weight: @font-weight-body-medium;
+  }
+}
+
+.staff-note--check {
+  display: flex;
+  align-items: center;
+  gap: @spacing-xs;
+
+  .anticon {
+    color: @color-risk-low;
+  }
+}
+
+.staff-note--info {
+  background: @color-disease-tag-bg;
+  color: @color-disease-tag;
+  display: flex;
+  align-items: center;
+  gap: @spacing-xs;
+}
+
+.staff-note--warn {
+  background: @color-risk-mid-bg;
+  color: @color-risk-mid;
+}
+
+.staff-note--flat {
+  margin-top: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.staff-auth-checks {
+  display: flex;
+  flex-direction: column;
+  gap: @spacing-sm;
+  margin-top: @spacing-md;
+}
+
+.staff-auth-check {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: @color-health-banner-bg;
+  border-radius: @radius-sm;
+  padding: @spacing-sm @spacing-md;
+
+  &__name {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+    color: @color-login-cta;
+  }
+
+  &__ok {
+    .text-auxiliary();
+    color: @color-login-cta;
+  }
+}
+
+.staff-audit-form {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: @spacing-xl;
+  margin-top: @spacing-md;
+}
+
+.staff-audit-results {
+  display: flex;
+  gap: @spacing-sm;
+}
+
+.staff-audit-result {
+  padding: @spacing-xs @spacing-lg;
+  cursor: pointer;
+  border: 1px solid transparent;
+
+  &--active {
+    border-color: currentColor;
+    font-weight: @font-weight-body-medium;
+  }
+}
+
+.staff-audit-footer {
+  display: flex;
+  align-items: center;
+  gap: @spacing-md;
+  margin-top: @spacing-md;
+
+  .staff-detail__actions {
+    margin-top: 0;
+  }
+}
+
+/* ===== 配置服务授权 ===== */
+.staff-auth-filter {
+  display: flex;
+  align-items: center;
+  gap: @spacing-sm;
+}
+
+.staff-auth-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: @spacing-md;
+  align-items: start;
+
+  .staff-auth-rail .staff-card {
+    margin-top: @spacing-md;
+  }
+}
+
+.staff-service-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: @spacing-md;
+}
+
+.staff-service-item {
+  border: 1px solid @color-border;
+  border-radius: @radius-sm;
+  padding: @spacing-md @spacing-lg;
+  cursor: pointer;
+
+  &--checked {
+    background: @color-health-banner-bg;
+    border-color: @color-primary;
+  }
+
+  &--disabled {
+    cursor: not-allowed;
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: @spacing-sm;
+  }
+
+  &__check {
+    color: @color-primary;
+    font-size: 16px;
+  }
+
+  &__box {
+    width: 16px;
+    height: 16px;
+    border: 1px solid @color-border;
+    border-radius: @radius-xs;
+  }
+
+  &__name {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__meta {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+    padding-left: 24px;
+  }
+}
+
+.staff-auth-selected {
+  display: flex;
+  flex-direction: column;
+  gap: @spacing-sm;
+  margin-top: @spacing-md;
+
+  &__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: @color-health-banner-bg;
+    border-radius: @radius-sm;
+    padding: @spacing-sm @spacing-md;
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+    color: @color-login-cta;
+  }
+}
+
+.staff-auth-verify {
+  background: @color-disease-tag-bg;
+  border-radius: @radius-sm;
+  padding: @spacing-sm @spacing-md;
+  margin-top: @spacing-md;
+
+  &__title {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+    color: @color-disease-tag;
+  }
+
+  &__row {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+
+    &--warn {
+      color: @color-risk-mid;
+    }
+  }
+}
+
+.staff-auth-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: @spacing-md;
+
+  .staff-detail__actions {
+    margin-top: 0;
+  }
+}
+
+/* ===== 上传执业资质 ===== */
+.staff-upload-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: @spacing-md;
+  align-items: start;
+
+  .staff-card {
+    margin-top: @spacing-md;
+  }
+}
+
+.staff-upload-box {
+  border: 1px dashed @color-primary;
+  border-radius: @radius-sm;
+  background: @color-health-banner-bg;
+  padding: @spacing-xl;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: @spacing-sm;
+  cursor: pointer;
+  margin-bottom: @spacing-lg;
+
+  &__icon {
+    font-size: 28px;
+    color: @color-primary;
+  }
+
+  &__title {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+    color: @color-login-cta;
+  }
+
+  &__sub {
+    .text-auxiliary();
+  }
+}
+
+.staff-uploaded {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: @spacing-md;
+
+  &__item {
+    border: 1px solid @color-border;
+    border-radius: @radius-sm;
+    padding: @spacing-md @spacing-lg;
+  }
+
+  &__name {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+    color: @color-login-cta;
+  }
+
+  &__meta {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+
+  &__del {
+    display: inline-block;
+    margin-top: @spacing-sm;
+    cursor: pointer;
+    font-size: @font-size-auxiliary;
+  }
+}
+
+.staff-profile__cell-value {
+  font-size: @font-size-body;
+  font-weight: @font-weight-body-medium;
+}

@@ -1,0 +1,882 @@
+/**
+ * 服务工单模块样式（工单列表 / 工单详情 / 派单弹窗 / 修改预约弹窗 / 医生审核 / 审核结果）
+ */
+
+.wo-page {
+  width: 100%;
+}
+
+/* ===== 通用：标签 / 文本 / 卡片 ===== */
+.wo-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px @spacing-xs;
+  border-radius: @radius-xs;
+  font-size: @font-size-auxiliary;
+  line-height: @line-height-auxiliary;
+  font-weight: @font-weight-label;
+
+  &--green {
+    background: @color-risk-low-bg;
+    color: @color-risk-low;
+  }
+
+  &--blue {
+    background: @color-disease-tag-bg;
+    color: @color-disease-tag;
+  }
+
+  &--orange {
+    background: @color-risk-mid-bg;
+    color: @color-risk-mid;
+  }
+
+  &--purple {
+    background: @color-ai-bg;
+    color: @color-ai;
+  }
+
+  &--red {
+    background: @color-risk-high-bg;
+    color: @color-risk-high;
+  }
+}
+
+.wo-text--warn {
+  color: @color-risk-mid;
+}
+
+.wo-text--strong {
+  font-weight: @font-weight-body-medium;
+}
+
+.wo-card {
+  .card-surface();
+  padding: @spacing-lg @spacing-xl;
+
+  & + & {
+    margin-top: @spacing-md;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: @spacing-sm;
+    margin-bottom: @spacing-md;
+  }
+
+  &__title {
+    .text-title-card();
+  }
+
+  &__sub {
+    .text-auxiliary();
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: @spacing-sm;
+    margin-top: @spacing-md;
+  }
+}
+
+.wo-field {
+  margin-bottom: @spacing-lg;
+
+  &__label {
+    font-size: @font-size-label;
+    line-height: @line-height-label;
+    font-weight: @font-weight-label;
+    margin-bottom: @spacing-xs;
+  }
+}
+
+.wo-note {
+  font-size: @font-size-auxiliary;
+  line-height: @line-height-auxiliary;
+  color: @color-text-secondary;
+
+  &--block {
+    background: @color-org-scope-bg;
+    border-radius: @radius-sm;
+    padding: @spacing-sm @spacing-md;
+    margin-bottom: @spacing-md;
+  }
+
+  &--blue {
+    background: @color-disease-tag-bg;
+    color: @color-info;
+    border-radius: @radius-sm;
+    padding: @spacing-sm @spacing-md;
+    margin-top: @spacing-md;
+  }
+
+  &--green {
+    background: @color-health-banner-bg;
+    color: @color-login-cta;
+    border-radius: @radius-sm;
+    padding: @spacing-sm @spacing-md;
+  }
+}
+
+.wo-kv {
+  display: flex;
+  align-items: baseline;
+  font-size: @font-size-body;
+  padding: @spacing-2xs 0;
+
+  &__label {
+    color: @color-text-secondary;
+    min-width: 64px;
+    margin-right: @spacing-md;
+
+    &--gap {
+      margin-left: @spacing-2xl;
+    }
+  }
+
+  &__value {
+    font-weight: @font-weight-body-medium;
+  }
+}
+
+.wo-row {
+  &__name {
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__sub {
+    .text-auxiliary();
+  }
+}
+
+.wo-empty {
+  .text-auxiliary();
+  padding: @spacing-lg 0;
+}
+
+.wo-rail {
+  &__gap {
+    margin-top: @spacing-md;
+  }
+
+  &__row {
+    display: flex;
+    justify-content: space-between;
+    font-size: @font-size-body;
+    padding: @spacing-2xs 0;
+  }
+
+  &__label {
+    color: @color-text-secondary;
+  }
+}
+
+/* ===== 工单列表 ===== */
+.wo-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: @spacing-md;
+}
+
+.wo-stat {
+  .card-surface();
+  padding: @spacing-lg @spacing-xl;
+
+  &__label {
+    .text-auxiliary();
+    font-size: @font-size-label;
+  }
+
+  &__value {
+    .text-metric();
+    margin-top: @spacing-2xs;
+
+    &--success {
+      color: @color-primary;
+    }
+
+    &--info {
+      color: @color-info;
+    }
+
+    &--warn {
+      color: @color-risk-mid;
+    }
+
+    &--danger {
+      color: @color-risk-high;
+    }
+  }
+}
+
+.wo-banner {
+  background: @color-health-banner-bg;
+  color: @color-login-cta;
+  border-radius: @radius-sm;
+  padding: @spacing-sm @spacing-md;
+  font-size: @font-size-body;
+  margin-top: @spacing-md;
+}
+
+.wo-tabs {
+  display: flex;
+  gap: @spacing-xs;
+  flex-wrap: wrap;
+  margin-top: @spacing-md;
+
+  &__item {
+    padding: @spacing-2xs @spacing-md;
+    border-radius: @radius-full;
+    background: @color-bg-card;
+    color: @color-text-secondary;
+    font-size: @font-size-body;
+    cursor: pointer;
+
+    &--active {
+      background: @color-primary;
+      color: #fff;
+      font-weight: @font-weight-label;
+    }
+  }
+}
+
+.wo-filters {
+  .card-surface();
+  margin-top: @spacing-md;
+  padding: @spacing-lg @spacing-xl;
+  display: flex;
+  gap: @spacing-sm;
+  flex-wrap: wrap;
+
+  .ant-select {
+    min-width: 150px;
+  }
+
+  &__search {
+    width: 300px;
+  }
+}
+
+.wo-list {
+  .card-surface();
+  margin-top: @spacing-md;
+  padding: @spacing-sm @spacing-xl @spacing-lg;
+}
+
+/* ===== 工单详情 ===== */
+.wo-detail {
+  &__title {
+    display: inline-flex;
+    align-items: center;
+    gap: @spacing-xs;
+  }
+
+  &__back {
+    cursor: pointer;
+    color: @color-text-secondary;
+
+    &:hover {
+      color: @color-primary;
+    }
+  }
+
+  &__status {
+    display: flex;
+    align-items: center;
+    gap: @spacing-sm;
+    margin-bottom: @spacing-md;
+  }
+
+  &__status-note {
+    .text-auxiliary();
+  }
+
+  &__tabs {
+    display: flex;
+    gap: @spacing-xs;
+    flex-wrap: wrap;
+    margin: @spacing-md 0;
+  }
+
+  &__tab {
+    padding: @spacing-xs @spacing-lg;
+    border-radius: @radius-sm;
+    background: @color-bg-card;
+    color: @color-text-secondary;
+    font-size: @font-size-body;
+    cursor: pointer;
+
+    &--active {
+      background: @color-primary;
+      color: #fff;
+      font-weight: @font-weight-label;
+    }
+  }
+}
+
+.wo-steps {
+  display: flex;
+  align-items: flex-start;
+
+  &__item {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    gap: @spacing-sm;
+    position: relative;
+  }
+
+  &__node {
+    width: 28px;
+    height: 28px;
+    border-radius: @radius-full;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: @font-size-auxiliary;
+    background: @color-org-scope-bg;
+    color: @color-text-secondary;
+    flex-shrink: 0;
+
+    &--done {
+      background: @color-primary;
+      color: #fff;
+    }
+
+    &--doing {
+      background: @color-primary-light;
+      color: @color-primary;
+      border: 1px solid @color-primary;
+    }
+  }
+
+  &__title {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+
+    &--todo {
+      color: @color-text-secondary;
+      font-weight: @font-weight-body;
+    }
+  }
+
+  &__desc {
+    .text-auxiliary();
+  }
+
+  &__line {
+    position: absolute;
+    left: 36px;
+    right: @spacing-md;
+    top: 14px;
+    height: 2px;
+    background: @color-border;
+
+    &--done {
+      background: @color-primary;
+    }
+  }
+}
+
+.wo-booking {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: @spacing-md;
+  align-items: start;
+  margin-bottom: @spacing-md;
+}
+
+.wo-assignee {
+  display: flex;
+  align-items: center;
+  gap: @spacing-md;
+  margin-bottom: @spacing-sm;
+
+  &__avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: @radius-full;
+    background: @color-primary-light;
+    flex-shrink: 0;
+    display: inline-block;
+  }
+
+  &__name {
+    font-size: @font-size-title-card;
+    line-height: @line-height-title-card;
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__title {
+    .text-auxiliary();
+  }
+
+  &__tags {
+    margin-left: auto;
+    display: flex;
+    gap: @spacing-xs;
+  }
+}
+
+.wo-contact {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: @spacing-md;
+  margin-bottom: @spacing-md;
+
+  &__results {
+    display: flex;
+    align-items: center;
+    gap: @spacing-sm;
+    margin-bottom: @spacing-md;
+  }
+}
+
+/* ===== 弹窗通用 ===== */
+.wo-modal {
+  &__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: @spacing-md;
+  }
+
+  &__head-side {
+    display: flex;
+    align-items: center;
+    gap: @spacing-sm;
+  }
+
+  &__title {
+    font-size: @font-size-title-module;
+    line-height: @line-height-title-module;
+    font-weight: @font-weight-title-module;
+  }
+
+  &__sub {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+
+  &__note {
+    .text-auxiliary();
+    margin-top: @spacing-md;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: @spacing-sm;
+    margin-top: @spacing-lg;
+  }
+}
+
+/* ===== 派单弹窗 ===== */
+.wo-dispatch {
+  &__rule {
+    background: @color-health-banner-bg;
+    border-radius: @radius-sm;
+    padding: @spacing-sm @spacing-md;
+    font-size: @font-size-auxiliary;
+    line-height: @line-height-auxiliary;
+    color: @color-login-cta;
+    margin-bottom: @spacing-md;
+  }
+
+  &__rule-title {
+    font-weight: @font-weight-label;
+  }
+
+  &__prefer {
+    display: flex;
+    margin-bottom: @spacing-md;
+  }
+
+  &__prefer-sub {
+    display: block;
+    .text-auxiliary();
+  }
+
+  &__table-head {
+    display: grid;
+    grid-template-columns: 1.4fr 1.6fr 1.4fr 1fr;
+    gap: @spacing-md;
+    padding: 0 @spacing-md @spacing-xs;
+    font-size: @font-size-auxiliary;
+    color: @color-text-secondary;
+  }
+}
+
+.wo-staff {
+  display: grid;
+  grid-template-columns: 1.4fr 1.6fr 1.4fr 1fr;
+  gap: @spacing-md;
+  align-items: center;
+  border: 1px solid @color-border;
+  border-radius: @radius-sm;
+  padding: @spacing-sm @spacing-md;
+  cursor: pointer;
+
+  & + & {
+    margin-top: @spacing-sm;
+  }
+
+  &--active {
+    border-color: @color-primary;
+    background: @color-primary-light;
+  }
+
+  &__main {
+    display: flex;
+    align-items: center;
+    gap: @spacing-sm;
+  }
+
+  &__tags {
+    display: flex;
+    gap: @spacing-xs;
+    flex-wrap: wrap;
+  }
+
+  &__slot {
+    font-size: @font-size-body;
+  }
+
+  &__action {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: @spacing-sm;
+  }
+}
+
+/* ===== 修改预约弹窗 ===== */
+.wo-reschedule {
+  &__summary {
+    background: @color-org-scope-bg;
+    border-radius: @radius-sm;
+    padding: @spacing-sm @spacing-md;
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+    margin-bottom: @spacing-md;
+  }
+
+  &__arrow {
+    color: @color-text-secondary;
+    margin: 0 @spacing-xs;
+  }
+
+  &__origin {
+    background: @color-org-scope-bg;
+    border-radius: @radius-sm;
+    padding: @spacing-sm @spacing-md;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: @spacing-md;
+  }
+
+  &__origin-value {
+    font-size: @font-size-title-card;
+    line-height: @line-height-title-card;
+    font-weight: @font-weight-body-medium;
+    margin-top: @spacing-2xs;
+  }
+
+  &__origin-staff {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: @spacing-md;
+  }
+
+  &__conflict {
+    background: @color-risk-mid-bg;
+    border-radius: @radius-sm;
+    padding: @spacing-sm @spacing-md;
+    font-size: @font-size-auxiliary;
+    line-height: @line-height-auxiliary;
+    color: @color-risk-mid;
+    margin-bottom: @spacing-md;
+  }
+
+  &__conflict-title {
+    font-weight: @font-weight-label;
+    margin-bottom: @spacing-2xs;
+  }
+
+  &__option {
+    display: flex;
+    align-items: flex-start;
+    gap: @spacing-sm;
+    border: 1px solid @color-border;
+    border-radius: @radius-sm;
+    padding: @spacing-sm @spacing-md;
+    cursor: pointer;
+    margin-top: @spacing-sm;
+
+    &--active {
+      border-color: @color-primary;
+      background: @color-primary-light;
+    }
+  }
+
+  &__option-title {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__option-desc {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+
+  &__pass {
+    background: @color-health-banner-bg;
+    border-radius: @radius-sm;
+    padding: @spacing-md;
+  }
+
+  &__pass-title {
+    color: @color-risk-low;
+    font-weight: @font-weight-label;
+    margin-bottom: @spacing-sm;
+
+    .anticon {
+      margin-right: @spacing-2xs;
+    }
+  }
+
+  &__checks {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: @spacing-md;
+    margin-bottom: @spacing-md;
+  }
+
+  &__check {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: @font-size-body;
+  }
+
+  &__keep-title {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+  }
+}
+
+/* ===== 医生审核 ===== */
+.wo-member {
+  .card-surface();
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: @spacing-md @spacing-xl;
+  margin-bottom: @spacing-md;
+
+  &__name {
+    font-size: @font-size-title-card;
+    line-height: @line-height-title-card;
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__meta {
+    font-size: @font-size-auxiliary;
+    color: @color-text-secondary;
+  }
+
+  &__side {
+    display: flex;
+    gap: @spacing-xl;
+    align-items: center;
+    font-size: @font-size-body;
+  }
+}
+
+.wo-audit {
+  display: grid;
+  grid-template-columns: 220px 1fr 300px;
+  gap: @spacing-md;
+  align-items: start;
+
+  &__pass {
+    color: @color-risk-low;
+    font-size: @font-size-auxiliary;
+  }
+
+  &__summary {
+    margin-top: @spacing-lg;
+    border-top: 1px solid @color-border;
+    padding-top: @spacing-md;
+  }
+
+  &__rail {
+    .wo-card {
+      margin-top: 0;
+    }
+  }
+
+  &__source {
+    background: @color-ai-bg;
+    border-radius: @radius-sm;
+    padding: @spacing-sm @spacing-md;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: @spacing-sm;
+    margin-top: @spacing-lg;
+  }
+}
+
+.wo-nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: @spacing-xs @spacing-sm;
+  border-radius: @radius-sm;
+  cursor: pointer;
+  font-size: @font-size-body;
+
+  & + & {
+    margin-top: @spacing-2xs;
+  }
+
+  &--warn {
+    background: @color-risk-mid-bg;
+    color: @color-risk-mid;
+    font-weight: @font-weight-label;
+  }
+}
+
+.wo-audit-item {
+  border: 1px solid @color-border;
+  border-radius: @radius-sm;
+  padding: @spacing-sm @spacing-md;
+
+  & + & {
+    margin-top: @spacing-sm;
+  }
+
+  &--blue {
+    background: @color-disease-tag-bg;
+    border-color: transparent;
+  }
+
+  &--orange {
+    background: @color-risk-mid-bg;
+    border-color: transparent;
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__title {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__content {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+
+  &__foot {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: @spacing-sm;
+    margin-top: @spacing-xs;
+  }
+
+  &__modify {
+    color: @color-risk-mid;
+    border-color: @color-risk-mid;
+  }
+}
+
+/* ===== 审核通过结果页 ===== */
+.wo-result {
+  max-width: 560px;
+  margin: @spacing-xl auto 0;
+  text-align: center;
+  padding: @spacing-3xl @spacing-2xl;
+
+  &__icon {
+    font-size: 48px;
+    color: @color-primary;
+  }
+
+  &__title {
+    font-size: @font-size-title-module;
+    line-height: @line-height-title-module;
+    font-weight: @font-weight-title-module;
+    margin-top: @spacing-sm;
+  }
+
+  &__sub {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+
+  &__member {
+    background: @color-org-scope-bg;
+    border-radius: @radius-sm;
+    padding: @spacing-md;
+    margin-top: @spacing-lg;
+    text-align: left;
+  }
+
+  &__member-name {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__member-meta {
+    font-size: @font-size-auxiliary;
+    color: @color-text-secondary;
+    font-weight: @font-weight-body;
+    margin-left: @spacing-xs;
+  }
+
+  &__member-org {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+
+  &__member-tags {
+    display: flex;
+    gap: @spacing-xs;
+    margin-top: @spacing-sm;
+  }
+
+  &__note {
+    margin-top: @spacing-md;
+    text-align: left;
+  }
+
+  &__tip {
+    .text-auxiliary();
+    margin-top: @spacing-md;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: center;
+    gap: @spacing-sm;
+    margin-top: @spacing-lg;
+  }
+}

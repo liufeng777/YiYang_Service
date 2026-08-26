@@ -7,7 +7,7 @@ import './index.less'
 
 interface PageContainerProps {
   /** 页面主标题 */
-  title: string
+  title: ReactNode
   /** 标题右侧操作区（如新建按钮） */
   extra?: ReactNode
   /** 辅助描述文字 */

@@ -1,0 +1,290 @@
+/**
+ * 健康活动模块样式（活动列表 / 报名名单 / 联系确认 / 现场签到）
+ */
+
+.ac-page {
+  width: 100%;
+}
+
+/* ===== 通用 ===== */
+.ac-text--warn {
+  color: @color-risk-mid;
+}
+
+.ac-text--success {
+  color: @color-primary;
+}
+
+.ac-required {
+  color: @color-risk-high;
+}
+
+.ac-card {
+  .card-surface();
+  padding: @spacing-lg @spacing-xl;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: @spacing-sm;
+    margin-bottom: @spacing-md;
+  }
+
+  &__title {
+    .text-title-card();
+  }
+}
+
+.ac-field {
+  margin-bottom: @spacing-lg;
+
+  &__label {
+    font-size: @font-size-label;
+    line-height: @line-height-label;
+    font-weight: @font-weight-label;
+    margin-bottom: @spacing-xs;
+  }
+}
+
+.ac-row {
+  &__name {
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__sub {
+    .text-auxiliary();
+  }
+
+  &__actions {
+    display: flex;
+    gap: @spacing-xs;
+  }
+}
+
+.ac-note-blue {
+  background: @color-disease-tag-bg;
+  color: @color-info;
+  border-radius: @radius-sm;
+  padding: @spacing-sm @spacing-md;
+  font-size: @font-size-auxiliary;
+  line-height: @line-height-auxiliary;
+  margin-top: @spacing-lg;
+
+  &__title {
+    font-weight: @font-weight-label;
+    margin-bottom: @spacing-2xs;
+  }
+
+  p {
+    margin: @spacing-2xs 0 0;
+  }
+}
+
+/* ===== 活动列表 ===== */
+.ac-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: @spacing-md;
+}
+
+.ac-stat {
+  .card-surface();
+  padding: @spacing-lg @spacing-xl;
+
+  &__label {
+    .text-auxiliary();
+    font-size: @font-size-label;
+  }
+
+  &__body {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: @spacing-2xs;
+  }
+
+  &__value {
+    .text-metric();
+  }
+
+  &__note {
+    .text-auxiliary();
+  }
+}
+
+.ac-filters {
+  .card-surface();
+  margin-top: @spacing-md;
+  padding: @spacing-lg @spacing-xl;
+  display: flex;
+  gap: @spacing-sm;
+  flex-wrap: wrap;
+  align-items: flex-end;
+
+  .ant-select {
+    min-width: 160px;
+  }
+
+  &__item {
+    &--grow {
+      flex: 1;
+      min-width: 280px;
+    }
+  }
+
+  &__row {
+    display: flex;
+    gap: @spacing-sm;
+
+    .ant-input-affix-wrapper {
+      flex: 1;
+    }
+  }
+
+  &__label {
+    .text-auxiliary();
+    margin-bottom: @spacing-2xs;
+  }
+
+  &__search {
+    flex: 1;
+    min-width: 280px;
+  }
+
+  &__actions {
+    display: flex;
+    gap: @spacing-sm;
+    margin-left: auto;
+  }
+}
+
+.ac-list {
+  .card-surface();
+  margin-top: @spacing-md;
+  padding: @spacing-sm @spacing-xl @spacing-lg;
+}
+
+/* ===== 报名名单 ===== */
+.ac-activity-bar {
+  background: @color-health-banner-bg;
+  border-radius: @radius-sm;
+  padding: @spacing-md @spacing-lg;
+
+  &__main {
+    font-size: @font-size-title-card;
+    line-height: @line-height-title-card;
+    font-weight: @font-weight-body-medium;
+    color: @color-login-cta;
+  }
+
+  &__meta {
+    font-size: @font-size-body;
+    color: @color-text-secondary;
+    margin-top: @spacing-2xs;
+  }
+}
+
+/* ===== 联系确认 ===== */
+.ac-contact {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: @spacing-md;
+  align-items: start;
+
+  &__account {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+    margin-bottom: @spacing-lg;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: @spacing-md;
+  }
+
+  &__next {
+    max-width: 280px;
+  }
+
+  &__submit {
+    display: flex;
+    justify-content: center;
+    margin-top: @spacing-lg;
+  }
+
+  &__rail {
+    .ac-card__header {
+      margin-bottom: @spacing-sm;
+    }
+  }
+}
+
+.ac-pills {
+  display: flex;
+  gap: @spacing-sm;
+  flex-wrap: wrap;
+}
+
+.ac-pill {
+  padding: @spacing-xs @spacing-lg;
+  border: 1px solid @color-border;
+  border-radius: @radius-sm;
+  font-size: @font-size-body;
+  cursor: pointer;
+
+  &--active {
+    border-color: @color-primary;
+    background: @color-primary-light;
+    color: @color-login-cta;
+    font-weight: @font-weight-label;
+  }
+}
+
+.ac-step {
+  display: flex;
+  gap: @spacing-sm;
+  padding: @spacing-sm 0;
+
+  & + & {
+    border-top: 1px solid @color-border;
+  }
+
+  &__no {
+    color: @color-primary;
+    font-weight: @font-weight-body-medium;
+    flex-shrink: 0;
+  }
+
+  &__title {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+  }
+
+  &__desc {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+}
+
+/* ===== 现场签到 ===== */
+.ac-checkin-stats {
+  .card-surface();
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  padding: @spacing-lg @spacing-xl;
+}
+
+.ac-checkin-stat {
+  &__label {
+    .text-auxiliary();
+    font-size: @font-size-label;
+  }
+
+  &__value {
+    .text-metric();
+    color: @color-primary-dark;
+    margin-top: @spacing-2xs;
+  }
+}

@@ -31,3 +31,10 @@ export function saveActivity(data: Partial<ActivityItem>) {
 export function toggleActivity(id: number, enabled: boolean) {
   return http.post<null>(`/activity/${id}/toggle`, { enabled })
 }
+
+/**
+ * TODO: 协同工作台端健康活动接口（本机构承接活动列表 / 报名名单 / 联系确认 / 现场签到与临时到场补登记）
+ * API v0.1（《协同工作台-API设计》）未定义，待后端补充；
+ * 当前 src/pages/activity 页面以本地 mock 演示完整交互。
+ * 注意：本模块上述运营后台域接口与本端健康活动页面无对应关系，页面未调用。
+ */

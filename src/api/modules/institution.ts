@@ -35,3 +35,10 @@ export function auditInstitution(id: number, approved: boolean, remark?: string)
 export function toggleInstitution(id: number, enabled: boolean) {
   return http.post<null>(`/institution/${id}/toggle`, { enabled })
 }
+
+/**
+ * TODO: 协同工作台端机构主数据接口（平台管理员：机构列表/新增机构/编辑/同步运营平台/同步日志）
+ * API v0.1（《协同工作台-API设计》）未定义，机构管理为运营后台域预留权限码（org:view），待后端补充；
+ * 当前 src/pages/institution 页面以本地 mock 演示完整交互。
+ * 注意：本模块上述接口与本端机构管理页面无对应关系，页面未调用。
+ */

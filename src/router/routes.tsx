@@ -56,6 +56,8 @@ export const PERMISSIONS = {
   HEALTH_GOAL: 'health:goal',
   /** 健康管理方案 */
   HEALTH_PLAN: 'health:plan',
+  /** AI 方案生成 */
+  HEALTH_PLAN_AI: 'health:plan-ai',
   /** 随访管理 */
   FOLLOWUP: 'staff:followup',
   /** 预警管理 */
@@ -205,8 +207,33 @@ export const routes: RouteConfig[] = [
     children: [
       {
         path: '',
-        meta: { title: '健康力测评' },
-        component: lazy(() => import('@/pages/health/assessment')),
+        meta: { title: '测评列表' },
+        component: lazy(() => import('@/pages/assess/list')),
+      },
+      {
+        path: 'create',
+        meta: { title: '新建健康力测评', hideInMenu: true },
+        component: lazy(() => import('@/pages/assess/create')),
+      },
+      {
+        path: 'templates',
+        meta: { title: '测评模板', hideInMenu: true },
+        component: lazy(() => import('@/pages/assess/templates')),
+      },
+      {
+        path: ':id',
+        meta: { title: '健康力测评详情', hideInMenu: true },
+        component: lazy(() => import('@/pages/assess/detail')),
+      },
+      {
+        path: ':id/entry',
+        meta: { title: '健康力测评录入', hideInMenu: true },
+        component: lazy(() => import('@/pages/assess/entry')),
+      },
+      {
+        path: ':id/analysis',
+        meta: { title: 'AI分析与专业确认', hideInMenu: true },
+        component: lazy(() => import('@/pages/assess/analysis')),
       },
     ],
   },
@@ -237,8 +264,38 @@ export const routes: RouteConfig[] = [
     children: [
       {
         path: '',
-        meta: { title: '健康管理方案' },
-        component: lazy(() => import('@/pages/health/plan')),
+        meta: { title: '方案列表' },
+        component: lazy(() => import('@/pages/plan/index')),
+      },
+      {
+        path: 'generate',
+        meta: { title: 'AI方案生成', hideInMenu: true, permissions: [PERMISSIONS.HEALTH_PLAN_AI] },
+        component: lazy(() => import('@/pages/plan/generate')),
+      },
+      {
+        path: ':id',
+        meta: { title: '方案详情', hideInMenu: true },
+        component: lazy(() => import('@/pages/plan/detail')),
+      },
+      {
+        path: ':id/review',
+        meta: { title: '审核健康管理方案', hideInMenu: true },
+        component: lazy(() => import('@/pages/plan/review')),
+      },
+      {
+        path: ':id/returned',
+        meta: { title: '方案已退回修改', hideInMenu: true },
+        component: lazy(() => import('@/pages/plan/returned')),
+      },
+      {
+        path: ':id/revise',
+        meta: { title: '返修方案并重新提交', hideInMenu: true },
+        component: lazy(() => import('@/pages/plan/revise')),
+      },
+      {
+        path: ':id/execution',
+        meta: { title: '执行详情', hideInMenu: true },
+        component: lazy(() => import('@/pages/plan/execution')),
       },
     ],
   },
@@ -248,8 +305,18 @@ export const routes: RouteConfig[] = [
     children: [
       {
         path: '',
-        meta: { title: '随访管理' },
-        component: lazy(() => import('@/pages/health/followup')),
+        meta: { title: '我的随访' },
+        component: lazy(() => import('@/pages/followup/index')),
+      },
+      {
+        path: 'create',
+        meta: { title: '创建健康预警回访', hideInMenu: true },
+        component: lazy(() => import('@/pages/followup/create')),
+      },
+      {
+        path: ':id/execute',
+        meta: { title: '执行随访', hideInMenu: true },
+        component: lazy(() => import('@/pages/followup/execute')),
       },
     ],
   },
@@ -259,8 +326,18 @@ export const routes: RouteConfig[] = [
     children: [
       {
         path: '',
-        meta: { title: '预警管理' },
-        component: lazy(() => import('@/pages/health/warning')),
+        meta: { title: '预警列表' },
+        component: lazy(() => import('@/pages/warning/index')),
+      },
+      {
+        path: ':id/handle',
+        meta: { title: '健康预警医生处置', hideInMenu: true },
+        component: lazy(() => import('@/pages/warning/handle')),
+      },
+      {
+        path: ':id/close',
+        meta: { title: '关闭健康预警', hideInMenu: true },
+        component: lazy(() => import('@/pages/warning/close')),
       },
     ],
   },
@@ -278,7 +355,22 @@ export const routes: RouteConfig[] = [
       {
         path: '',
         meta: { title: '服务工单' },
-        component: lazy(() => import('@/pages/fulfillment/work-order')),
+        component: lazy(() => import('@/pages/work-order/index')),
+      },
+      {
+        path: ':id',
+        meta: { title: '服务工单详情', hideInMenu: true },
+        component: lazy(() => import('@/pages/work-order/detail')),
+      },
+      {
+        path: ':id/audit',
+        meta: { title: '审核服务订单', hideInMenu: true },
+        component: lazy(() => import('@/pages/work-order/audit')),
+      },
+      {
+        path: ':id/audit-result',
+        meta: { title: '审核通过', hideInMenu: true },
+        component: lazy(() => import('@/pages/work-order/audit-result')),
       },
     ],
   },
@@ -293,8 +385,18 @@ export const routes: RouteConfig[] = [
     children: [
       {
         path: '',
-        meta: { title: '异常处理' },
-        component: lazy(() => import('@/pages/fulfillment/exception')),
+        meta: { title: '异常列表' },
+        component: lazy(() => import('@/pages/exception/index')),
+      },
+      {
+        path: ':id/health',
+        meta: { title: '健康异常处理', hideInMenu: true },
+        component: lazy(() => import('@/pages/exception/health')),
+      },
+      {
+        path: ':id/wo',
+        meta: { title: '工单异常处理', hideInMenu: true },
+        component: lazy(() => import('@/pages/exception/wo')),
       },
     ],
   },
@@ -307,7 +409,22 @@ export const routes: RouteConfig[] = [
       {
         path: '',
         meta: { title: '健康活动' },
-        component: lazy(() => import('@/pages/activity/list')),
+        component: lazy(() => import('@/pages/activity/index')),
+      },
+      {
+        path: ':id/registrations',
+        meta: { title: '报名名单', hideInMenu: true },
+        component: lazy(() => import('@/pages/activity/registrations')),
+      },
+      {
+        path: ':id/registrations/:rid/contact',
+        meta: { title: '联系确认', hideInMenu: true },
+        component: lazy(() => import('@/pages/activity/contact')),
+      },
+      {
+        path: ':id/check-in',
+        meta: { title: '现场签到', hideInMenu: true },
+        component: lazy(() => import('@/pages/activity/checkin')),
       },
     ],
   },
@@ -318,7 +435,12 @@ export const routes: RouteConfig[] = [
       {
         path: '',
         meta: { title: '咨询管理' },
-        component: lazy(() => import('@/pages/operation/consultation')),
+        component: lazy(() => import('@/pages/consultation/index')),
+      },
+      {
+        path: 'register',
+        meta: { title: '登记电话咨询', hideInMenu: true },
+        component: lazy(() => import('@/pages/consultation/register')),
       },
     ],
   },
@@ -330,8 +452,18 @@ export const routes: RouteConfig[] = [
     children: [
       {
         path: '',
-        meta: { title: '机构管理' },
+        meta: { title: '机构列表' },
         component: lazy(() => import('@/pages/institution/list')),
+      },
+      {
+        path: 'create',
+        meta: { title: '新增机构', hideInMenu: true },
+        component: lazy(() => import('@/pages/institution/create')),
+      },
+      {
+        path: ':id',
+        meta: { title: '机构详情', hideInMenu: true },
+        component: lazy(() => import('@/pages/institution/detail')),
       },
     ],
   },
@@ -341,8 +473,48 @@ export const routes: RouteConfig[] = [
     children: [
       {
         path: '',
-        meta: { title: '人员管理' },
-        component: lazy(() => import('@/pages/org/staff')),
+        meta: { title: '人员列表' },
+        component: lazy(() => import('@/pages/staff/list')),
+      },
+      {
+        path: 'credentials',
+        meta: { title: '执业资质', hideInMenu: true },
+        component: lazy(() => import('@/pages/staff/credentials')),
+      },
+      {
+        path: 'qualification',
+        meta: { title: '派单资格', hideInMenu: true },
+        component: lazy(() => import('@/pages/staff/qualification')),
+      },
+      {
+        path: 'audit',
+        meta: { title: '资质审核', hideInMenu: true },
+        component: lazy(() => import('@/pages/staff/audit')),
+      },
+      {
+        path: 'audit/:id',
+        meta: { title: '专业人员统一审核', hideInMenu: true },
+        component: lazy(() => import('@/pages/staff/audit-detail')),
+      },
+      {
+        path: 'create',
+        meta: { title: '新增人员', hideInMenu: true },
+        component: lazy(() => import('@/pages/staff/create')),
+      },
+      {
+        path: ':id',
+        meta: { title: '人员详情', hideInMenu: true },
+        component: lazy(() => import('@/pages/staff/detail')),
+      },
+      {
+        path: ':id/authorize',
+        meta: { title: '配置服务授权', hideInMenu: true },
+        component: lazy(() => import('@/pages/staff/authorize')),
+      },
+      {
+        path: ':id/credential-upload',
+        meta: { title: '上传执业资质', hideInMenu: true },
+        component: lazy(() => import('@/pages/staff/credential-upload')),
       },
     ],
   },
@@ -352,8 +524,28 @@ export const routes: RouteConfig[] = [
     children: [
       {
         path: '',
-        meta: { title: '团队管理' },
-        component: lazy(() => import('@/pages/org/team')),
+        meta: { title: '团队列表' },
+        component: lazy(() => import('@/pages/team/list')),
+      },
+      {
+        path: 'create',
+        meta: { title: '新建团队', hideInMenu: true },
+        component: lazy(() => import('@/pages/team/create')),
+      },
+      {
+        path: 'unassigned',
+        meta: { title: '待分配患者', hideInMenu: true },
+        component: lazy(() => import('@/pages/team/unassigned')),
+      },
+      {
+        path: 'assign',
+        meta: { title: '批量分配管理团队', hideInMenu: true },
+        component: lazy(() => import('@/pages/team/assign')),
+      },
+      {
+        path: ':id',
+        meta: { title: '团队详情', hideInMenu: true },
+        component: lazy(() => import('@/pages/team/detail')),
       },
     ],
   },
@@ -363,8 +555,13 @@ export const routes: RouteConfig[] = [
     children: [
       {
         path: '',
-        meta: { title: '角色管理' },
-        component: lazy(() => import('@/pages/system/role')),
+        meta: { title: '角色列表' },
+        component: lazy(() => import('@/pages/role/list')),
+      },
+      {
+        path: 'create',
+        meta: { title: '新建角色', hideInMenu: true },
+        component: lazy(() => import('@/pages/role/create')),
       },
     ],
   },

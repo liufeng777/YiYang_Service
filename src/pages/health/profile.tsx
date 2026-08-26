@@ -15,6 +15,7 @@ import {
   type MedicationItem,
 } from './mock'
 import { BasicInfoTab, ExamTab, HistoryTab, MetricsTab, RecordsTab } from './profile-tabs'
+import { AssessTab } from './assess-tab'
 import './index.less'
 
 const RISK_TEXT = { high: '高风险', mid: '中风险', low: '低风险' } as const
@@ -28,6 +29,7 @@ const TAB_ITEMS = [
   '检查检验',
   '健康记录',
   '用药记录',
+  '健康力测评',
 ]
 
 /** 健康概览 Tab */
@@ -376,6 +378,7 @@ export default function HealthProfile() {
     if (tab === '检查检验') return <ExamTab />
     if (tab === '健康记录') return <RecordsTab />
     if (tab === '用药记录') return <MedicationTab />
+    if (tab === '健康力测评') return <AssessTab />
     return <div className="hr-card hr-card--placeholder">「{tab}」内容待接入后端数据后实现</div>
   }, [tab])
 
