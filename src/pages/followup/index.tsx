@@ -4,7 +4,7 @@
  * TODO: 接入后端后替换为 followupApi.getFollowups（§6.3），数据为本地 mock（见 ./mock.ts）
  */
 import { useMemo, useState } from 'react'
-import { Button, DatePicker, Input, Select, Table, Tabs } from 'antd'
+import { Button, Card, DatePicker, Input, Select, Table, Tabs } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
@@ -27,32 +27,39 @@ export default function FollowupList() {
   const [tab, setTab] = useState<'pending' | 'done'>('pending')
   const [typeFilter, setTypeFilter] = useState<FollowupTypeKey>()
   const [keyword, setKeyword] = useState('')
+  const [applied, setApplied] = useState({ typeFilter: undefined as FollowupTypeKey | undefined, keyword: '' })
   const [page, setPage] = useState(1)
   const pageSize = 20
 
   const pendingFiltered = useMemo(
     () =>
       mockFollowupPending.filter((row) => {
-        if (typeFilter && row.type !== typeFilter) return false
-        if (keyword && !row.memberName.includes(keyword)) return false
+        if (applied.typeFilter && row.type !== applied.typeFilter) return false
+        if (applied.keyword && !row.memberName.includes(applied.keyword)) return false
         return true
       }),
-    [typeFilter, keyword],
+    [applied],
   )
 
   const doneFiltered = useMemo(
     () =>
       mockFollowupDone.filter((row) => {
-        if (typeFilter && row.type !== typeFilter) return false
-        if (keyword && !row.memberName.includes(keyword)) return false
+        if (applied.typeFilter && row.type !== applied.typeFilter) return false
+        if (applied.keyword && !row.memberName.includes(applied.keyword)) return false
         return true
       }),
-    [typeFilter, keyword],
+    [applied],
   )
+
+  const applyFilters = () => {
+    setApplied({ typeFilter, keyword })
+    setPage(1)
+  }
 
   const onReset = () => {
     setTypeFilter(undefined)
     setKeyword('')
+    setApplied({ typeFilter: undefined, keyword: '' })
     setPage(1)
   }
 
@@ -174,45 +181,32 @@ export default function FollowupList() {
         )}
 
         {/* 筛选 */}
-        <div className="fu-filters">
-          <div className="fu-filters__field">
-            <div className="fu-filters__label">随访类型</div>
-            <Select
-              placeholder="全部类型"
-              value={typeFilter}
-              onChange={setTypeFilter}
-              options={TYPE_OPTIONS}
-              allowClear
-            />
-          </div>
-          <div className="fu-filters__field">
-            <div className="fu-filters__label">{tab === 'pending' ? '计划日期' : '完成日期'}</div>
-            {tab === 'pending' ? (
-              <Select placeholder="今天" options={[{ value: 'today', label: '今天' }]} allowClear />
-            ) : (
-              <DatePicker.RangePicker placeholder={['开始日期', '结束日期']} />
-            )}
-          </div>
-          <div className="fu-filters__field">
-            <div className="fu-filters__label">服务对象</div>
-            <Input
-              prefix={<SearchOutlined />}
-              placeholder="姓名 / 手机号"
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value.trim())}
-              allowClear
-            />
-          </div>
-          <div className="fu-filters__actions">
-            <Button type="primary" onClick={() => setPage(1)}>
-              查询
-            </Button>
-            <Button onClick={onReset}>重置</Button>
-          </div>
-        </div>
+        <Card variant="borderless" className="filter-bar">
+          <Select
+            placeholder="全部类型"
+            value={typeFilter}
+            onChange={setTypeFilter}
+            options={TYPE_OPTIONS}
+            allowClear
+          />
+          {tab === 'pending' ? (
+            <Select placeholder="全部日期" options={[{ value: 'today', label: '今天' }]} allowClear />
+          ) : (
+            <DatePicker.RangePicker placeholder={['开始日期', '结束日期']} />
+          )}
+          <Input
+            prefix={<SearchOutlined />}
+            placeholder="姓名 / 手机号"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value.trim())}
+            allowClear
+          />
+          <Button type="primary" onClick={applyFilters}>查询</Button>
+          <Button onClick={onReset}>重置</Button>
+        </Card>
 
         {/* 列表 */}
-        <div className="fu-list">
+        <Card variant="borderless" className="list-card">
           {tab === 'pending' ? (
             <Table<MockFollowupPendingRow>
               rowKey="id"
@@ -228,7 +222,7 @@ export default function FollowupList() {
               pagination={{ current: page, pageSize, total: doneFiltered.length, onChange: setPage }}
             />
           )}
-        </div>
+        </Card>
 
         <div className="fu-footnote">
           <span className="fu-footnote__label">交互说明</span>

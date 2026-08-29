@@ -4,7 +4,7 @@
  * TODO: 患者分配接口 API v0.1 未定义，待后端补充
  */
 import { useMemo, useState } from 'react'
-import { Button, Input, Select, Table, message } from 'antd'
+import { Button, Card, Input, Select, Table, message } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import {
@@ -29,21 +29,24 @@ const DATE_OPTIONS = ['最近30天', '最近7天', '今日']
 export default function TeamUnassigned() {
   const navigate = useNavigate()
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
+  const [applied, setApplied] = useState<Filters>({ keyword: '' })
   const [selected, setSelected] = useState<string[]>([])
+
+  const applyFilters = () => setApplied(filters)
 
   const filtered = useMemo(
     () =>
       mockUnassignedList.filter((row) => {
         if (
-          filters.keyword &&
-          ![row.name, row.memberId].some((v) => v.includes(filters.keyword))
+          applied.keyword &&
+          ![row.name, row.memberId].some((v) => v.includes(applied.keyword))
         )
           return false
-        if (filters.source && row.source !== filters.source) return false
-        if (filters.risk && row.risk !== filters.risk) return false
+        if (applied.source && row.source !== applied.source) return false
+        if (applied.risk && row.risk !== applied.risk) return false
         return true
       }),
-    [filters],
+    [applied],
   )
 
   const stats = [
@@ -125,13 +128,12 @@ export default function TeamUnassigned() {
         </div>
 
         {/* 筛选 */}
-        <div className="team-filters team-filters--inline">
+        <Card variant="borderless" className="filter-bar">
           <Input
             placeholder="姓名 / 手机号 / 会员ID"
             value={filters.keyword}
             onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
             allowClear
-            style={{ maxWidth: 220 }}
           />
           <Select
             placeholder="来源：全部"
@@ -139,7 +141,6 @@ export default function TeamUnassigned() {
             onChange={(v) => setFilters((f) => ({ ...f, source: v }))}
             options={SOURCE_OPTIONS.map((v) => ({ value: v, label: `来源：${v}` }))}
             allowClear
-            style={{ minWidth: 160 }}
           />
           <Select
             placeholder="风险等级：全部"
@@ -147,7 +148,6 @@ export default function TeamUnassigned() {
             onChange={(v) => setFilters((f) => ({ ...f, risk: v }))}
             options={RISK_OPTIONS.map((v) => ({ value: v, label: `风险等级：${v}` }))}
             allowClear
-            style={{ minWidth: 160 }}
           />
           <Select
             placeholder="建档日期：最近30天"
@@ -155,13 +155,12 @@ export default function TeamUnassigned() {
             onChange={(v) => setFilters((f) => ({ ...f, dateRange: v }))}
             options={DATE_OPTIONS.map((v) => ({ value: v, label: `建档日期：${v}` }))}
             allowClear
-            style={{ minWidth: 170 }}
           />
-          <Button type="primary">查询</Button>
-        </div>
+          <Button type="primary" onClick={applyFilters}>查询</Button>
+        </Card>
 
         {/* 患者表格 */}
-        <div className="team-list">
+        <Card variant="borderless" className="list-card">
           <Table<MockUnassignedRow>
             rowKey="id"
             columns={columns}
@@ -172,7 +171,7 @@ export default function TeamUnassigned() {
               onChange: (keys) => setSelected(keys as string[]),
             }}
           />
-        </div>
+        </Card>
 
         <div className="team-note team-note--green">{mockUnassignedNote}</div>
       </PageContainer>

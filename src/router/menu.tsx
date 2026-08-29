@@ -100,24 +100,85 @@ export function findOpenKeys(pathname: string): string[] {
   return keys
 }
 
-/** 根据路径构建面包屑（一级 -> 二级） */
-export function findBreadcrumb(pathname: string): Array<{ title: string }> {
+/** 面包屑项：title 展示文案，path 用于点击跳转 */
+export interface BreadcrumbItem {
+  title: string
+  path: string
+}
+
+interface PagePattern {
+  /** 完整路径模式，如 /assessment/:id/entry */
+  pattern: string
+  title: string
+}
+
+/** 展开某一级导航下的所有页面路径模式（默认页 '' 不重复占位） */
+function expandPages(route: RouteConfig, base: string): PagePattern[] {
+  const list: PagePattern[] = []
+  for (const child of route.children ?? []) {
+    if (!child.path) continue
+    const pattern = joinPath(base, child.path)
+    list.push({ pattern, title: child.meta.title })
+    list.push(...expandPages(child, pattern))
+  }
+  return list
+}
+
+/** 路径模式与给定路径段精确匹配（':xxx' 为参数段，段数需一致） */
+function matchPattern(pattern: string, segments: string[]): boolean {
+  const patternSegs = pattern.split('/').filter(Boolean)
+  if (patternSegs.length !== segments.length) return false
+  return patternSegs.every((seg, index) => seg.startsWith(':') || seg === segments[index])
+}
+
+/**
+ * 根据路径构建面包屑（支持多级嵌套与路径参数）
+ * - 一级导航默认页只显示一级标题，避免「工作台 / 工作台」式重复
+ * - 详情 / 编辑等隐藏页按路径参数逐级补全（如 健康力测评 / 健康力测评详情）
+ * - 相邻层级同名时去重，每一项携带可跳转路径，末级为当前页
+ */
+export function findBreadcrumb(pathname: string): BreadcrumbItem[] {
   for (const route of routes) {
-    if (!pathname.startsWith(route.path)) continue
-    const crumb: Array<{ title: string }> = [{ title: route.meta.title }]
-    const child = route.children?.find((c) => pathname === joinPath(route.path, c.path))
-    if (child) crumb.push({ title: child.meta.title })
-    return crumb
+    if (!(pathname === route.path || pathname.startsWith(`${route.path}/`))) continue
+
+    // 一级导航落点：有默认页（''）时用一级路径；否则落到第一个可见二级导航，
+    // 避免面包屑点击一级项时跳到无匹配路由的空白页
+    const defaultChild = route.children?.find((c) => !c.path && !c.meta.hideInMenu)
+    const firstVisibleChild = route.children?.find((c) => !c.meta.hideInMenu)
+    const landingPath = defaultChild
+      ? route.path
+      : firstVisibleChild
+        ? joinPath(route.path, firstVisibleChild.path)
+        : route.path
+
+    const crumbs: BreadcrumbItem[] = [{ title: route.meta.title, path: landingPath }]
+    const pages = expandPages(route, route.path)
+    const segments = pathname.split('/').filter(Boolean)
+
+    // 逐级累积前缀，前缀恰好完整匹配某个页面路径模式时补一级面包屑
+    for (let depth = 2; depth <= segments.length; depth += 1) {
+      const prefixSegs = segments.slice(0, depth)
+      const hit = pages.find((page) => matchPattern(page.pattern, prefixSegs))
+      if (hit && hit.title !== crumbs[crumbs.length - 1].title) {
+        crumbs.push({ title: hit.title, path: `/${prefixSegs.join('/')}` })
+      }
+    }
+    return crumbs
   }
   return []
 }
 
-/** 根据路径查找页面标题（用于 document.title） */
+/** 根据路径查找页面标题（用于 document.title），取最深匹配页面 */
 export function findPageTitle(pathname: string): string {
   for (const route of routes) {
-    if (!pathname.startsWith(route.path)) continue
-    const child = route.children?.find((c) => pathname === joinPath(route.path, c.path))
-    if (child) return `${child.meta.title} - ${route.meta.title}`
+    if (!(pathname === route.path || pathname.startsWith(`${route.path}/`))) continue
+    const segments = pathname.split('/').filter(Boolean)
+    const hit = expandPages(route, route.path).find((page) => matchPattern(page.pattern, segments))
+    if (hit) return hit.title === route.meta.title ? route.meta.title : `${hit.title} - ${route.meta.title}`
+    const defaultChild = route.children?.find((c) => !c.path)
+    if (defaultChild && pathname === route.path && defaultChild.meta.title !== route.meta.title) {
+      return `${defaultChild.meta.title} - ${route.meta.title}`
+    }
     return route.meta.title
   }
   return ''

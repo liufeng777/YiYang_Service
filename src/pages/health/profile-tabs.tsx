@@ -289,12 +289,13 @@ export function MetricsTab() {
 
 export function RecordsTab() {
   const [keyword, setKeyword] = useState('')
+  const [appliedKeyword, setAppliedKeyword] = useState('')
   const events = useMemo(
     () =>
       mockHealthEvents.filter(
-        (e) => !keyword || e.title.includes(keyword) || e.summary.includes(keyword),
+        (e) => !appliedKeyword || e.title.includes(appliedKeyword) || e.summary.includes(appliedKeyword),
       ),
-    [keyword],
+    [appliedKeyword],
   )
   return (
     <div>
@@ -308,19 +309,18 @@ export function RecordsTab() {
         <span className="hr-tag hr-tag--risk-low">只读汇总</span>
       </div>
 
-      <div className="hr-card hr-records__filters">
-        <span className="hr-records__filter">记录类型：全部</span>
-        <span className="hr-records__filter">时间：最近一年</span>
-        <Input
-          className="hr-records__keyword"
-          placeholder="关键词：事件名称 / 记录人"
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value.trim())}
-          allowClear
-        />
-        <Button type="primary" className="hr-records__search">
-          查询
-        </Button>
+      <div className="hr-card">
+        <div className="filter-row">
+          <span className="hr-records__filter">记录类型：全部</span>
+          <span className="hr-records__filter">时间：最近一年</span>
+          <Input
+            placeholder="关键词：事件名称 / 记录人"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value.trim())}
+            allowClear
+          />
+          <Button type="primary" onClick={() => setAppliedKeyword(keyword)}>查询</Button>
+        </div>
       </div>
 
       <div className="hr-card">
@@ -715,25 +715,15 @@ export function ExamTab() {
         ))}
       </div>
 
-      <div className="hr-card hr-exam__filters">
-        <div className="hr-exam__filter">
-          <span className="hr-overview-item__label">记录类型</span>
+      <div className="hr-card">
+        <div className="filter-row">
           <Input placeholder="全部类型" />
-        </div>
-        <div className="hr-exam__filter">
-          <span className="hr-overview-item__label">项目分类</span>
           <Input placeholder="全部分类" />
-        </div>
-        <div className="hr-exam__filter">
-          <span className="hr-overview-item__label">日期</span>
           <Input placeholder="最近一年" />
-        </div>
-        <div className="hr-exam__filter">
-          <span className="hr-overview-item__label">关键词</span>
           <Input placeholder="项目名称 / 机构" />
+          <Button>重置</Button>
+          <Button type="primary">查询</Button>
         </div>
-        <Button type="primary">查询</Button>
-        <Button>重置</Button>
       </div>
 
       <div className="hr-card hr-exam__table">

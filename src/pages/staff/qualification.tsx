@@ -4,7 +4,7 @@
  * TODO: 派单资格综合校验接口 API v0.1 未单列，待后端补充（基础数据见 @/api/modules/staff §7）
  */
 import { useMemo, useState } from 'react'
-import { Button, Select, Table } from 'antd'
+import { Button, Card, Select, Table } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import { mockQualList, mockQualStats, type MockQualRow } from './mock'
@@ -26,17 +26,25 @@ const CREDENTIAL_OPTIONS = ['有效', '待人工审核', '即将到期', '已过
 export default function StaffQualification() {
   const navigate = useNavigate()
   const [filters, setFilters] = useState<Filters>({})
+  const [applied, setApplied] = useState<Filters>({})
+
+  const applyFilters = () => setApplied(filters)
+
+  const resetFilters = () => {
+    setFilters({})
+    setApplied({})
+  }
 
   const filtered = useMemo(
     () =>
       mockQualList.filter((row) => {
-        if (filters.org && row.org !== filters.org) return false
-        if (filters.role && row.role !== filters.role) return false
-        if (filters.dispatch && row.dispatch !== filters.dispatch) return false
-        if (filters.credential && !row.credentialStatus.includes(filters.credential)) return false
+        if (applied.org && row.org !== applied.org) return false
+        if (applied.role && row.role !== applied.role) return false
+        if (applied.dispatch && row.dispatch !== applied.dispatch) return false
+        if (applied.credential && !row.credentialStatus.includes(applied.credential)) return false
         return true
       }),
-    [filters],
+    [applied],
   )
 
   const stats = [
@@ -127,68 +135,52 @@ export default function StaffQualification() {
         </div>
 
         {/* 筛选 */}
-        <div className="staff-filters">
-          <div className="staff-filters__item">
-            <div className="staff-filters__label">所属机构</div>
-            <Select
-              placeholder="全部机构"
-              value={filters.org}
-              onChange={(v) => setFilters((f) => ({ ...f, org: v }))}
-              options={ORG_OPTIONS.map((v) => ({ value: v, label: v }))}
-              allowClear
-            />
-          </div>
-          <div className="staff-filters__item">
-            <div className="staff-filters__label">人员角色</div>
-            <Select
-              placeholder="全部角色"
-              value={filters.role}
-              onChange={(v) => setFilters((f) => ({ ...f, role: v }))}
-              options={ROLE_OPTIONS.map((v) => ({ value: v, label: v }))}
-              allowClear
-            />
-          </div>
-          <div className="staff-filters__item">
-            <div className="staff-filters__label">服务项目</div>
-            <Select
-              placeholder="全部项目"
-              value={filters.service}
-              onChange={(v) => setFilters((f) => ({ ...f, service: v }))}
-              options={SERVICE_OPTIONS.map((v) => ({ value: v, label: v }))}
-              allowClear
-            />
-          </div>
-          <div className="staff-filters__item">
-            <div className="staff-filters__label">证照状态</div>
-            <Select
-              placeholder="全部状态"
-              value={filters.credential}
-              onChange={(v) => setFilters((f) => ({ ...f, credential: v }))}
-              options={CREDENTIAL_OPTIONS.map((v) => ({ value: v, label: v }))}
-              allowClear
-            />
-          </div>
-          <div className="staff-filters__item">
-            <div className="staff-filters__label">派单资格</div>
-            <Select
-              placeholder="全部"
-              value={filters.dispatch}
-              onChange={(v) => setFilters((f) => ({ ...f, dispatch: v }))}
-              options={[
-                { value: 'ok', label: '可派单' },
-                { value: 'no', label: '不可派单' },
-              ]}
-              allowClear
-            />
-          </div>
-          <div className="staff-filters__actions">
-            <Button type="primary">查询</Button>
-            <Button onClick={() => setFilters({})}>重置</Button>
-          </div>
-        </div>
+        <Card variant="borderless" className="filter-bar">
+          <Select
+            placeholder="全部机构"
+            value={filters.org}
+            onChange={(v) => setFilters((f) => ({ ...f, org: v }))}
+            options={ORG_OPTIONS.map((v) => ({ value: v, label: v }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部角色"
+            value={filters.role}
+            onChange={(v) => setFilters((f) => ({ ...f, role: v }))}
+            options={ROLE_OPTIONS.map((v) => ({ value: v, label: v }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部项目"
+            value={filters.service}
+            onChange={(v) => setFilters((f) => ({ ...f, service: v }))}
+            options={SERVICE_OPTIONS.map((v) => ({ value: v, label: v }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部状态"
+            value={filters.credential}
+            onChange={(v) => setFilters((f) => ({ ...f, credential: v }))}
+            options={CREDENTIAL_OPTIONS.map((v) => ({ value: v, label: v }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部"
+            value={filters.dispatch}
+            onChange={(v) => setFilters((f) => ({ ...f, dispatch: v }))}
+            options={[
+              { value: 'ok', label: '可派单' },
+              { value: 'no', label: '不可派单' },
+            ]}
+            allowClear
+          />
+          
+          <Button type="primary" onClick={applyFilters}>查询</Button>
+          <Button onClick={resetFilters}>重置</Button>
+        </Card>
 
         {/* 派单资格表格 */}
-        <div className="staff-list">
+        <Card variant="borderless" className="list-card">
           <Table<MockQualRow>
             rowKey="id"
             columns={columns}
@@ -201,7 +193,7 @@ export default function StaffQualification() {
               派单时再次校验人员状态、任职、证照与服务授权。
             </span>
           </div>
-        </div>
+        </Card>
       </PageContainer>
     </div>
   )

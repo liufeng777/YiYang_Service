@@ -4,7 +4,7 @@
  * TODO: 统一审核接口 API v0.1 未单列（§7 仅有资质状态更新），待后端补充
  */
 import { useMemo, useState } from 'react'
-import { Button, DatePicker, Input, Select, Table } from 'antd'
+import { Button, Card, DatePicker, Input, Select, Table } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import {
@@ -42,17 +42,27 @@ export default function StaffAudit() {
   const [keyword, setKeyword] = useState('')
   const [role, setRole] = useState<string>()
   const [org, setOrg] = useState<string>()
+  const [applied, setApplied] = useState({ keyword: '', role: undefined as string | undefined, org: undefined as string | undefined })
+
+  const applyFilters = () => setApplied({ keyword, role, org })
+
+  const resetFilters = () => {
+    setKeyword('')
+    setRole(undefined)
+    setOrg(undefined)
+    setApplied({ keyword: '', role: undefined, org: undefined })
+  }
 
   const filtered = useMemo(
     () =>
       mockAuditList.filter((row) => {
         if (tab && row.status !== tab) return false
-        if (keyword && ![row.name, row.phone].some((v) => v.includes(keyword))) return false
-        if (role && !row.roleOrg.startsWith(role)) return false
-        if (org && !row.roleOrg.endsWith(org)) return false
+        if (applied.keyword && ![row.name, row.phone].some((v) => v.includes(applied.keyword))) return false
+        if (applied.role && !row.roleOrg.startsWith(applied.role)) return false
+        if (applied.org && !row.roleOrg.endsWith(applied.org)) return false
         return true
       }),
-    [tab, keyword, role, org],
+    [tab, applied],
   )
 
   const stats = [
@@ -136,59 +146,41 @@ export default function StaffAudit() {
         </div>
 
         {/* 筛选 */}
-        <div className="staff-filters">
-          <div className="staff-filters__item">
-            <Input
-              placeholder="姓名 / 手机号 / 工号"
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value.trim())}
-              allowClear
-            />
-          </div>
-          <div className="staff-filters__item">
-            <Select
-              placeholder="全部角色"
-              value={role}
-              onChange={setRole}
-              options={ROLE_OPTIONS.map((v) => ({ value: v, label: v }))}
-              allowClear
-            />
-          </div>
-          <div className="staff-filters__item">
-            <Select
-              placeholder="全部机构"
-              value={org}
-              onChange={setOrg}
-              options={ORG_OPTIONS.map((v) => ({ value: v, label: v }))}
-              allowClear
-            />
-          </div>
-          <div className="staff-filters__item">
-            <DatePicker placeholder="提交时间" />
-          </div>
-          <div className="staff-filters__actions">
-            <Button type="primary">查询</Button>
-            <Button
-              onClick={() => {
-                setKeyword('')
-                setRole(undefined)
-                setOrg(undefined)
-              }}
-            >
-              重置
-            </Button>
-          </div>
-        </div>
+        <Card variant="borderless" className="filter-bar">
+          <Input
+            placeholder="姓名 / 手机号 / 工号"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value.trim())}
+            allowClear
+          />
+          <Select
+            placeholder="全部角色"
+            value={role}
+            onChange={setRole}
+            options={ROLE_OPTIONS.map((v) => ({ value: v, label: v }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部机构"
+            value={org}
+            onChange={setOrg}
+            options={ORG_OPTIONS.map((v) => ({ value: v, label: v }))}
+            allowClear
+          />
+          <DatePicker placeholder="提交时间" />
+          <Button onClick={resetFilters}>重置</Button>
+          <Button type="primary" onClick={applyFilters}>查询</Button>
+        </Card>
 
         {/* 审核表格 */}
-        <div className="staff-list">
+        <Card variant="borderless" className="list-card">
           <Table<MockAuditRow>
             rowKey="id"
             columns={columns}
             dataSource={filtered}
             pagination={false}
           />
-        </div>
+        </Card>
       </PageContainer>
     </div>
   )

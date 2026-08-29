@@ -4,7 +4,7 @@
  * TODO: 角色管理接口 API v0.1 未定义（运营后台域），待后端补充
  */
 import { useMemo, useState } from 'react'
-import { Button, Input, Select, Table } from 'antd'
+import { Button, Card, Input, Select, Table } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
@@ -28,17 +28,26 @@ interface Filters {
 export default function RoleList() {
   const navigate = useNavigate()
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
+  const [applied, setApplied] = useState<Filters>({ keyword: '' })
+
+  const applyFilters = () => setApplied(filters)
+
+  const resetFilters = () => {
+    const init: Filters = { keyword: '' }
+    setFilters(init)
+    setApplied(init)
+  }
 
   const filtered = useMemo(
     () =>
       mockRoleList.filter((row) => {
-        if (filters.keyword && !row.name.includes(filters.keyword)) return false
-        if (filters.type && row.type !== filters.type) return false
-        if (filters.module && !row.scope.includes(filters.module.replace('管理', ''))) return false
-        if (filters.status && row.status !== filters.status) return false
+        if (applied.keyword && !row.name.includes(applied.keyword)) return false
+        if (applied.type && row.type !== applied.type) return false
+        if (applied.module && !row.scope.includes(applied.module.replace('管理', ''))) return false
+        if (applied.status && row.status !== applied.status) return false
         return true
       }),
-    [filters],
+    [applied],
   )
 
   const stats = [
@@ -123,57 +132,44 @@ export default function RoleList() {
         </div>
 
         {/* 筛选 */}
-        <div className="role-filters">
-          <div className="role-filters__item">
-            <div className="role-filters__label">角色名称</div>
-            <Input
-              placeholder="请输入角色名称"
-              value={filters.keyword}
-              onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
-              allowClear
-            />
-          </div>
-          <div className="role-filters__item">
-            <div className="role-filters__label">配置类型</div>
-            <Select
-              placeholder="全部类型"
-              value={filters.type}
-              onChange={(v) => setFilters((f) => ({ ...f, type: v }))}
-              options={Object.entries(ROLE_TYPE_TEXT).map(([value, label]) => ({ value, label }))}
-              allowClear
-            />
-          </div>
-          <div className="role-filters__item">
-            <div className="role-filters__label">权限模块</div>
-            <Select
-              placeholder="全部模块"
-              value={filters.module}
-              onChange={(v) => setFilters((f) => ({ ...f, module: v }))}
-              options={mockRoleModules.map((v) => ({ value: v, label: v }))}
-              allowClear
-            />
-          </div>
-          <div className="role-filters__item">
-            <div className="role-filters__label">角色状态</div>
-            <Select
-              placeholder="全部状态"
-              value={filters.status}
-              onChange={(v) => setFilters((f) => ({ ...f, status: v }))}
-              options={[
-                { value: 'enabled', label: '启用' },
-                { value: 'disabled', label: '待启用' },
-              ]}
-              allowClear
-            />
-          </div>
-          <div className="role-filters__actions">
-            <Button type="primary">查询</Button>
-            <Button onClick={() => setFilters({ keyword: '' })}>重置</Button>
-          </div>
-        </div>
+        <Card variant="borderless" className="filter-bar">
+          <Input
+            placeholder="请输入角色名称"
+            value={filters.keyword}
+            onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部类型"
+            value={filters.type}
+            onChange={(v) => setFilters((f) => ({ ...f, type: v }))}
+            options={Object.entries(ROLE_TYPE_TEXT).map(([value, label]) => ({ value, label }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部模块"
+            value={filters.module}
+            onChange={(v) => setFilters((f) => ({ ...f, module: v }))}
+            options={mockRoleModules.map((v) => ({ value: v, label: v }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部状态"
+            value={filters.status}
+            onChange={(v) => setFilters((f) => ({ ...f, status: v }))}
+            options={[
+              { value: 'enabled', label: '启用' },
+              { value: 'disabled', label: '待启用' },
+            ]}
+            allowClear
+          />
+          <Button type="primary" onClick={applyFilters}>查询</Button>
+          <Button onClick={resetFilters}>重置</Button>
+          
+        </Card>
 
         {/* 角色表格 */}
-        <div className="role-list">
+        <Card variant="borderless" className="list-card">
           <Table<MockRoleRow>
             rowKey="id"
             columns={columns}
@@ -186,7 +182,7 @@ export default function RoleList() {
               角色由系统管理员统一维护，供全系统使用；人员在新增或编辑时选择角色。
             </span>
           </div>
-        </div>
+        </Card>
       </PageContainer>
     </div>
   )

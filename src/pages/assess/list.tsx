@@ -3,7 +3,7 @@
  * TODO: 接入后端后对齐 API §4.1 评估列表 GET /api/v1/staff/members/:id/assessments
  */
 import { useMemo, useState } from 'react'
-import { Button, DatePicker, Input, Modal, Select, Table } from 'antd'
+import { Button, Card, DatePicker, Input, Modal, Select, Table } from 'antd'
 import {
   DownloadOutlined,
   FilePdfOutlined,
@@ -60,11 +60,19 @@ function TemplateDownloadModal({ open, onClose }: { open: boolean; onClose: () =
 export default function AssessList() {
   const navigate = useNavigate()
   const [keyword, setKeyword] = useState('')
+  const [appliedKeyword, setAppliedKeyword] = useState('')
   const [downloadOpen, setDownloadOpen] = useState(false)
 
+  const applyFilters = () => setAppliedKeyword(keyword)
+
+  const resetFilters = () => {
+    setKeyword('')
+    setAppliedKeyword('')
+  }
+
   const list = useMemo(
-    () => mockAssessList.filter((r) => !keyword || r.name.includes(keyword)),
-    [keyword],
+    () => mockAssessList.filter((r) => !appliedKeyword || r.name.includes(appliedKeyword)),
+    [appliedKeyword],
   )
 
   const columns = [
@@ -164,31 +172,30 @@ export default function AssessList() {
       }
     >
       {/* 筛选区 */}
-      <div className="as-card as-filters">
+      <Card variant="borderless" className="filter-bar">
         <Input
-          className="as-filters__keyword"
           prefix={<SearchOutlined />}
           placeholder="测评对象姓名"
           value={keyword}
           onChange={(e) => setKeyword(e.target.value.trim())}
           allowClear
         />
-        <Select className="as-filters__item" placeholder="所属机构" allowClear options={['城东护理院', '幸福里健康驿站', '康宁护理院'].map((v) => ({ value: v, label: v }))} />
-        <Select className="as-filters__item" placeholder="评测类型" allowClear options={['居家快速测评', '专业健康力评测'].map((v) => ({ value: v, label: v }))} />
-        <Select className="as-filters__item" placeholder="评测来源" allowClear options={['C端自主测评', '面访问答', '电话访谈', '纸质问卷录入', '现场专业评测'].map((v) => ({ value: v, label: v }))} />
-        <Select className="as-filters__item" placeholder="评测状态" allowClear options={Object.entries(ASSESS_STATUS).map(([v, s]) => ({ value: v, label: s.text }))} />
-        <DatePicker.RangePicker className="as-filters__item" placeholder={['评测开始', '评测结束']} />
-        <Button type="primary">查询</Button>
-        <Button onClick={() => setKeyword('')}>重置</Button>
-      </div>
+        <Select placeholder="全部机构" allowClear options={['城东护理院', '幸福里健康驿站', '康宁护理院'].map((v) => ({ value: v, label: v }))} />
+        <Select placeholder="全部类型" allowClear options={['居家快速测评', '专业健康力评测'].map((v) => ({ value: v, label: v }))} />
+        <Select placeholder="全部来源" allowClear options={['C端自主测评', '面访问答', '电话访谈', '纸质问卷录入', '现场专业评测'].map((v) => ({ value: v, label: v }))} />
+        <Select placeholder="全部状态" allowClear options={Object.entries(ASSESS_STATUS).map(([v, s]) => ({ value: v, label: s.text }))} />
+        <DatePicker.RangePicker placeholder={['评测开始', '评测结束']} />
+        <Button type="primary" onClick={applyFilters}>查询</Button>
+        <Button onClick={resetFilters}>重置</Button>
+      </Card>
 
       {/* 列表 */}
-      <div className="as-card">
+      <Card variant="borderless" className="list-card">
         <div className="as-card__header">
           <span className="as-card__title">共 128 条测评记录</span>
         </div>
         <Table<AssessRecord> rowKey="id" columns={columns} dataSource={list} pagination={false} />
-      </div>
+      </Card>
 
       {/* 状态说明 */}
       <div className="as-footnote as-footnote--green">

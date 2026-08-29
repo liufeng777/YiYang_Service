@@ -2,7 +2,7 @@
  * 顶部导航栏：折叠按钮 + 面包屑 + 当前机构 + 搜索 + 用户信息
  */
 import { useMemo } from 'react'
-import { Breadcrumb, Dropdown, Layout, Avatar, Space, Button, Input } from 'antd'
+import { Breadcrumb, Dropdown, Layout, Avatar, Space, Button } from 'antd'
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -24,7 +24,26 @@ export default function HeaderBar() {
   const currentOrg = useUserStore((state) => state.currentOrg)
   const logout = useUserStore((state) => state.logout)
 
-  const breadcrumbItems = useMemo(() => findBreadcrumb(location.pathname), [location.pathname])
+  const breadcrumbItems = useMemo(
+    () =>
+      findBreadcrumb(location.pathname).map((item, index, list) => ({
+        // 末级为当前页不可点击；其余层级（含一级导航）点击跳转对应落点页
+        title:
+          index === list.length - 1 ? (
+            item.title
+          ) : (
+            <a
+              onClick={(event) => {
+                event.preventDefault()
+                navigate(item.path)
+              }}
+            >
+              {item.title}
+            </a>
+          ),
+      })),
+    [location.pathname, navigate],
+  )
 
   return (
     <Layout.Header className="layout-header">
@@ -46,7 +65,7 @@ export default function HeaderBar() {
           </span>
         </div>
         {/* 全局搜索（姓名 / 手机号，回车跳转线索列表） */}
-        <div className="layout-header__search">
+        {/* <div className="layout-header__search">
           <span className="layout-header__field-label">搜索</span>
           <Input
             size="small"
@@ -56,7 +75,7 @@ export default function HeaderBar() {
               navigate(`/leads?keyword=${encodeURIComponent(e.currentTarget.value.trim())}`)
             }
           />
-        </div>
+        </div> */}
         <Dropdown
           menu={{
             items: [

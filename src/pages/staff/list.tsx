@@ -4,7 +4,7 @@
  * TODO: 接口见 @/api/modules/staff（《协同工作台-API设计》§7），待后端联调后替换 mock
  */
 import { useMemo, useState } from 'react'
-import { Button, Input, Select, Table } from 'antd'
+import { Button, Card, Input, Select, Table } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
@@ -34,19 +34,28 @@ const ROLE_OPTIONS = ['护士', '医师', '护理员', '康复治疗师', '机�
 export default function StaffList() {
   const navigate = useNavigate()
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
+  const [applied, setApplied] = useState<Filters>({ keyword: '' })
+
+  const applyFilters = () => setApplied(filters)
+
+  const resetFilters = () => {
+    const init: Filters = { keyword: '' }
+    setFilters(init)
+    setApplied(init)
+  }
 
   const filtered = useMemo(
     () =>
       mockStaffList.filter((row) => {
-        if (filters.keyword && ![row.name, row.phone].some((v) => v.includes(filters.keyword)))
+        if (applied.keyword && ![row.name, row.phone].some((v) => v.includes(applied.keyword)))
           return false
-        if (filters.type && row.type !== filters.type) return false
-        if (filters.org && row.org !== filters.org) return false
-        if (filters.role && row.role !== filters.role) return false
-        if (filters.status && row.status !== filters.status) return false
+        if (applied.type && row.type !== applied.type) return false
+        if (applied.org && row.org !== applied.org) return false
+        if (applied.role && row.role !== applied.role) return false
+        if (applied.status && row.status !== applied.status) return false
         return true
       }),
-    [filters],
+    [applied],
   )
 
   const stats = [
@@ -144,64 +153,48 @@ export default function StaffList() {
         </div>
 
         {/* 筛选 */}
-        <div className="staff-filters">
-          <div className="staff-filters__item">
-            <div className="staff-filters__label">姓名 / 手机号</div>
-            <Input
-              placeholder="请输入姓名或手机号"
-              value={filters.keyword}
-              onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
-              allowClear
-            />
-          </div>
-          <div className="staff-filters__item">
-            <div className="staff-filters__label">人员类型</div>
-            <Select
-              placeholder="全部类型"
-              value={filters.type}
-              onChange={(v) => setFilters((f) => ({ ...f, type: v }))}
-              options={Object.entries(STAFF_TYPE_TEXT).map(([value, label]) => ({ value, label }))}
-              allowClear
-            />
-          </div>
-          <div className="staff-filters__item">
-            <div className="staff-filters__label">当前机构</div>
-            <Select
-              placeholder="城东护理院"
-              value={filters.org}
-              onChange={(v) => setFilters((f) => ({ ...f, org: v }))}
-              options={ORG_OPTIONS.map((v) => ({ value: v, label: v }))}
-              allowClear
-            />
-          </div>
-          <div className="staff-filters__item">
-            <div className="staff-filters__label">人员角色</div>
-            <Select
-              placeholder="全部角色"
-              value={filters.role}
-              onChange={(v) => setFilters((f) => ({ ...f, role: v }))}
-              options={ROLE_OPTIONS.map((v) => ({ value: v, label: v }))}
-              allowClear
-            />
-          </div>
-          <div className="staff-filters__item">
-            <div className="staff-filters__label">人员状态</div>
-            <Select
-              placeholder="全部状态"
-              value={filters.status}
-              onChange={(v) => setFilters((f) => ({ ...f, status: v }))}
-              options={Object.entries(STAFF_STATUS_TEXT).map(([value, label]) => ({ value, label }))}
-              allowClear
-            />
-          </div>
-          <div className="staff-filters__actions">
-            <Button type="primary">查询</Button>
-            <Button onClick={() => setFilters({ keyword: '' })}>重置</Button>
-          </div>
-        </div>
+        <Card variant="borderless" className="filter-bar">
+          <Input
+            placeholder="请输入姓名或手机号"
+            value={filters.keyword}
+            onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部类型"
+            value={filters.type}
+            onChange={(v) => setFilters((f) => ({ ...f, type: v }))}
+            options={Object.entries(STAFF_TYPE_TEXT).map(([value, label]) => ({ value, label }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部机构"
+            value={filters.org}
+            onChange={(v) => setFilters((f) => ({ ...f, org: v }))}
+            options={ORG_OPTIONS.map((v) => ({ value: v, label: v }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部角色"
+            value={filters.role}
+            onChange={(v) => setFilters((f) => ({ ...f, role: v }))}
+            options={ROLE_OPTIONS.map((v) => ({ value: v, label: v }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部状态"
+            value={filters.status}
+            onChange={(v) => setFilters((f) => ({ ...f, status: v }))}
+            options={Object.entries(STAFF_STATUS_TEXT).map(([value, label]) => ({ value, label }))}
+            allowClear
+          />
+          
+          <Button type="primary" onClick={applyFilters}>查询</Button>
+          <Button onClick={resetFilters}>重置</Button>
+        </Card>
 
         {/* 人员表格 */}
-        <div className="staff-list">
+        <Card variant="borderless" className="list-card">
           <Table<MockStaffRow>
             rowKey="id"
             columns={columns}
@@ -214,7 +207,7 @@ export default function StaffList() {
               本页仅维护当前机构；平台管理员可切换机构代建。
             </span>
           </div>
-        </div>
+        </Card>
       </PageContainer>
     </div>
   )

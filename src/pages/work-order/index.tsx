@@ -4,7 +4,7 @@
  * TODO: 接入后端后替换为 workOrderApi.getWorkOrders（API §9.2）
  */
 import { useMemo, useState } from 'react'
-import { Button, DatePicker, Input, Select, Table } from 'antd'
+import { Button, Card, DatePicker, Input, Select, Table } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
@@ -53,6 +53,7 @@ export default function WorkOrderList() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<WoStatus | 'all'>('all')
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
+  const [applied, setApplied] = useState<Filters>({ keyword: '' })
   const [page, setPage] = useState(1)
   const pageSize = 20
 
@@ -66,21 +67,27 @@ export default function WorkOrderList() {
       mockWorkOrderList.filter((row) => {
         if (activeTab !== 'all' && row.status !== activeTab) return false
         if (
-          filters.keyword &&
+          applied.keyword &&
           ![row.woNo, row.orderNo, row.memberName, row.memberPhone].some((v) =>
-            v.includes(filters.keyword),
+            v.includes(applied.keyword),
           )
         )
           return false
-        if (filters.status && row.status !== filters.status) return false
-        if (filters.service && row.serviceName !== filters.service) return false
+        if (applied.status && row.status !== applied.status) return false
+        if (applied.service && row.serviceName !== applied.service) return false
         return true
       }),
-    [activeTab, filters],
+    [activeTab, applied],
   )
+
+  const applyFilters = () => {
+    setApplied(filters)
+    setPage(1)
+  }
 
   const onReset = () => {
     setFilters({ keyword: '' })
+    setApplied({ keyword: '' })
     setActiveTab('all')
     setPage(1)
   }
@@ -232,9 +239,8 @@ export default function WorkOrderList() {
         </div>
 
         {/* 筛选 */}
-        <div className="wo-filters">
+        <Card variant="borderless" className="filter-bar">
           <Input
-            className="wo-filters__search"
             prefix={<SearchOutlined />}
             placeholder="工单号 / 订单号 / 姓名 / 手机号"
             value={filters.keyword}
@@ -261,14 +267,12 @@ export default function WorkOrderList() {
               setFilters((f) => ({ ...f, date: typeof ds === 'string' ? ds : undefined }))
             }
           />
-          <Button type="primary" onClick={() => setPage(1)}>
-            查询
-          </Button>
           <Button onClick={onReset}>重置</Button>
-        </div>
+          <Button type="primary" onClick={applyFilters}>查询</Button>
+        </Card>
 
         {/* 工单表格 */}
-        <div className="wo-list">
+        <Card variant="borderless" className="list-card">
           <Table<MockWorkOrderRow>
             rowKey="id"
             columns={columns}
@@ -281,7 +285,7 @@ export default function WorkOrderList() {
               showTotal: (total) => `每页 ${pageSize} 条 · 共 ${total} 条`,
             }}
           />
-        </div>
+        </Card>
       </PageContainer>
     </div>
   )

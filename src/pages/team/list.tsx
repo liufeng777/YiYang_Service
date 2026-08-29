@@ -4,7 +4,7 @@
  * TODO: 团队管理接口 API v0.1 未定义，待后端补充
  */
 import { useMemo, useState } from 'react'
-import { Button, Input, Select, Table } from 'antd'
+import { Button, Card, Input, Select, Table } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
@@ -22,16 +22,25 @@ const ORG_OPTIONS = ['城东护理院', '幸福护理院', '安康康复中心']
 export default function TeamList() {
   const navigate = useNavigate()
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
+  const [applied, setApplied] = useState<Filters>({ keyword: '' })
+
+  const applyFilters = () => setApplied(filters)
+
+  const resetFilters = () => {
+    const init: Filters = { keyword: '' }
+    setFilters(init)
+    setApplied(init)
+  }
 
   const filtered = useMemo(
     () =>
       mockTeamList.filter((row) => {
-        if (filters.keyword && !row.name.includes(filters.keyword)) return false
-        if (filters.org && row.org !== filters.org) return false
-        if (filters.status && row.status !== filters.status) return false
+        if (applied.keyword && !row.name.includes(applied.keyword)) return false
+        if (applied.org && row.org !== applied.org) return false
+        if (applied.status && row.status !== applied.status) return false
         return true
       }),
-    [filters],
+    [applied],
   )
 
   const stats = [
@@ -116,47 +125,37 @@ export default function TeamList() {
         </div>
 
         {/* 筛选 */}
-        <div className="team-filters">
-          <div className="team-filters__item">
-            <div className="team-filters__label">团队名称</div>
-            <Input
-              placeholder="请输入团队名称"
-              value={filters.keyword}
-              onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
-              allowClear
-            />
-          </div>
-          <div className="team-filters__item">
-            <div className="team-filters__label">当前机构</div>
-            <Select
-              placeholder="城东护理院"
-              value={filters.org}
-              onChange={(v) => setFilters((f) => ({ ...f, org: v }))}
-              options={ORG_OPTIONS.map((v) => ({ value: v, label: v }))}
-              allowClear
-            />
-          </div>
-          <div className="team-filters__item">
-            <div className="team-filters__label">团队状态</div>
-            <Select
-              placeholder="全部状态"
-              value={filters.status}
-              onChange={(v) => setFilters((f) => ({ ...f, status: v }))}
-              options={[
-                { value: 'enabled', label: '启用' },
-                { value: 'disabled', label: '停用' },
-              ]}
-              allowClear
-            />
-          </div>
-          <div className="team-filters__actions">
-            <Button type="primary">查询</Button>
-            <Button onClick={() => setFilters({ keyword: '' })}>重置</Button>
-          </div>
-        </div>
+        <Card variant="borderless" className="filter-bar">
+          <Input
+            placeholder="请输入团队名称"
+            value={filters.keyword}
+            onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部机构"
+            value={filters.org}
+            onChange={(v) => setFilters((f) => ({ ...f, org: v }))}
+            options={ORG_OPTIONS.map((v) => ({ value: v, label: v }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部状态"
+            value={filters.status}
+            onChange={(v) => setFilters((f) => ({ ...f, status: v }))}
+            options={[
+              { value: 'enabled', label: '启用' },
+              { value: 'disabled', label: '停用' },
+            ]}
+            allowClear
+          />
+          
+          <Button type="primary" onClick={applyFilters}>查询</Button>
+          <Button onClick={resetFilters}>重置</Button>
+        </Card>
 
         {/* 团队表格 */}
-        <div className="team-list">
+        <Card variant="borderless" className="list-card">
           <Table<MockTeamRow>
             rowKey="id"
             columns={columns}
@@ -169,7 +168,7 @@ export default function TeamList() {
               团队是责任人候选成员池；患者责任关系在健康档案中指定。
             </span>
           </div>
-        </div>
+        </Card>
       </PageContainer>
     </div>
   )

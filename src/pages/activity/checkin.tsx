@@ -4,7 +4,7 @@
  * TODO: 现场签到接口 API v0.1 未定义，待后端补充
  */
 import { useMemo, useState } from 'react'
-import { Button, Input, Modal, Table, message } from 'antd'
+import { Button, Card, Input, Modal, Table, message } from 'antd'
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import PageContainer from '@/components/PageContainer'
 import { mockCheckinList, mockCheckinStats, type MockCheckinRow } from './mock'
@@ -12,6 +12,7 @@ import './index.less'
 
 export default function ActivityCheckin() {
   const [keyword, setKeyword] = useState('')
+  const [appliedKeyword, setAppliedKeyword] = useState('')
   const [list, setList] = useState(mockCheckinList)
   const [walkInOpen, setWalkInOpen] = useState(false)
   const [walkInName, setWalkInName] = useState('')
@@ -20,10 +21,12 @@ export default function ActivityCheckin() {
   const filtered = useMemo(
     () =>
       list.filter(
-        (row) => !keyword || row.name.includes(keyword) || row.phone.includes(keyword),
+        (row) => !appliedKeyword || row.name.includes(appliedKeyword) || row.phone.includes(appliedKeyword),
       ),
-    [list, keyword],
+    [list, appliedKeyword],
   )
+
+  const applyFilters = () => setAppliedKeyword(keyword)
 
   const checkin = (row: MockCheckinRow) => {
     // TODO: 签到接口待后端补充
@@ -137,32 +140,29 @@ export default function ActivityCheckin() {
         </div>
 
         {/* 搜索 */}
-        <div className="ac-filters">
+        <Card variant="borderless" className="filter-bar">
           <Input
-            className="ac-filters__search"
             prefix={<SearchOutlined />}
             placeholder="输入姓名、手机号或会员ID"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value.trim())}
             allowClear
           />
-          <div className="ac-filters__actions">
-            <Button type="primary">查询</Button>
-            <Button icon={<PlusOutlined />} onClick={() => setWalkInOpen(true)}>
-              临时到场
-            </Button>
-          </div>
-        </div>
+          <Button type="primary" onClick={applyFilters}>查询</Button>
+          <Button icon={<PlusOutlined />} onClick={() => setWalkInOpen(true)}>
+            临时到场
+          </Button>
+        </Card>
 
         {/* 签到表格 */}
-        <div className="ac-list">
+        <Card variant="borderless" className="list-card">
           <Table<MockCheckinRow>
             rowKey="id"
             columns={columns}
             dataSource={filtered}
             pagination={false}
           />
-        </div>
+        </Card>
       </PageContainer>
 
       <Modal

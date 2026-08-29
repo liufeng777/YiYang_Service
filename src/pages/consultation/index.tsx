@@ -4,7 +4,7 @@
  * TODO: 接入后端后替换为 consultApi.getConsultations（API §10.4）
  */
 import { useMemo, useState } from 'react'
-import { Button, DatePicker, Input, Select, Table } from 'antd'
+import { Button, Card, DatePicker, Input, Select, Table } from 'antd'
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
@@ -25,15 +25,24 @@ interface Filters {
 export default function ConsultationList() {
   const navigate = useNavigate()
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
+  const [applied, setApplied] = useState<Filters>({ keyword: '' })
+
+  const applyFilters = () => setApplied(filters)
+
+  const resetFilters = () => {
+    const init: Filters = { keyword: '' }
+    setFilters(init)
+    setApplied(init)
+  }
 
   const filtered = useMemo(
     () =>
       mockConsultList.filter(
         (row) =>
-          !filters.keyword ||
-          [row.caller, row.target, row.content].some((v) => v.includes(filters.keyword)),
+          !applied.keyword ||
+          [row.caller, row.target, row.content].some((v) => v.includes(applied.keyword)),
       ),
-    [filters],
+    [applied],
   )
 
   const stats = [
@@ -133,9 +142,8 @@ export default function ConsultationList() {
         </div>
 
         {/* 筛选 */}
-        <div className="cs-filters">
+        <Card variant="borderless" className="filter-bar">
           <Input
-            className="cs-filters__search"
             prefix={<SearchOutlined />}
             placeholder="姓名 / 手机号"
             value={filters.keyword}
@@ -143,7 +151,7 @@ export default function ConsultationList() {
             allowClear
           />
           <Select
-            placeholder="咨询机构：当前机构"
+            placeholder="咨询机构：全部"
             options={[{ value: 'current', label: '咨询机构：当前机构' }]}
             defaultValue="current"
           />
@@ -158,26 +166,24 @@ export default function ConsultationList() {
             allowClear
           />
           <DatePicker
-            placeholder="登记日期：今天"
+            placeholder="登记日期"
             onChange={(_, ds) =>
               setFilters((f) => ({ ...f, date: typeof ds === 'string' ? ds : undefined }))
             }
           />
-          <div className="cs-filters__actions">
-            <Button type="primary">查询</Button>
-            <Button onClick={() => setFilters({ keyword: '' })}>重置</Button>
-          </div>
-        </div>
+          <Button type="primary" onClick={applyFilters}>查询</Button>
+          <Button onClick={resetFilters}>重置</Button>
+        </Card>
 
         {/* 咨询表格 */}
-        <div className="cs-list">
+        <Card variant="borderless" className="list-card">
           <Table<MockConsultRow>
             rowKey="id"
             columns={columns}
             dataSource={filtered}
             pagination={false}
           />
-        </div>
+        </Card>
       </PageContainer>
     </div>
   )

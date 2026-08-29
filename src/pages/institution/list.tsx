@@ -4,7 +4,7 @@
  * TODO: 机构主数据接口 API v0.1 未定义（运营后台域），数据为本地 mock（见 ./mock.ts）
  */
 import { useMemo, useState } from 'react'
-import { Button, Input, Select, Table, message } from 'antd'
+import { Button, Card, Input, Select, Table, message } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
@@ -33,18 +33,27 @@ interface Filters {
 export default function InstitutionList() {
   const navigate = useNavigate()
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
+  const [applied, setApplied] = useState<Filters>({ keyword: '' })
+
+  const applyFilters = () => setApplied(filters)
+
+  const resetFilters = () => {
+    const init: Filters = { keyword: '' }
+    setFilters(init)
+    setApplied(init)
+  }
 
   const filtered = useMemo(
     () =>
       mockOrgList.filter((row) => {
-        if (filters.keyword && ![row.name, row.code].some((v) => v.includes(filters.keyword)))
+        if (applied.keyword && ![row.name, row.code].some((v) => v.includes(applied.keyword)))
           return false
-        if (filters.type && row.type !== filters.type) return false
-        if (filters.status && row.status !== filters.status) return false
-        if (filters.sync && row.syncStatus !== filters.sync) return false
+        if (applied.type && row.type !== applied.type) return false
+        if (applied.status && row.status !== applied.status) return false
+        if (applied.sync && row.syncStatus !== applied.sync) return false
         return true
       }),
-    [filters],
+    [applied],
   )
 
   const stats = [
@@ -143,55 +152,41 @@ export default function InstitutionList() {
         </div>
 
         {/* 筛选 */}
-        <div className="org-filters">
-          <div className="org-filters__item">
-            <div className="org-filters__label">机构名称 / 统一信用代码</div>
-            <Input
-              placeholder="请输入机构名称或代码"
-              value={filters.keyword}
-              onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
-              allowClear
-            />
-          </div>
-          <div className="org-filters__item">
-            <div className="org-filters__label">机构类型</div>
-            <Select
-              placeholder="全部类型"
-              value={filters.type}
-              onChange={(v) => setFilters((f) => ({ ...f, type: v }))}
-              options={['护理院', '康复机构'].map((v) => ({ value: v, label: v }))}
-              allowClear
-            />
-          </div>
-          <div className="org-filters__item">
-            <div className="org-filters__label">运营状态</div>
-            <Select
-              placeholder="全部状态"
-              value={filters.status}
-              onChange={(v) => setFilters((f) => ({ ...f, status: v }))}
-              options={['运营中', '已停用'].map((v) => ({ value: v, label: v }))}
-              allowClear
-            />
-          </div>
-          <div className="org-filters__item">
-            <div className="org-filters__label">同步状态</div>
-            <Select
-              placeholder="全部状态"
-              value={filters.sync}
-              onChange={(v) => setFilters((f) => ({ ...f, sync: v }))}
-              options={Object.entries(ORG_SYNC_TEXT).map(([value, label]) => ({ value, label }))}
-              allowClear
-            />
-          </div>
-          <div className="org-filters__actions">
-            <Button type="primary">查询</Button>
-            <Button onClick={() => setFilters({ keyword: '' })}>重置</Button>
-            <Button onClick={() => message.success('导出任务已创建，完成后可下载')}>导出</Button>
-          </div>
-        </div>
+        <Card variant="borderless" className="filter-bar">
+          <Input
+            placeholder="请输入机构名称或代码"
+            value={filters.keyword}
+            onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部类型"
+            value={filters.type}
+            onChange={(v) => setFilters((f) => ({ ...f, type: v }))}
+            options={['护理院', '康复机构'].map((v) => ({ value: v, label: v }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部状态"
+            value={filters.status}
+            onChange={(v) => setFilters((f) => ({ ...f, status: v }))}
+            options={['运营中', '已停用'].map((v) => ({ value: v, label: v }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部状态"
+            value={filters.sync}
+            onChange={(v) => setFilters((f) => ({ ...f, sync: v }))}
+            options={Object.entries(ORG_SYNC_TEXT).map(([value, label]) => ({ value, label }))}
+            allowClear
+          />
+          <Button type="primary" onClick={applyFilters}>查询</Button>
+          <Button onClick={resetFilters}>重置</Button>
+          <Button onClick={() => message.success('导出任务已创建，完成后可下载')}>导出</Button>
+        </Card>
 
         {/* 机构表格 */}
-        <div className="org-list">
+        <Card variant="borderless" className="list-card">
           <Table<MockOrgRow>
             rowKey="id"
             columns={columns}
@@ -202,7 +197,7 @@ export default function InstitutionList() {
             <span>共 8 家机构　1 / 1</span>
             <span>仅平台管理员可新增机构；机构管理员维护本机构人员与团队</span>
           </div>
-        </div>
+        </Card>
       </PageContainer>
     </div>
   )

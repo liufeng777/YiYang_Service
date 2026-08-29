@@ -4,7 +4,7 @@
  * TODO: 团队管理接口 API v0.1 未定义，待后端补充
  */
 import { useMemo, useState } from 'react'
-import { Button, Drawer, Input, Select, Table } from 'antd'
+import { Button, Card, Drawer, Input, Select, Table } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import {
@@ -24,21 +24,30 @@ interface Filters {
 export default function TeamDetail() {
   const navigate = useNavigate()
   const [filters, setFilters] = useState<Filters>({ keyword: '', patient: '' })
+  const [applied, setApplied] = useState<Filters>({ keyword: '', patient: '' })
   const [drawerOpen, setDrawerOpen] = useState(false)
+
+  const applyFilters = () => setApplied(filters)
+
+  const resetFilters = () => {
+    const init: Filters = { keyword: '', patient: '' }
+    setFilters(init)
+    setApplied(init)
+  }
 
   const filtered = useMemo(
     () =>
       d.members.filter((row) => {
-        if (filters.keyword && !row.name.includes(filters.keyword)) return false
-        if (filters.role && TEAM_ROLE_TEXT[row.role] !== filters.role) return false
+        if (applied.keyword && !row.name.includes(applied.keyword)) return false
+        if (applied.role && TEAM_ROLE_TEXT[row.role] !== applied.role) return false
         if (
-          filters.patient &&
-          !row.patients.some((p) => p.name.includes(filters.patient))
+          applied.patient &&
+          !row.patients.some((p) => p.name.includes(applied.patient))
         )
           return false
         return true
       }),
-    [filters],
+    [applied],
   )
 
   const columns = [
@@ -123,43 +132,33 @@ export default function TeamDetail() {
         </div>
 
         {/* 筛选 */}
-        <div className="team-filters">
-          <div className="team-filters__item">
-            <div className="team-filters__label">成员姓名</div>
-            <Input
-              placeholder="请输入姓名"
-              value={filters.keyword}
-              onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
-              allowClear
-            />
-          </div>
-          <div className="team-filters__item">
-            <div className="team-filters__label">岗位</div>
-            <Select
-              placeholder="全部岗位"
-              value={filters.role}
-              onChange={(v) => setFilters((f) => ({ ...f, role: v }))}
-              options={Object.values(TEAM_ROLE_TEXT).map((v) => ({ value: v, label: v }))}
-              allowClear
-            />
-          </div>
-          <div className="team-filters__item">
-            <div className="team-filters__label">责任患者姓名</div>
-            <Input
-              placeholder="请输入责任患者姓名"
-              value={filters.patient}
-              onChange={(e) => setFilters((f) => ({ ...f, patient: e.target.value.trim() }))}
-              allowClear
-            />
-          </div>
-          <div className="team-filters__actions">
-            <Button type="primary">查询</Button>
-            <Button onClick={() => setFilters({ keyword: '', patient: '' })}>重置</Button>
-          </div>
-        </div>
+        <Card variant="borderless" className="filter-bar">
+          <Input
+            placeholder="请输入姓名"
+            value={filters.keyword}
+            onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部岗位"
+            value={filters.role}
+            onChange={(v) => setFilters((f) => ({ ...f, role: v }))}
+            options={Object.values(TEAM_ROLE_TEXT).map((v) => ({ value: v, label: v }))}
+            allowClear
+          />
+          <Input
+            placeholder="请输入责任患者姓名"
+            value={filters.patient}
+            onChange={(e) => setFilters((f) => ({ ...f, patient: e.target.value.trim() }))}
+            allowClear
+          />
+          
+          <Button type="primary" onClick={applyFilters}>查询</Button>
+          <Button onClick={resetFilters}>重置</Button>
+        </Card>
 
         {/* 成员表格 */}
-        <div className="team-list">
+        <Card variant="borderless" className="list-card">
           <Table<MockTeamMemberRow>
             rowKey="id"
             columns={columns}
@@ -170,7 +169,7 @@ export default function TeamDetail() {
             <span>共 6 位成员　1 / 1</span>
             <span className="team-text--danger">{d.footerNote}</span>
           </div>
-        </div>
+        </Card>
       </PageContainer>
 
       {/* 成员在管患者抽屉 */}

@@ -4,7 +4,7 @@
  * TODO: 接口见 @/api/modules/staff（§7 资质列表/新增/状态更新），待后端联调后替换 mock
  */
 import { useMemo, useState } from 'react'
-import { Button, Input, Select, Table } from 'antd'
+import { Button, Card, Input, Select, Table } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
@@ -47,18 +47,27 @@ const EXPIRY_OPTIONS = ['30天内到期', '已过期', '有效']
 export default function CredentialList() {
   const navigate = useNavigate()
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
+  const [applied, setApplied] = useState<Filters>({ keyword: '' })
+
+  const applyFilters = () => setApplied(filters)
+
+  const resetFilters = () => {
+    const init: Filters = { keyword: '' }
+    setFilters(init)
+    setApplied(init)
+  }
 
   const filtered = useMemo(
     () =>
       mockCredentialList.filter((row) => {
-        if (filters.keyword && ![row.name, row.phone].some((v) => v.includes(filters.keyword)))
+        if (applied.keyword && ![row.name, row.phone].some((v) => v.includes(applied.keyword)))
           return false
-        if (filters.org && row.org !== filters.org) return false
-        if (filters.certType && row.certType !== filters.certType) return false
-        if (filters.status && row.status !== filters.status) return false
+        if (applied.org && row.org !== applied.org) return false
+        if (applied.certType && row.certType !== applied.certType) return false
+        if (applied.status && row.status !== applied.status) return false
         return true
       }),
-    [filters],
+    [applied],
   )
 
   const stats = [
@@ -149,67 +158,51 @@ export default function CredentialList() {
         </div>
 
         {/* 筛选 */}
-        <div className="staff-filters">
-          <div className="staff-filters__item">
-            <div className="staff-filters__label">人员 / 手机号</div>
-            <Input
-              placeholder="请输入人员姓名或手机号"
-              value={filters.keyword}
-              onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
-              allowClear
-            />
-          </div>
-          <div className="staff-filters__item">
-            <div className="staff-filters__label">所属机构</div>
-            <Select
-              placeholder="全部机构"
-              value={filters.org}
-              onChange={(v) => setFilters((f) => ({ ...f, org: v }))}
-              options={ORG_OPTIONS.map((v) => ({ value: v, label: v }))}
-              allowClear
-            />
-          </div>
-          <div className="staff-filters__item">
-            <div className="staff-filters__label">证书类型</div>
-            <Select
-              placeholder="全部类型"
-              value={filters.certType}
-              onChange={(v) => setFilters((f) => ({ ...f, certType: v }))}
-              options={mockCertTypes.map((v) => ({ value: v, label: v }))}
-              allowClear
-            />
-          </div>
-          <div className="staff-filters__item">
-            <div className="staff-filters__label">审核状态</div>
-            <Select
-              placeholder="全部状态"
-              value={filters.status}
-              onChange={(v) => setFilters((f) => ({ ...f, status: v }))}
-              options={Object.entries(CREDENTIAL_STATUS_TEXT).map(([value, label]) => ({
-                value,
-                label,
-              }))}
-              allowClear
-            />
-          </div>
-          <div className="staff-filters__item">
-            <div className="staff-filters__label">到期状态</div>
-            <Select
-              placeholder="全部状态"
-              value={filters.expiry}
-              onChange={(v) => setFilters((f) => ({ ...f, expiry: v }))}
-              options={EXPIRY_OPTIONS.map((v) => ({ value: v, label: v }))}
-              allowClear
-            />
-          </div>
-          <div className="staff-filters__actions">
-            <Button type="primary">查询</Button>
-            <Button onClick={() => setFilters({ keyword: '' })}>重置</Button>
-          </div>
-        </div>
+        <Card variant="borderless" className="filter-bar">
+          <Input
+            placeholder="请输入人员姓名或手机号"
+            value={filters.keyword}
+            onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部机构"
+            value={filters.org}
+            onChange={(v) => setFilters((f) => ({ ...f, org: v }))}
+            options={ORG_OPTIONS.map((v) => ({ value: v, label: v }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部类型"
+            value={filters.certType}
+            onChange={(v) => setFilters((f) => ({ ...f, certType: v }))}
+            options={mockCertTypes.map((v) => ({ value: v, label: v }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部状态"
+            value={filters.status}
+            onChange={(v) => setFilters((f) => ({ ...f, status: v }))}
+            options={Object.entries(CREDENTIAL_STATUS_TEXT).map(([value, label]) => ({
+              value,
+              label,
+            }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部状态"
+            value={filters.expiry}
+            onChange={(v) => setFilters((f) => ({ ...f, expiry: v }))}
+            options={EXPIRY_OPTIONS.map((v) => ({ value: v, label: v }))}
+            allowClear
+          />
+          
+          <Button type="primary" onClick={applyFilters}>查询</Button>
+          <Button onClick={resetFilters}>重置</Button>
+        </Card>
 
         {/* 资质表格 */}
-        <div className="staff-list">
+        <Card variant="borderless" className="list-card">
           <Table<MockCredentialRow>
             rowKey="id"
             columns={columns}
@@ -222,7 +215,7 @@ export default function CredentialList() {
               证照到期仅限制依赖该资质的服务，不停用人员账号
             </span>
           </div>
-        </div>
+        </Card>
       </PageContainer>
     </div>
   )

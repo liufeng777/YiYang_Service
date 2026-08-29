@@ -4,7 +4,7 @@
  * TODO: 履约异常列表接口 API v0.1 未定义，数据为本地 mock
  */
 import { useMemo, useState } from 'react'
-import { Button, DatePicker, Input, Select, Table, message } from 'antd'
+import { Button, Card, DatePicker, Input, Select, Table, message } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import {
@@ -30,6 +30,7 @@ export default function ExceptionList() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<ExceptionType | 'all'>('all')
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
+  const [applied, setApplied] = useState<Filters>({ keyword: '' })
   const [page, setPage] = useState(1)
   const pageSize = 20
 
@@ -37,17 +38,23 @@ export default function ExceptionList() {
     () =>
       mockExceptionList.filter((row) => {
         if (activeTab !== 'all' && row.type !== activeTab) return false
-        if (filters.keyword && ![row.id, row.content].some((v) => v.includes(filters.keyword)))
+        if (applied.keyword && ![row.id, row.content].some((v) => v.includes(applied.keyword)))
           return false
-        if (filters.status && row.status !== filters.status) return false
-        if (filters.type && row.type !== filters.type) return false
+        if (applied.status && row.status !== applied.status) return false
+        if (applied.type && row.type !== applied.type) return false
         return true
       }),
-    [activeTab, filters],
+    [activeTab, applied],
   )
+
+  const applyFilters = () => {
+    setApplied(filters)
+    setPage(1)
+  }
 
   const onReset = () => {
     setFilters({ keyword: '' })
+    setApplied({ keyword: '' })
     setActiveTab('all')
     setPage(1)
   }
@@ -148,65 +155,46 @@ export default function ExceptionList() {
         </div>
 
         {/* 筛选 */}
-        <div className="ex-filters">
-          <div className="ex-filters__item">
-            <div className="ex-filters__label">异常编号 / 关键词</div>
-            <Input
-              placeholder="请输入"
-              value={filters.keyword}
-              onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
-              allowClear
-            />
-          </div>
-          <div className="ex-filters__item">
-            <div className="ex-filters__label">处理状态</div>
-            <Select
-              placeholder="全部状态"
-              value={filters.status}
-              onChange={(v) => setFilters((f) => ({ ...f, status: v }))}
-              options={Object.entries(EXCEPTION_STATUS_TEXT).map(([value, label]) => ({ value, label }))}
-              allowClear
-            />
-          </div>
-          <div className="ex-filters__item">
-            <div className="ex-filters__label">异常分类</div>
-            <Select
-              placeholder="全部分类"
-              value={filters.type}
-              onChange={(v) => setFilters((f) => ({ ...f, type: v }))}
-              options={Object.entries(EXCEPTION_TYPE_TEXT).map(([value, label]) => ({ value, label }))}
-              allowClear
-            />
-          </div>
-          <div className="ex-filters__item">
-            <div className="ex-filters__label">紧急程度</div>
-            <Select
-              placeholder="全部等级"
-              value={filters.urgency}
-              onChange={(v) => setFilters((f) => ({ ...f, urgency: v }))}
-              options={['紧急', '高', '中', '低'].map((v) => ({ value: v, label: v }))}
-              allowClear
-            />
-          </div>
-          <div className="ex-filters__item">
-            <div className="ex-filters__label">上报日期</div>
-            <DatePicker
-              placeholder="2026-08-12"
-              onChange={(_, ds) =>
-                setFilters((f) => ({ ...f, date: typeof ds === 'string' ? ds : undefined }))
-              }
-            />
-          </div>
-          <div className="ex-filters__actions">
-            <Button type="primary" onClick={() => setPage(1)}>
-              查询
-            </Button>
-            <Button onClick={onReset}>重置</Button>
-          </div>
-        </div>
+        <Card variant="borderless" className="filter-bar">
+          <Input
+            placeholder="异常编号 / 关键词"
+            value={filters.keyword}
+            onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部状态"
+            value={filters.status}
+            onChange={(v) => setFilters((f) => ({ ...f, status: v }))}
+            options={Object.entries(EXCEPTION_STATUS_TEXT).map(([value, label]) => ({ value, label }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部分类"
+            value={filters.type}
+            onChange={(v) => setFilters((f) => ({ ...f, type: v }))}
+            options={Object.entries(EXCEPTION_TYPE_TEXT).map(([value, label]) => ({ value, label }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部等级"
+            value={filters.urgency}
+            onChange={(v) => setFilters((f) => ({ ...f, urgency: v }))}
+            options={['紧急', '高', '中', '低'].map((v) => ({ value: v, label: v }))}
+            allowClear
+          />
+          <DatePicker
+            placeholder="上报日期"
+            onChange={(_, ds) =>
+              setFilters((f) => ({ ...f, date: typeof ds === 'string' ? ds : undefined }))
+            }
+          />
+          <Button onClick={onReset}>重置</Button>
+          <Button type="primary" onClick={applyFilters}>查询</Button>
+        </Card>
 
         {/* 异常表格 */}
-        <div className="ex-list">
+        <Card variant="borderless" className="list-card">
           <Table<MockExceptionRow>
             rowKey="id"
             columns={columns}
@@ -219,7 +207,7 @@ export default function ExceptionList() {
               showTotal: (total) => `共 ${total} 条`,
             }}
           />
-        </div>
+        </Card>
       </PageContainer>
     </div>
   )

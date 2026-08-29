@@ -4,7 +4,7 @@
  * TODO: 跨会员方案列表 / 统计接口 API v0.1 未定义，数据为本地 mock（见 ./mock.ts）
  */
 import { useMemo, useState } from 'react'
-import { Button, Input, Select, Table } from 'antd'
+import { Button, Card, Input, Select, Table } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
@@ -21,6 +21,7 @@ interface Filters {
 export default function PlanList() {
   const navigate = useNavigate()
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
+  const [applied, setApplied] = useState<Filters>({ keyword: '' })
   const [page, setPage] = useState(1)
   const pageSize = 20
 
@@ -33,17 +34,23 @@ export default function PlanList() {
   const filtered = useMemo(
     () =>
       mockPlanList.filter((row) => {
-        if (filters.keyword && !row.name.includes(filters.keyword)) return false
-        if (filters.disease && !row.diseases.includes(filters.disease)) return false
-        if (filters.status && row.status !== filters.status) return false
-        if (filters.creator && row.creator !== filters.creator) return false
+        if (applied.keyword && !row.name.includes(applied.keyword)) return false
+        if (applied.disease && !row.diseases.includes(applied.disease)) return false
+        if (applied.status && row.status !== applied.status) return false
+        if (applied.creator && row.creator !== applied.creator) return false
         return true
       }),
-    [filters],
+    [applied],
   )
+
+  const applyFilters = () => {
+    setApplied(filters)
+    setPage(1)
+  }
 
   const onReset = () => {
     setFilters({ keyword: '' })
+    setApplied({ keyword: '' })
     setPage(1)
   }
 
@@ -165,9 +172,8 @@ export default function PlanList() {
         </div>
 
         {/* 筛选卡 */}
-        <div className="plan-filters">
+        <Card variant="borderless" className="filter-bar">
           <Input
-            className="plan-filters__search"
             prefix={<SearchOutlined />}
             placeholder="搜索姓名、手机号或身份证号"
             value={filters.keyword}
@@ -195,14 +201,12 @@ export default function PlanList() {
             options={creatorOptions.map((c) => ({ value: c, label: c }))}
             allowClear
           />
-          <Button type="primary" onClick={() => setPage(1)}>
-            查询
-          </Button>
           <Button onClick={onReset}>重置</Button>
-        </div>
+          <Button type="primary" onClick={applyFilters}>查询</Button>
+        </Card>
 
         {/* 方案记录卡 */}
-        <div className="plan-list">
+        <Card variant="borderless" className="list-card">
           <div className="plan-list__header">
             <span className="plan-list__title">健康管理方案记录</span>
             <span className="plan-list__sub">
@@ -221,7 +225,7 @@ export default function PlanList() {
               showTotal: (total) => `每页 ${pageSize} 条 · 共 ${total} 条`,
             }}
           />
-        </div>
+        </Card>
       </PageContainer>
     </div>
   )

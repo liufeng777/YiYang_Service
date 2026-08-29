@@ -4,7 +4,7 @@
  * TODO: 接入后端后替换为 warningApi.getWarnings（API §6.1）
  */
 import { useMemo, useState } from 'react'
-import { Button, DatePicker, Input, Select, Table, message } from 'antd'
+import { Button, Card, DatePicker, Input, Select, Table, message } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import {
@@ -30,6 +30,7 @@ export default function WarningList() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<WarningType | 'all'>('all')
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
+  const [applied, setApplied] = useState<Filters>({ keyword: '' })
   const [page, setPage] = useState(1)
   const pageSize = 20
 
@@ -37,18 +38,24 @@ export default function WarningList() {
     () =>
       mockWarningList.filter((row) => {
         if (activeTab !== 'all' && row.type !== activeTab) return false
-        if (filters.keyword && ![row.id, row.content].some((v) => v.includes(filters.keyword)))
+        if (applied.keyword && ![row.id, row.content].some((v) => v.includes(applied.keyword)))
           return false
-        if (filters.status && row.status !== filters.status) return false
-        if (filters.type && row.type !== filters.type) return false
-        if (filters.level && row.currentLevel !== filters.level) return false
+        if (applied.status && row.status !== applied.status) return false
+        if (applied.type && row.type !== applied.type) return false
+        if (applied.level && row.currentLevel !== applied.level) return false
         return true
       }),
-    [activeTab, filters],
+    [activeTab, applied],
   )
+
+  const applyFilters = () => {
+    setApplied(filters)
+    setPage(1)
+  }
 
   const onReset = () => {
     setFilters({ keyword: '' })
+    setApplied({ keyword: '' })
     setActiveTab('all')
     setPage(1)
   }
@@ -151,65 +158,46 @@ export default function WarningList() {
         </div>
 
         {/* 筛选 */}
-        <div className="wn-filters">
-          <div className="wn-filters__item">
-            <div className="wn-filters__label">姓名 / 会员ID / 预警编号</div>
-            <Input
-              placeholder="请输入"
-              value={filters.keyword}
-              onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
-              allowClear
-            />
-          </div>
-          <div className="wn-filters__item">
-            <div className="wn-filters__label">处理状态</div>
-            <Select
-              placeholder="全部状态"
-              value={filters.status}
-              onChange={(v) => setFilters((f) => ({ ...f, status: v }))}
-              options={Object.entries(WARNING_STATUS_TEXT).map(([value, label]) => ({ value, label }))}
-              allowClear
-            />
-          </div>
-          <div className="wn-filters__item">
-            <div className="wn-filters__label">预警类型</div>
-            <Select
-              placeholder="全部类型"
-              value={filters.type}
-              onChange={(v) => setFilters((f) => ({ ...f, type: v }))}
-              options={Object.entries(WARNING_TYPE_TEXT).map(([value, label]) => ({ value, label }))}
-              allowClear
-            />
-          </div>
-          <div className="wn-filters__item">
-            <div className="wn-filters__label">风险等级</div>
-            <Select
-              placeholder="全部风险"
-              value={filters.level}
-              onChange={(v) => setFilters((f) => ({ ...f, level: v }))}
-              options={['高风险', '中风险', '低风险'].map((v) => ({ value: v, label: v }))}
-              allowClear
-            />
-          </div>
-          <div className="wn-filters__item">
-            <div className="wn-filters__label">触发日期</div>
-            <DatePicker
-              placeholder="2026-08-12"
-              onChange={(_, ds) =>
-                setFilters((f) => ({ ...f, date: typeof ds === 'string' ? ds : undefined }))
-              }
-            />
-          </div>
-          <div className="wn-filters__actions">
-            <Button type="primary" onClick={() => setPage(1)}>
-              查询
-            </Button>
-            <Button onClick={onReset}>重置</Button>
-          </div>
-        </div>
+        <Card variant="borderless" className="filter-bar">
+          <Input
+            placeholder="姓名 / 会员ID / 预警编号"
+            value={filters.keyword}
+            onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部状态"
+            value={filters.status}
+            onChange={(v) => setFilters((f) => ({ ...f, status: v }))}
+            options={Object.entries(WARNING_STATUS_TEXT).map(([value, label]) => ({ value, label }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部类型"
+            value={filters.type}
+            onChange={(v) => setFilters((f) => ({ ...f, type: v }))}
+            options={Object.entries(WARNING_TYPE_TEXT).map(([value, label]) => ({ value, label }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部风险"
+            value={filters.level}
+            onChange={(v) => setFilters((f) => ({ ...f, level: v }))}
+            options={['高风险', '中风险', '低风险'].map((v) => ({ value: v, label: v }))}
+            allowClear
+          />
+          <DatePicker
+            placeholder="触发日期"
+            onChange={(_, ds) =>
+              setFilters((f) => ({ ...f, date: typeof ds === 'string' ? ds : undefined }))
+            }
+          />
+          <Button onClick={onReset}>重置</Button>
+          <Button type="primary" onClick={applyFilters}>查询</Button>
+        </Card>
 
         {/* 预警表格 */}
-        <div className="wn-list">
+        <Card variant="borderless" className="list-card">
           <Table<MockWarningRow>
             rowKey="id"
             columns={columns}
@@ -222,7 +210,7 @@ export default function WarningList() {
               showTotal: (total) => `共 ${total} 条`,
             }}
           />
-        </div>
+        </Card>
       </PageContainer>
     </div>
   )

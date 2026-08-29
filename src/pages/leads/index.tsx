@@ -3,7 +3,7 @@
  * 数据当前为 mock（见 ./mock.ts）；接入后端后替换为 leadApi.getLeadList
  */
 import { useMemo, useState } from 'react'
-import { Button, DatePicker, Input, Select, Table, Tabs } from 'antd'
+import { Button, Card, DatePicker, Input, Select, Table } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import dayjs from 'dayjs'
@@ -28,34 +28,40 @@ export default function LeadList() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   // 顶栏全局搜索带入的 keyword（姓名 / 手机号）
-  const [filters, setFilters] = useState<Filters>({ keyword: searchParams.get('keyword') ?? '' })
+  const initialFilters: Filters = { keyword: searchParams.get('keyword') ?? '' }
+  const [filters, setFilters] = useState<Filters>(initialFilters)
+  const [applied, setApplied] = useState<Filters>(initialFilters)
   const [page, setPage] = useState(1)
   const pageSize = 10
 
-  // TODO: 接入后端后替换为 leadApi.getLeadList({ ...filters, page, page_size: pageSize })
+  // TODO: 接入后端后替换为 leadApi.getLeadList({ ...applied, page, page_size: pageSize })
   const filtered = useMemo(
     () =>
       mockLeads.filter((lead) => {
         if (
-          filters.keyword &&
-          !lead.contact_name.includes(filters.keyword) &&
-          !lead.contact_phone.includes(filters.keyword)
+          applied.keyword &&
+          !lead.contact_name.includes(applied.keyword) &&
+          !lead.contact_phone.includes(applied.keyword)
         ) {
           return false
         }
-        if (filters.source_type && lead.source_type !== filters.source_type) return false
-        if (filters.demand_type && lead.demand_type !== filters.demand_type) return false
-        if (filters.date && dayjs(lead.created_at * 1000).format('YYYY-MM-DD') !== filters.date) {
+        if (applied.source_type && lead.source_type !== applied.source_type) return false
+        if (applied.demand_type && lead.demand_type !== applied.demand_type) return false
+        if (applied.date && dayjs(lead.created_at * 1000).format('YYYY-MM-DD') !== applied.date) {
           return false
         }
         return true
       }),
-    [filters],
+    [applied],
   )
 
-  const onSearch = () => setPage(1)
+  const onSearch = () => {
+    setApplied(filters)
+    setPage(1)
+  }
   const onReset = () => {
     setFilters({ keyword: '' })
+    setApplied({ keyword: '' })
     setPage(1)
   }
 
@@ -123,67 +129,54 @@ export default function LeadList() {
         }
       >
         {/* 页签（预留多页签扩展，当前仅线索登记） */}
-        <div className="lead-page__tabs">
+        {/* <div className="lead-page__tabs">
           <Tabs
             activeKey="register"
             items={[{ key: 'register', label: '线索登记' }]}
           />
-        </div>
+        </div> */}
 
         {/* 筛选区 */}
-        <div className="lead-page__filters">
-          <div className="lead-filter">
-            <span className="lead-filter__label">用户信息</span>
-            <Input
-              placeholder="姓名 / 手机号"
-              value={filters.keyword}
-              onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
-              allowClear
-            />
-          </div>
-          <div className="lead-filter">
-            <span className="lead-filter__label">线索来源</span>
-            <Select
-              placeholder="全部来源"
-              value={filters.source_type}
-              onChange={(v) => setFilters((f) => ({ ...f, source_type: v }))}
-              options={Object.entries(LEAD_SOURCE_MAP).map(([value, label]) => ({
-                value: Number(value),
-                label,
-              }))}
-              allowClear
-            />
-          </div>
-          <div className="lead-filter">
-            <span className="lead-filter__label">意向类型</span>
-            <Select
-              placeholder="全部意向"
-              value={filters.demand_type}
-              onChange={(v) => setFilters((f) => ({ ...f, demand_type: v }))}
-              options={Object.entries(LEAD_DEMAND_MAP).map(([value, label]) => ({
-                value: Number(value),
-                label,
-              }))}
-              allowClear
-            />
-          </div>
-          <div className="lead-filter">
-            <span className="lead-filter__label">登记日期</span>
-            <DatePicker
-              value={filters.date ? dayjs(filters.date) : null}
-              onChange={(d) => setFilters((f) => ({ ...f, date: d ? d.format('YYYY-MM-DD') : undefined }))}
-            />
-          </div>
-          <div className="lead-filter lead-filter--actions">
-            <Button type="primary" onClick={onSearch}>
-              查询
-            </Button>
-            <Button onClick={onReset}>重置</Button>
-          </div>
-        </div>
+        <Card variant="borderless" className="filter-bar">
+          <Input
+            placeholder="用户姓名 / 手机号"
+            value={filters.keyword}
+            onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
+            allowClear
+          />
+          <Select
+            placeholder="线索来源"
+            value={filters.source_type}
+            onChange={(v) => setFilters((f) => ({ ...f, source_type: v }))}
+            options={Object.entries(LEAD_SOURCE_MAP).map(([value, label]) => ({
+              value: Number(value),
+              label,
+            }))}
+            allowClear
+          />
+          <Select
+            placeholder="意向类型"
+            value={filters.demand_type}
+            onChange={(v) => setFilters((f) => ({ ...f, demand_type: v }))}
+            options={Object.entries(LEAD_DEMAND_MAP).map(([value, label]) => ({
+              value: Number(value),
+              label,
+            }))}
+            allowClear
+          />
+          <DatePicker
+            placeholder='登记日期'
+            value={filters.date ? dayjs(filters.date) : null}
+            onChange={(d) => setFilters((f) => ({ ...f, date: d ? d.format('YYYY-MM-DD') : undefined }))}
+            style={{ flex: '1 1 140px', minWidth: 140 }}
+            allowClear
+          />
+          <Button onClick={onReset}>重置</Button>
+          <Button type="primary" onClick={onSearch}>查询</Button>
+        </Card>
 
         {/* 列表 */}
-        <div className="lead-page__table">
+        <Card variant="borderless" className="list-card">
           <Table<LeadItem>
             rowKey="id"
             columns={columns}
@@ -197,7 +190,7 @@ export default function LeadList() {
               simple: true,
             }}
           />
-        </div>
+        </Card>
       </PageContainer>
     </div>
   )

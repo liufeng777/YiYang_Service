@@ -4,7 +4,7 @@
  * TODO: 活动接口 API v0.1 未定义，数据为本地 mock（见 ./mock.ts）
  */
 import { useMemo, useState } from 'react'
-import { Button, DatePicker, Input, Table, message } from 'antd'
+import { Button, Card, DatePicker, Input, Table, message } from 'antd'
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
@@ -21,13 +21,22 @@ interface Filters {
 export default function ActivityList() {
   const navigate = useNavigate()
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
+  const [applied, setApplied] = useState<Filters>({ keyword: '' })
+
+  const applyFilters = () => setApplied(filters)
+
+  const resetFilters = () => {
+    const init: Filters = { keyword: '' }
+    setFilters(init)
+    setApplied(init)
+  }
 
   const filtered = useMemo(
     () =>
       mockActivityList.filter(
-        (row) => !filters.keyword || row.name.includes(filters.keyword),
+        (row) => !applied.keyword || row.name.includes(applied.keyword),
       ),
-    [filters],
+    [applied],
   )
 
   const stats = [
@@ -127,43 +136,37 @@ export default function ActivityList() {
         </div>
 
         {/* 筛选 */}
-        <div className="ac-filters">
-          <div className="ac-filters__item ac-filters__item--grow">
-            <div className="ac-filters__label">活动名称 / 日期</div>
-            <div className="ac-filters__row">
-              <Input
-                prefix={<SearchOutlined />}
-                placeholder="搜索活动名称"
-                value={filters.keyword}
-                onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
-                allowClear
-              />
-              <RangePicker
-                placeholder={['2026-08-13', '2026-09-12']}
-                onChange={(_, ds) =>
-                  setFilters((f) => ({
-                    ...f,
-                    dateRange: Array.isArray(ds) && ds[0] && ds[1] ? [ds[0], ds[1]] : undefined,
-                  }))
-                }
-              />
-            </div>
-          </div>
-          <div className="ac-filters__actions">
-            <Button type="primary">查询</Button>
-            <Button onClick={() => setFilters({ keyword: '' })}>重置</Button>
-          </div>
-        </div>
+        <Card variant="borderless" className="filter-bar">
+          <Input
+            prefix={<SearchOutlined />}
+            placeholder="活动名称 / 日期"
+            value={filters.keyword}
+            onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
+            allowClear
+            onPressEnter={applyFilters}
+          />
+          <RangePicker
+            placeholder={['开始日期', '结束日期']}
+            onChange={(_, ds) =>
+              setFilters((f) => ({
+                ...f,
+                dateRange: Array.isArray(ds) && ds[0] && ds[1] ? [ds[0], ds[1]] : undefined,
+              }))
+            }
+          />
+          <Button onClick={resetFilters}>重置</Button>
+          <Button type="primary" onClick={applyFilters}>查询</Button>
+        </Card>
 
         {/* 活动表格 */}
-        <div className="ac-list">
+        <Card variant="borderless" className="list-card">
           <Table<MockActivityRow>
             rowKey="id"
             columns={columns}
             dataSource={filtered}
             pagination={false}
           />
-        </div>
+        </Card>
       </PageContainer>
     </div>
   )

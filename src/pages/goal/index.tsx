@@ -4,7 +4,7 @@
  * TODO: 跨会员目标列表 / 统计接口 API v0.1 未定义，数据为本地 mock（见 ./mock.ts）
  */
 import { useMemo, useState } from 'react'
-import { Button, Input, Select, Table } from 'antd'
+import { Button, Card, Input, Select, Table } from 'antd'
 import { FlagOutlined, SearchOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
@@ -26,6 +26,7 @@ const STATUS_OPTIONS = [
 export default function GoalList() {
   const navigate = useNavigate()
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
+  const [applied, setApplied] = useState<Filters>({ keyword: '' })
   const [page, setPage] = useState(1)
   const pageSize = 20
 
@@ -35,17 +36,23 @@ export default function GoalList() {
   const filtered = useMemo(
     () =>
       mockGoalList.filter((row) => {
-        if (filters.keyword && !row.memberName.includes(filters.keyword)) return false
-        if (filters.status && row.status !== filters.status) return false
-        if (filters.disease && row.disease !== filters.disease) return false
-        if (filters.doctor && row.doctor !== filters.doctor) return false
+        if (applied.keyword && !row.memberName.includes(applied.keyword)) return false
+        if (applied.status && row.status !== applied.status) return false
+        if (applied.disease && row.disease !== applied.disease) return false
+        if (applied.doctor && row.doctor !== applied.doctor) return false
         return true
       }),
-    [filters],
+    [applied],
   )
+
+  const applyFilters = () => {
+    setApplied(filters)
+    setPage(1)
+  }
 
   const onReset = () => {
     setFilters({ keyword: '' })
+    setApplied({ keyword: '' })
     setPage(1)
   }
 
@@ -151,23 +158,22 @@ export default function GoalList() {
         </div>
 
         {/* 筛选卡 */}
-        <div className="goal-filters">
+        <Card variant="borderless" className="filter-bar">
           <Select
-            placeholder="状态"
+            placeholder="全部状态"
             value={filters.status}
             onChange={(v) => setFilters((f) => ({ ...f, status: v }))}
             options={STATUS_OPTIONS}
             allowClear
           />
           <Select
-            placeholder="病种"
+            placeholder="全部病种"
             value={filters.disease}
             onChange={(v) => setFilters((f) => ({ ...f, disease: v }))}
             options={diseaseOptions.map((d) => ({ value: d, label: d }))}
             allowClear
           />
           <Input
-            className="goal-filters__search"
             prefix={<SearchOutlined />}
             placeholder="服务对象：姓名 / 会员ID / 手机号"
             value={filters.keyword}
@@ -175,20 +181,18 @@ export default function GoalList() {
             allowClear
           />
           <Select
-            placeholder="责任医生"
+            placeholder="全部责任医生"
             value={filters.doctor}
             onChange={(v) => setFilters((f) => ({ ...f, doctor: v }))}
             options={doctorOptions.map((d) => ({ value: d, label: d }))}
             allowClear
           />
-          <Button type="primary" onClick={() => setPage(1)}>
-            查询
-          </Button>
           <Button onClick={onReset}>重置</Button>
-        </div>
+          <Button type="primary" onClick={applyFilters}>查询</Button>
+        </Card>
 
         {/* 目标列表卡 */}
-        <div className="goal-list">
+        <Card variant="borderless" className="list-card">
           <Table<MockGoalRow>
             rowKey="id"
             columns={columns}
@@ -201,7 +205,7 @@ export default function GoalList() {
               showTotal: (total) => `共 ${total} 条`,
             }}
           />
-        </div>
+        </Card>
 
         <div className="goal-footnote">
           健管师不能直接修改临床目标值，目标值与评价周期由责任医生在「制定管理目标」时确认

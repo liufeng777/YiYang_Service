@@ -4,7 +4,7 @@
  * TODO: 报名名单接口 API v0.1 未定义，数据为本地 mock
  */
 import { useMemo, useState } from 'react'
-import { Button, Input, Select, Table, message } from 'antd'
+import { Button, Card, Input, Select, Table, message } from 'antd'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import {
@@ -29,19 +29,28 @@ export default function ActivityRegistrations() {
   const navigate = useNavigate()
   const a = mockActivityInfo
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
+  const [applied, setApplied] = useState<Filters>({ keyword: '' })
+
+  const applyFilters = () => setApplied(filters)
+
+  const resetFilters = () => {
+    const init: Filters = { keyword: '' }
+    setFilters(init)
+    setApplied(init)
+  }
 
   const filtered = useMemo(
     () =>
       mockRegistrations.filter((row) => {
-        if (filters.keyword && ![row.applicant, row.participant].some((v) => v.includes(filters.keyword)))
+        if (applied.keyword && ![row.applicant, row.participant].some((v) => v.includes(applied.keyword)))
           return false
-        if (filters.identity && row.accountType !== filters.identity) return false
-        if (filters.contact && row.contactStatus !== filters.contact) return false
-        if (filters.checkin === '已签到' && !row.checkedIn) return false
-        if (filters.checkin === '未签到' && row.checkedIn) return false
+        if (applied.identity && row.accountType !== applied.identity) return false
+        if (applied.contact && row.contactStatus !== applied.contact) return false
+        if (applied.checkin === '已签到' && !row.checkedIn) return false
+        if (applied.checkin === '未签到' && row.checkedIn) return false
         return true
       }),
-    [filters],
+    [applied],
   )
 
   const renderAction = (row: MockRegistrationRow) => {
@@ -156,15 +165,13 @@ export default function ActivityRegistrations() {
         </div>
 
         {/* 筛选 */}
-        <div className="ac-filters">
-          <div className="ac-filters__item ac-filters__item--grow">
-            <Input
-              placeholder="姓名 / 手机号 / 会员ID"
-              value={filters.keyword}
-              onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
-              allowClear
-            />
-          </div>
+        <Card variant="borderless" className="filter-bar">
+          <Input
+            placeholder="姓名 / 手机号 / 会员ID"
+            value={filters.keyword}
+            onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
+            allowClear
+          />
           <Select
             placeholder="身份状态：全部"
             value={filters.identity}
@@ -189,21 +196,19 @@ export default function ActivityRegistrations() {
             options={['已签到', '未签到'].map((v) => ({ value: v, label: `签到状态：${v}` }))}
             allowClear
           />
-          <div className="ac-filters__actions">
-            <Button type="primary">查询</Button>
-            <Button onClick={() => setFilters({ keyword: '' })}>重置</Button>
-          </div>
-        </div>
+          <Button type="primary" onClick={applyFilters}>查询</Button>
+          <Button onClick={resetFilters}>重置</Button>
+        </Card>
 
         {/* 报名表格 */}
-        <div className="ac-list">
+        <Card variant="borderless" className="list-card">
           <Table<MockRegistrationRow>
             rowKey="id"
             columns={columns}
             dataSource={filtered}
             pagination={false}
           />
-        </div>
+        </Card>
       </PageContainer>
     </div>
   )

@@ -4,7 +4,7 @@
  */
 import { useMemo, useState } from 'react'
 import type { Key } from 'react'
-import { Avatar, Button, Dropdown, Input, Select, Table } from 'antd'
+import { Avatar, Button, Card, Dropdown, Input, Select, Table } from 'antd'
 import { MoreOutlined, PlusOutlined, SearchOutlined, SettingOutlined, UploadOutlined } from '@ant-design/icons'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
@@ -26,7 +26,9 @@ const QUICK_FILTERS = ['高风险', '资料待完善', '待制定方案', '7天�
 export default function HealthRecordList() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const [filters, setFilters] = useState<Filters>({ keyword: searchParams.get('keyword') ?? '' })
+  const initialFilters: Filters = { keyword: searchParams.get('keyword') ?? '' }
+  const [filters, setFilters] = useState<Filters>(initialFilters)
+  const [applied, setApplied] = useState<Filters>(initialFilters)
   const [quick, setQuick] = useState<string>()
   const [selectedKeys, setSelectedKeys] = useState<Key[]>([])
   const [page, setPage] = useState(1)
@@ -36,21 +38,21 @@ export default function HealthRecordList() {
   const diseaseOptions = useMemo(() => [...new Set(mockRecordList.flatMap((r) => r.diseases))], [])
   const managerOptions = useMemo(() => [...new Set(mockRecordList.map((r) => r.manager))], [])
 
-  // TODO: 接入后端后替换为 memberApi.getMemberList({ ...filters, page, page_size: pageSize })
+  // TODO: 接入后端后替换为 memberApi.getMemberList({ ...applied, page, page_size: pageSize })
   const filtered = useMemo(
     () =>
       mockRecordList.filter((row) => {
         if (
-          filters.keyword &&
-          !row.name.includes(filters.keyword) &&
-          !row.phone.includes(filters.keyword)
+          applied.keyword &&
+          !row.name.includes(applied.keyword) &&
+          !row.phone.includes(applied.keyword)
         ) {
           return false
         }
-        if (filters.org && row.org !== filters.org) return false
-        if (filters.disease && !row.diseases.includes(filters.disease)) return false
-        if (filters.risk && row.risk !== filters.risk) return false
-        if (filters.manager && row.manager !== filters.manager) return false
+        if (applied.org && row.org !== applied.org) return false
+        if (applied.disease && !row.diseases.includes(applied.disease)) return false
+        if (applied.risk && row.risk !== applied.risk) return false
+        if (applied.manager && row.manager !== applied.manager) return false
         if (quick === '高风险' && row.risk !== 'high') return false
         if (quick === '资料待完善' && row.completeness >= 80) return false
         if (quick === '待制定方案' && row.planStatus !== '方案待制定') return false
@@ -58,11 +60,17 @@ export default function HealthRecordList() {
         if (quick === '同步异常' && row.syncOk) return false
         return true
       }),
-    [filters, quick],
+    [applied, quick],
   )
+
+  const applyFilters = () => {
+    setApplied(filters)
+    setPage(1)
+  }
 
   const onReset = () => {
     setFilters({ keyword: '' })
+    setApplied({ keyword: '' })
     setQuick(undefined)
     setPage(1)
   }
@@ -224,48 +232,44 @@ export default function HealthRecordList() {
         </div>
 
         {/* 筛选卡 */}
-        <div className="hr-filters">
-          <div className="hr-filters__row">
-            <Input
-              className="hr-filters__search"
-              prefix={<SearchOutlined />}
-              placeholder="搜索手机号、会员ID或姓名"
-              value={filters.keyword}
-              onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
-              allowClear
-            />
-            <Select
-              placeholder="所属机构"
-              value={filters.org}
-              onChange={(v) => setFilters((f) => ({ ...f, org: v }))}
-              options={orgOptions.map((o) => ({ value: o, label: o }))}
-              allowClear
-            />
-            <Select
-              placeholder="病种类标签"
-              value={filters.disease}
-              onChange={(v) => setFilters((f) => ({ ...f, disease: v }))}
-              options={diseaseOptions.map((d) => ({ value: d, label: d }))}
-              allowClear
-            />
-            <Select
-              placeholder="风险等级"
-              value={filters.risk}
-              onChange={(v) => setFilters((f) => ({ ...f, risk: v }))}
-              options={Object.entries(RISK_TEXT).map(([value, label]) => ({ value, label }))}
-              allowClear
-            />
-            <Select
-              placeholder="责任健康管理师"
-              value={filters.manager}
-              onChange={(v) => setFilters((f) => ({ ...f, manager: v }))}
-              options={managerOptions.map((m) => ({ value: m, label: m }))}
-              allowClear
-            />
-            <Button type="primary" onClick={() => setPage(1)}>
-              查询
-            </Button>
-          </div>
+        <Card variant="borderless" className="filter-bar">
+          <Input
+            prefix={<SearchOutlined />}
+            placeholder="搜索手机号、会员ID或姓名"
+            value={filters.keyword}
+            onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部机构"
+            value={filters.org}
+            onChange={(v) => setFilters((f) => ({ ...f, org: v }))}
+            options={orgOptions.map((o) => ({ value: o, label: o }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部病种"
+            value={filters.disease}
+            onChange={(v) => setFilters((f) => ({ ...f, disease: v }))}
+            options={diseaseOptions.map((d) => ({ value: d, label: d }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部风险"
+            value={filters.risk}
+            onChange={(v) => setFilters((f) => ({ ...f, risk: v }))}
+            options={Object.entries(RISK_TEXT).map(([value, label]) => ({ value, label }))}
+            allowClear
+          />
+          <Select
+            placeholder="全部责任健管师"
+            value={filters.manager}
+            onChange={(v) => setFilters((f) => ({ ...f, manager: v }))}
+            options={managerOptions.map((m) => ({ value: m, label: m }))}
+            allowClear
+          />
+          <Button onClick={onReset}>重置</Button>
+          <Button type="primary" onClick={applyFilters}>查询</Button>
           <div className="hr-filters__quick">
             {QUICK_FILTERS.map((q) => (
               <span
@@ -280,10 +284,10 @@ export default function HealthRecordList() {
               重置筛选
             </Button>
           </div>
-        </div>
+        </Card>
 
         {/* 档案列表卡 */}
-        <div className="hr-list">
+        <Card variant="borderless" className="list-card">
           <div className="hr-list__header">
             <span className="hr-list__title">档案列表&nbsp;&nbsp;共 {filtered.length.toLocaleString()} 人</span>
             <Button type="text" icon={<SettingOutlined />}>
@@ -306,7 +310,7 @@ export default function HealthRecordList() {
               showTotal: (total) => `已选择 ${selectedKeys.length} 项 · 每页 ${pageSize} 条 · 共 ${total} 条`,
             }}
           />
-        </div>
+        </Card>
       </PageContainer>
     </div>
   )
