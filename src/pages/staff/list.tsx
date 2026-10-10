@@ -35,6 +35,8 @@ export default function StaffList() {
   const navigate = useNavigate()
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
   const [applied, setApplied] = useState<Filters>({ keyword: '' })
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   const applyFilters = () => setApplied(filters)
 
@@ -194,15 +196,23 @@ export default function StaffList() {
         </Card>
 
         {/* 人员表格 */}
-        <Card variant="borderless" className="list-card">
+        <Card variant="borderless" className="list-card table-fill">
           <Table<MockStaffRow>
             rowKey="id"
             columns={columns}
             dataSource={filtered}
-            pagination={false}
+            pagination={{
+              current: page,
+              pageSize,
+              total: filtered.length,
+              onChange: (nextPage, nextPageSize) => {
+                setPage(nextPage)
+                setPageSize(nextPageSize)
+              },
+              showTotal: (total) => `共 ${total} 条`,
+            }}
           />
           <div className="staff-list__footer">
-            <span>共 126 人　1 / 13</span>
             <span className="staff-text--danger">
               本页仅维护当前机构；平台管理员可切换机构代建。
             </span>

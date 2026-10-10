@@ -34,6 +34,8 @@ export default function InstitutionList() {
   const navigate = useNavigate()
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
   const [applied, setApplied] = useState<Filters>({ keyword: '' })
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   const applyFilters = () => setApplied(filters)
 
@@ -186,15 +188,23 @@ export default function InstitutionList() {
         </Card>
 
         {/* 机构表格 */}
-        <Card variant="borderless" className="list-card">
+        <Card variant="borderless" className="list-card table-fill">
           <Table<MockOrgRow>
             rowKey="id"
             columns={columns}
             dataSource={filtered}
-            pagination={false}
+            pagination={{
+              current: page,
+              pageSize,
+              total: filtered.length,
+              onChange: (nextPage, nextPageSize) => {
+                setPage(nextPage)
+                setPageSize(nextPageSize)
+              },
+              showTotal: (total) => `共 ${total} 条`,
+            }}
           />
           <div className="org-list__footer">
-            <span>共 8 家机构　1 / 1</span>
             <span>仅平台管理员可新增机构；机构管理员维护本机构人员与团队</span>
           </div>
         </Card>

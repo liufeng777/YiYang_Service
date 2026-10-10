@@ -59,3 +59,55 @@ body {
 .text-success {
   color: @color-primary;
 }
+
+.ant-card-body {
+  padding: 20px !important;
+}
+
+// ===== 列表页表格卡片：占满页面剩余高度 =====
+// 用法：在列表卡片（antd Card 或模块自定义卡片 div）上追加 className="table-fill"
+// 效果：卡片撑满 PageContainer 内容区剩余高度，表体内部滚动（表头吸顶），分页固定在卡片底部
+.table-fill {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  // 兼容 antd Card 作为卡片容器
+  &.ant-card > .ant-card-body {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ant-spin,
+  .ant-table-wrapper,
+  .ant-spin-nested-loading,
+  .ant-spin-container {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ant-spin-container > .ant-table {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+  }
+
+  // 表头吸顶
+  .ant-table-thead > tr > th {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+
+  // 分页贴底
+  .ant-pagination {
+    flex-shrink: 0;
+    margin-bottom: 0;
+  }
+}

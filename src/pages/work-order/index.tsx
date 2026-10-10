@@ -55,7 +55,7 @@ export default function WorkOrderList() {
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
   const [applied, setApplied] = useState<Filters>({ keyword: '' })
   const [page, setPage] = useState(1)
-  const pageSize = 20
+  const [pageSize, setPageSize] = useState(20)
 
   const serviceOptions = useMemo(
     () => [...new Set(mockWorkOrderList.map((r) => r.serviceName))],
@@ -272,7 +272,7 @@ export default function WorkOrderList() {
         </Card>
 
         {/* 工单表格 */}
-        <Card variant="borderless" className="list-card">
+        <Card variant="borderless" className="list-card table-fill">
           <Table<MockWorkOrderRow>
             rowKey="id"
             columns={columns}
@@ -281,8 +281,11 @@ export default function WorkOrderList() {
               current: page,
               pageSize,
               total: filtered.length,
-              onChange: setPage,
-              showTotal: (total) => `每页 ${pageSize} 条 · 共 ${total} 条`,
+              onChange: (nextPage, nextPageSize) => {
+                setPage(nextPage)
+                setPageSize(nextPageSize)
+              },
+              showTotal: (total) => `共 ${total} 条`,
             }}
           />
         </Card>

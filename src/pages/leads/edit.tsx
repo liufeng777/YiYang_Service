@@ -5,7 +5,8 @@
  *   编辑回显调用 leadApi.getLeadDetail
  */
 import { useEffect, useState } from 'react'
-import { Button, Checkbox, Form, Input, Select, Tag, App } from 'antd'
+import { Button, Checkbox, Form, Input, Select, Tag, App, Card } from 'antd'
+import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 import PageContainer from '@/components/PageContainer'
@@ -81,11 +82,11 @@ export default function LeadEdit() {
             {sourceType && (
               <Tag className="lead-edit__source-tag">来源：{LEAD_SOURCE_MAP[sourceType]}</Tag>
             )}
-            <Button onClick={() => navigate('/leads')}>返回列表</Button>
+            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/leads')}>返回线索列表</Button>
           </>
         }
       >
-        <div className="lead-edit__card">
+        <Card className='lead-edit__card'>
           <Form<LeadFormValues>
             form={form}
             layout="vertical"
@@ -203,7 +204,7 @@ export default function LeadEdit() {
               </Button>
             </div>
           </Form>
-        </div>
+        </Card>
       </PageContainer>
     </div>
   )

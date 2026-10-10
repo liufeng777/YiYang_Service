@@ -4,11 +4,12 @@
  * TODO: 接入后端后对齐 API §4.5 发起评估 POST /api/v1/staff/members/:id/assessments
  */
 import { useState } from 'react'
-import { Button, Input, Radio, Select, message } from 'antd'
-import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
+import { Button, Input, Radio, Select, message, Upload, UploadProps } from 'antd'
+import { ArrowLeftOutlined, UploadOutlined, SearchOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import { mockTemplates, type AssessSource, type AssessType } from './mock'
+const { Dragger } = Upload;
 import './index.less'
 
 const TYPE_OPTIONS: { value: AssessType; desc: string }[] = [
@@ -26,39 +27,70 @@ export default function AssessCreate() {
   const [source, setSource] = useState<AssessSource>('纸质问卷录入')
   const [templateId, setTemplateId] = useState('T-PRO')
 
-  const template = mockTemplates.find((t) => t.id === templateId)
+  const template = mockTemplates.find((t) => t.id === templateId);
+
+  const props: UploadProps = {
+    name: 'file',
+    multiple: false,
+    action: '',
+    onChange(info) {
+      const { status } = info.file;
+      if (status !== 'uploading') {
+        console.log(info.file, info.fileList);
+      }
+      if (status === 'done') {
+        message.success(`${info.file.name} file uploaded successfully.`);
+      }
+      if (status === 'error') {
+        message.error(`${info.file.name} file upload failed.`);
+      }
+    },
+    onDrop(e) {
+      console.log('Dropped files', e.dataTransfer.files);
+    },
+  };
+
 
   return (
     <PageContainer
       title="新建健康力测评"
       description="选择评测对象与模板，录入完成后由 AI 辅助分析、专业人员确认"
+      extra={
+        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/assessment')}>返回测评列表</Button>
+        
+      }
     >
       {/* 1 选择评测对象 */}
-      <div className="as-card">
-        <div className="as-card__header">
-          <span className="as-card__title">1. 选择评测对象</span>
-        </div>
-        <div className="as-create__search">
-          <Input
-            prefix={<SearchOutlined />}
-            placeholder="输入姓名 / 手机号 / 档案编号查找对象"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value.trim())}
-            onPressEnter={() => setFound(true)}
-          />
-          <Button type="primary" onClick={() => (keyword ? setFound(true) : message.info('请输入查找内容'))}>
-            查询档案
-          </Button>
+      <div className="as-card as-target">
+        <div>
+          <div className="as-card__header">
+            <span className="as-card__title">1. 选择评测对象</span>
+          </div>
+          <div className="as-create__search">
+            <Input
+              prefix={<SearchOutlined />}
+              placeholder="输入姓名 / 手机号 / 档案编号查找对象"
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value.trim())}
+              onPressEnter={() => setFound(true)}
+            />
+            <Button type="primary" onClick={() => (keyword ? setFound(true) : message.info('请输入查找内容'))}>
+              查询档案
+            </Button>
+          </div>
         </div>
         {found && (
           <div className="as-member-hit">
             <div className="as-member-hit__main">
-              <span className="as-member-hit__name">张桂芳 女 67岁</span>
-              <span className="as-member-hit__meta">手机号 138****6021</span>
-              <span className="as-member-hit__meta">档案 HF202608120038</span>
-              <span className="as-member-hit__meta">城东护理院</span>
+              <div style={{display: 'flex', justifyContent: 'space-between'}}>
+                <span className="as-member-hit__name">张桂芳 女 67岁</span>
+                <span className="as-tag as-tag--done">已关联健康档案</span>
+              </div>
+              <span className="as-member-hit__meta">手机号: 138****6021</span>
+              <span className="as-member-hit__meta">档案: HF202608120038</span>
+              <div className="as-member-hit__meta">所属机构: 城东护理院</div>
             </div>
-            <span className="as-tag as-tag--done">已关联健康档案</span>
+            
           </div>
         )}
       </div>
@@ -110,26 +142,31 @@ export default function AssessCreate() {
           </div>
         </div>
         <div className="as-upload-box">
-          <PlusOutlined /> 上传问卷照片或扫描件
-          <div className="as-upload-box__hint">支持 JPG / PNG / PDF，作为原始留痕；一期不做OCR识别</div>
-          <Button className="as-upload-box__btn">选择文件</Button>
+            <Dragger {...props}>
+              <Button>
+                <UploadOutlined /> 上传文件
+              </Button>
+              <p className="as-upload-box__hint">上传问卷照片或扫描件</p>
+              <p className="as-upload-box__btn">
+              支持 JPG / PNG / PDF，作为原始留痕；一期不做OCR识别
+          </p>
+          </Dragger>
         </div>
-        <div className="as-footnote as-footnote--blue">
+        <div className="as-footnote">
           模板ID、版本、来源、PDF地址、模板状态已作为基础字段预留，后续支持多版本模板管理。
         </div>
-      </div>
-
-      {/* 底部操作 */}
-      <div className="as-footer-actions">
-        <Button onClick={() => navigate('/assessment')}>取消</Button>
-        <Button onClick={() => message.success('草稿已保存（mock）')}>保存草稿</Button>
-        <Button
-          type="primary"
-          disabled={!found}
-          onClick={() => navigate('/assessment/A20260819001/entry')}
-        >
-          开始录入
-        </Button>
+        {/* 底部操作 */}
+        <div className="as-footer-actions">
+          <Button onClick={() => navigate('/assessment')}>取消</Button>
+          <Button onClick={() => message.success('草稿已保存（mock）')}>保存草稿</Button>
+          <Button
+            type="primary"
+            disabled={!found}
+            onClick={() => navigate('/assessment/A20260819001/entry')}
+          >
+            开始录入
+          </Button>
+        </div>
       </div>
     </PageContainer>
   )

@@ -3,12 +3,11 @@
  * TODO: 接入后端后对齐 API §4.1 评估列表 GET /api/v1/staff/members/:id/assessments
  */
 import { useMemo, useState } from 'react'
-import { Button, Card, DatePicker, Input, Modal, Select, Table } from 'antd'
+import { Button, Card, DatePicker, Input, Modal, Select, Table, Space } from 'antd'
 import {
   DownloadOutlined,
   FilePdfOutlined,
   PlusOutlined,
-  SearchOutlined,
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
@@ -62,6 +61,8 @@ export default function AssessList() {
   const [keyword, setKeyword] = useState('')
   const [appliedKeyword, setAppliedKeyword] = useState('')
   const [downloadOpen, setDownloadOpen] = useState(false)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   const applyFilters = () => setAppliedKeyword(keyword)
 
@@ -113,8 +114,8 @@ export default function AssessList() {
       key: 'risk',
       render: (_: unknown, row: AssessRecord) => (
         <div>
-          <div>{row.riskText}</div>
           <span className={`as-tag ${RISK_LEVEL[row.risk].cls}`}>{RISK_LEVEL[row.risk].text}</span>
+          <div className="as-row__sub" style={{padding: '2px 0 0 4px'}}>{row.riskText}</div>
         </div>
       ),
     },
@@ -160,7 +161,7 @@ export default function AssessList() {
       title="AI长者健康力测评"
       description="统一管理C端自主测评与专业人员录入，AI分析后由专业人员确认"
       extra={
-        <>
+        <Space>
           <Button onClick={() => navigate('/assessment/templates')}>测评模板</Button>
           <Button icon={<DownloadOutlined />} onClick={() => setDownloadOpen(true)}>
             下载空白评测表
@@ -168,40 +169,58 @@ export default function AssessList() {
           <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/assessment/create')}>
             新建测评
           </Button>
-        </>
+        </Space>
       }
     >
       {/* 筛选区 */}
       <Card variant="borderless" className="filter-bar">
         <Input
-          prefix={<SearchOutlined />}
           placeholder="测评对象姓名"
           value={keyword}
           onChange={(e) => setKeyword(e.target.value.trim())}
           allowClear
         />
-        <Select placeholder="全部机构" allowClear options={['城东护理院', '幸福里健康驿站', '康宁护理院'].map((v) => ({ value: v, label: v }))} />
-        <Select placeholder="全部类型" allowClear options={['居家快速测评', '专业健康力评测'].map((v) => ({ value: v, label: v }))} />
-        <Select placeholder="全部来源" allowClear options={['C端自主测评', '面访问答', '电话访谈', '纸质问卷录入', '现场专业评测'].map((v) => ({ value: v, label: v }))} />
-        <Select placeholder="全部状态" allowClear options={Object.entries(ASSESS_STATUS).map(([v, s]) => ({ value: v, label: s.text }))} />
-        <DatePicker.RangePicker placeholder={['评测开始', '评测结束']} />
+        <Select placeholder="所属机构" allowClear options={['城东护理院', '幸福里健康驿站', '康宁护理院'].map((v) => ({ value: v, label: v }))} />
+        <Select placeholder="测评类型" allowClear options={['居家快速测评', '专业健康力评测'].map((v) => ({ value: v, label: v }))} />
+        <Select placeholder="测评来源" allowClear options={['C端自主测评', '面访问答', '电话访谈', '纸质问卷录入', '现场专业评测'].map((v) => ({ value: v, label: v }))} />
+        <Select placeholder="测评状态" allowClear options={Object.entries(ASSESS_STATUS).map(([v, s]) => ({ value: v, label: s.text }))} />
+        <DatePicker
+          placeholder='测试时间'
+          // value={filters.date ? dayjs(filters.date) : null}
+          // onChange={(d) => setFilters((f) => ({ ...f, date: d ? d.format('YYYY-MM-DD') : undefined }))}
+          style={{ flex: '1 1 140px', minWidth: 140 }}
+          allowClear
+        />
         <Button type="primary" onClick={applyFilters}>查询</Button>
         <Button onClick={resetFilters}>重置</Button>
       </Card>
 
       {/* 列表 */}
-      <Card variant="borderless" className="list-card">
-        <div className="as-card__header">
-          <span className="as-card__title">共 128 条测评记录</span>
+      <Card variant="borderless" className="list-card table-fill">
+        <div className="list-card__header">
+          <span className="list-card__header__title">测评记录</span>
+          <span className="list-card__header__text as-footnote as-footnote--green">
+            状态说明：评测中＝专业人员录入未完成；待确认＝AI 分析已生成，等待专业人员确认；已完成＝专业人员确认后归档到健康档案，不同量表得分不合并为单一总分。
+          </span>
         </div>
-        <Table<AssessRecord> rowKey="id" columns={columns} dataSource={list} pagination={false} />
+        <Table<AssessRecord>
+          rowKey="id"
+          columns={columns}
+          dataSource={list}
+          size='small'
+          pagination={{
+            current: page,
+            pageSize,
+            total: list.length,
+            onChange: (nextPage, nextPageSize) => {
+              setPage(nextPage)
+              setPageSize(nextPageSize)
+            },
+            showTotal: (total) => `共 ${total} 条`,
+          }}
+        />
       </Card>
-
-      {/* 状态说明 */}
-      <div className="as-footnote as-footnote--green">
-        状态说明：评测中＝专业人员录入未完成；待确认＝AI 分析已生成，等待专业人员确认；已完成＝专业人员确认后归档到健康档案，不同量表得分不合并为单一总分。
-      </div>
-
+      
       <TemplateDownloadModal open={downloadOpen} onClose={() => setDownloadOpen(false)} />
     </PageContainer>
   )

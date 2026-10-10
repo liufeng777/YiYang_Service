@@ -125,12 +125,30 @@ export const routes: RouteConfig[] = [
 
   /* ===== 客户与健康管理 ===== */
   {
+    path: '/member',
+    meta: { title: '健康会员', icon: <TeamOutlined />, group: '客户与健康管理', permissions: [PERMISSIONS.HEALTH_VIEW] },
+    children: [
+      {
+        path: '',
+        meta: { title: '健康会员列表' },
+        component: lazy(() => import('@/pages/member/list')),
+      },
+      {
+        path: ':id',
+        meta: { title: '健康会员详情', hideInMenu: true },
+        component: lazy(() => import('@/pages/member/detail')),
+      },
+    ],
+  },
+  {
+    // 线索管理：已从侧边栏移除（被「健康会员」替代），路由与代码文件暂时保留，
+    // 全部子级 hideInMenu 使导航不在侧边栏展示，工作台/活动等模块内的既有链接仍可用
     path: '/leads',
     meta: { title: '线索管理', icon: <AimOutlined />, group: '客户与健康管理', permissions: [PERMISSIONS.LEAD_VIEW] },
     children: [
       {
         path: '',
-        meta: { title: '线索登记' },
+        meta: { title: '线索登记', hideInMenu: true },
         component: lazy(() => import('@/pages/leads/index')),
       },
       {
@@ -162,7 +180,7 @@ export const routes: RouteConfig[] = [
       {
         path: '',
         meta: { title: '档案列表' },
-        component: lazy(() => import('@/pages/health/record')),
+        component: lazy(() => import('@/pages/health')),
       },
       {
         path: 'create',

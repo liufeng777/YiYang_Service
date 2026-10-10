@@ -27,6 +27,8 @@ export default function StaffQualification() {
   const navigate = useNavigate()
   const [filters, setFilters] = useState<Filters>({})
   const [applied, setApplied] = useState<Filters>({})
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   const applyFilters = () => setApplied(filters)
 
@@ -180,12 +182,21 @@ export default function StaffQualification() {
         </Card>
 
         {/* 派单资格表格 */}
-        <Card variant="borderless" className="list-card">
+        <Card variant="borderless" className="list-card table-fill">
           <Table<MockQualRow>
             rowKey="id"
             columns={columns}
             dataSource={filtered}
-            pagination={false}
+            pagination={{
+              current: page,
+              pageSize,
+              total: filtered.length,
+              onChange: (nextPage, nextPageSize) => {
+                setPage(nextPage)
+                setPageSize(nextPageSize)
+              },
+              showTotal: (total) => `共 ${total} 条`,
+            }}
           />
           <div className="staff-list__footer">
             <span>普通用户不进入本列表。</span>

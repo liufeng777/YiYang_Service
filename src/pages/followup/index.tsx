@@ -29,7 +29,7 @@ export default function FollowupList() {
   const [keyword, setKeyword] = useState('')
   const [applied, setApplied] = useState({ typeFilter: undefined as FollowupTypeKey | undefined, keyword: '' })
   const [page, setPage] = useState(1)
-  const pageSize = 20
+  const [pageSize, setPageSize] = useState(20)
 
   const pendingFiltered = useMemo(
     () =>
@@ -206,20 +206,38 @@ export default function FollowupList() {
         </Card>
 
         {/* 列表 */}
-        <Card variant="borderless" className="list-card">
+        <Card variant="borderless" className="list-card table-fill">
           {tab === 'pending' ? (
             <Table<MockFollowupPendingRow>
               rowKey="id"
               columns={pendingColumns}
               dataSource={pendingFiltered}
-              pagination={{ current: page, pageSize, total: pendingFiltered.length, onChange: setPage }}
+              pagination={{
+                current: page,
+                pageSize,
+                total: pendingFiltered.length,
+                onChange: (nextPage, nextPageSize) => {
+                  setPage(nextPage)
+                  setPageSize(nextPageSize)
+                },
+                showTotal: (total) => `共 ${total} 条`,
+              }}
             />
           ) : (
             <Table<MockFollowupDoneRow>
               rowKey="id"
               columns={doneColumns}
               dataSource={doneFiltered}
-              pagination={{ current: page, pageSize, total: doneFiltered.length, onChange: setPage }}
+              pagination={{
+                current: page,
+                pageSize,
+                total: doneFiltered.length,
+                onChange: (nextPage, nextPageSize) => {
+                  setPage(nextPage)
+                  setPageSize(nextPageSize)
+                },
+                showTotal: (total) => `共 ${total} 条`,
+              }}
             />
           )}
         </Card>

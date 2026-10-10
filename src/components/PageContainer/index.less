@@ -1,11 +1,16 @@
 .page-container {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   padding: @spacing-lg;
 
   &__header {
+    flex-shrink: 0;
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    margin-bottom: @spacing-lg;
+    margin-bottom: @spacing-md;
   }
 
   &__title {
@@ -18,7 +23,13 @@
     .text-auxiliary();
   }
 
+  // 内容区：占满剩余高度；内部为纵向 flex，列表卡片（.table-fill）撑满剩余空间，
+  // 内容超长时仅内容区滚动，页面标题固定
   &__body {
+    flex: 1;
     min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
   }
 }

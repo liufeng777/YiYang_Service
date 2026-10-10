@@ -4,8 +4,8 @@
  * TODO: 接入后端后对齐 API §4.2 评估详情（问卷/答案）
  */
 import { useState } from 'react'
-import { Button, Input, Modal, Progress, Radio, message } from 'antd'
-import { CheckCircleFilled, LeftOutlined, RightOutlined } from '@ant-design/icons'
+import { Button, Input, Modal, Radio, message, Card } from 'antd'
+import { ArrowLeftOutlined, CheckCircleFilled, LeftOutlined, RightOutlined, MinusCircleOutlined } from '@ant-design/icons'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import {
@@ -77,10 +77,13 @@ export default function AssessEntry() {
           ? `张桂芳 · 67岁｜《居家快速测评表 V1.0》｜C端自主测评 · ${p.autoSaved.replace('刚刚已保存', '08-19 10:26 已同步')}`
           : `张桂芳 · 67岁｜《专业健康力评测表 V1.0》｜${p.source}`
       }
+      extra={
+        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(`/assessment/${id}`)}>返回测评详情</Button>
+      }
     >
       <div className="as-entry">
         {/* 左：评测目录 */}
-        <div className="as-card as-entry__nav">
+        <Card className="as-card as-entry__nav">
           <div className="as-card__header">
             <span className="as-card__title">评测目录</span>
           </div>
@@ -90,14 +93,18 @@ export default function AssessEntry() {
               className={`as-entry__nav-item${s.active ? ' as-entry__nav-item--active' : ''}`}
               onClick={() => setActive(s.key)}
             >
-              <span>{s.name}</span>
-              {s.done && <CheckCircleFilled className="as-entry__nav-done" />}
+              
+              <span className='as-entry__nav-item--header'>
+                {s.done ? <CheckCircleFilled className="as-entry__nav-done" /> : <MinusCircleOutlined className="as-entry__nav-wait" />}
+                <span>{s.name}</span>
+              </span>
+              <span className={s.done ? 'as-entry__nav-done as-entry__label' : 'as-entry__nav-wait as-entry__label'}>{s.done ? '已完成' : '待填写'}</span>
             </div>
           ))}
-        </div>
+        </Card>
 
         {/* 中：当前维度题目 */}
-        <div className="as-card as-entry__main">
+        <Card className="as-card as-entry__main">
           <div className="as-card__header">
             <span className="as-card__title">
               {sections.find((s) => s.key === active)?.name}
@@ -128,43 +135,43 @@ export default function AssessEntry() {
               下一维度 <RightOutlined />
             </Button>
           </div>
-        </div>
+        </Card>
 
         {/* 右：完成情况 */}
-        <div className="as-entry__side">
+        <Card className="as-entry__side">
           <div className="as-card">
             <div className="as-card__header">
               <span className="as-card__title">完成情况</span>
             </div>
             <div className="as-progress">
-              <Progress
-                percent={Math.round((p.finished / p.total) * 100)}
-                format={() => `${p.finished}/${p.total}`}
-              />
               <div className="as-progress__row">
-                <span>未完成题目</span>
-                <span>{p.unfinished}</span>
+                <span className='as-progress__label'>已完成题目</span>
+                <span className='as-text--success'>{p.finished} / {p.total}</span>
               </div>
               <div className="as-progress__row">
-                <span>必填项缺失</span>
-                <span className="as-text--warn">{p.requiredMissing}</span>
+                <span className='as-progress__label'>未完成题目</span>
+                <span className='as-text--warn'>{p.unfinished}</span>
+              </div>
+              <div className="as-progress__row">
+                <span className='as-progress__label'>必填项缺失</span>
+                <span className="as-text--danger">{p.requiredMissing}</span>
               </div>
             </div>
             <div className="as-meta-list">
               <div className="as-meta-list__row">
-                <span>评测来源</span>
-                <span>{readonly ? 'C端自主测评' : p.source}</span>
+                <span className='as-progress__label'>评测来源</span>
+                <span className='as-progress__value'>{readonly ? 'C端自主测评' : p.source}</span>
               </div>
               <div className="as-meta-list__row">
-                <span>评测人员</span>
-                <span>{readonly ? 'C端用户自主完成' : p.assessor}</span>
+                <span className='as-progress__label'>评测人员</span>
+                <span className='as-progress__value'>{readonly ? 'C端用户自主完成' : p.assessor}</span>
               </div>
               <div className="as-meta-list__row">
-                <span>模板版本</span>
-                <span>{p.version}</span>
+                <span className='as-progress__label'>模板版本</span>
+                <span className='as-progress__value'>{p.version}</span>
               </div>
               <div className="as-meta-list__row">
-                <span>自动保存</span>
+                <span className='as-progress__label'>自动保存</span>
                 <span className="as-text--ok">
                   {readonly ? '08-19 10:26 已同步' : p.autoSaved}
                 </span>
@@ -195,7 +202,7 @@ export default function AssessEntry() {
               )}
             </div>
           </div>
-        </div>
+        </Card>
       </div>
 
       <CheckModal open={checkOpen} onClose={() => setCheckOpen(false)} />

@@ -36,10 +36,10 @@ export const ASSESS_STATUS: Record<AssessStatus, { text: string; cls: string }> 
 }
 
 export const RISK_LEVEL: Record<RiskLevel, { text: string; cls: string }> = {
-  good: { text: '状态良好', cls: 'as-tag--good' },
-  attention: { text: '需要关注', cls: 'as-tag--attention' },
-  high: { text: '较高风险', cls: 'as-tag--high' },
-  insufficient: { text: '信息不足', cls: 'as-tag--insufficient' },
+  good: { text: '状态良好', cls: 'as-label--good' },
+  attention: { text: '需要关注', cls: 'as-label--attention' },
+  high: { text: '较高风险', cls: 'as-label--high' },
+  insufficient: { text: '信息不足', cls: 'as-label--insufficient' },
 }
 
 export const mockAssessList: AssessRecord[] = [
@@ -189,7 +189,7 @@ export interface EntrySection {
 export const mockEntrySections: EntrySection[] = [
   { key: 'living', name: '生活能力与独立性', done: true },
   { key: 'sensory', name: '感官功能', done: true },
-  { key: 'quality', name: '生活质量', done: false, active: true },
+  { key: 'quality', name: '生活质量', done: false},
   { key: 'nutrition', name: '营养与衰弱', done: false },
   { key: 'mobility', name: '行动能力与跌倒风险', done: false },
   { key: 'cognition', name: '认知、情绪与精神状态', done: false },

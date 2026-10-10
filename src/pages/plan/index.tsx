@@ -23,7 +23,7 @@ export default function PlanList() {
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
   const [applied, setApplied] = useState<Filters>({ keyword: '' })
   const [page, setPage] = useState(1)
-  const pageSize = 20
+  const [pageSize, setPageSize] = useState(20)
 
   const diseaseOptions = useMemo(() => [...new Set(mockPlanList.flatMap((r) => r.diseases))], [])
   const creatorOptions = useMemo(
@@ -206,7 +206,7 @@ export default function PlanList() {
         </Card>
 
         {/* 方案记录卡 */}
-        <Card variant="borderless" className="list-card">
+        <Card variant="borderless" className="list-card table-fill">
           <div className="plan-list__header">
             <span className="plan-list__title">健康管理方案记录</span>
             <span className="plan-list__sub">
@@ -221,8 +221,11 @@ export default function PlanList() {
               current: page,
               pageSize,
               total: filtered.length,
-              onChange: setPage,
-              showTotal: (total) => `每页 ${pageSize} 条 · 共 ${total} 条`,
+              onChange: (nextPage, nextPageSize) => {
+                setPage(nextPage)
+                setPageSize(nextPageSize)
+              },
+              showTotal: (total) => `共 ${total} 条`,
             }}
           />
         </Card>

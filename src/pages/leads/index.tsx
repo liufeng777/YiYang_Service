@@ -32,7 +32,7 @@ export default function LeadList() {
   const [filters, setFilters] = useState<Filters>(initialFilters)
   const [applied, setApplied] = useState<Filters>(initialFilters)
   const [page, setPage] = useState(1)
-  const pageSize = 10
+  const [pageSize, setPageSize] = useState(10)
 
   // TODO: 接入后端后替换为 leadApi.getLeadList({ ...applied, page, page_size: pageSize })
   const filtered = useMemo(
@@ -110,7 +110,7 @@ export default function LeadList() {
       key: 'action',
       width: 90,
       render: (_: unknown, record: LeadItem) => (
-        <Button size="small" className="lead-table__action" onClick={() => navigate(`/leads/edit/${record.id}`)}>
+        <Button size="small" type="link" onClick={() => navigate(`/leads/edit/${record.id}`)}>
           查看
         </Button>
       ),
@@ -120,7 +120,7 @@ export default function LeadList() {
   return (
     <div className="lead-page">
       <PageContainer
-        title="线索登记"
+        title="线索管理"
         description="简单记录线上咨询和线下接触中产生的用户意向"
         extra={
           <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/leads/create')}>
@@ -176,18 +176,24 @@ export default function LeadList() {
         </Card>
 
         {/* 列表 */}
-        <Card variant="borderless" className="list-card">
+        <Card variant="borderless" className="list-card table-fill">
+          <div className="list-card__header">
+            <span className='list-card__header__title'>线索列表</span>
+          </div>
           <Table<LeadItem>
             rowKey="id"
             columns={columns}
             dataSource={filtered}
+            size="small"
             pagination={{
               current: page,
               pageSize,
               total: filtered.length,
-              onChange: setPage,
+              onChange: (nextPage, nextPageSize) => {
+                setPage(nextPage)
+                setPageSize(nextPageSize)
+              },
               showTotal: (total) => `共 ${total} 条`,
-              simple: true,
             }}
           />
         </Card>

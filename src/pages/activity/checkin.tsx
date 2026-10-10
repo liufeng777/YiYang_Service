@@ -17,6 +17,8 @@ export default function ActivityCheckin() {
   const [walkInOpen, setWalkInOpen] = useState(false)
   const [walkInName, setWalkInName] = useState('')
   const [walkInPhone, setWalkInPhone] = useState('')
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   const filtered = useMemo(
     () =>
@@ -155,12 +157,22 @@ export default function ActivityCheckin() {
         </Card>
 
         {/* 签到表格 */}
-        <Card variant="borderless" className="list-card">
+        <Card variant="borderless" className="list-card table-fill">
           <Table<MockCheckinRow>
             rowKey="id"
             columns={columns}
             dataSource={filtered}
-            pagination={false}
+            size="small"
+            pagination={{
+              current: page,
+              pageSize,
+              total: filtered.length,
+              onChange: (nextPage, nextPageSize) => {
+                setPage(nextPage)
+                setPageSize(nextPageSize)
+              },
+              showTotal: (total) => `共 ${total} 条`,
+            }}
           />
         </Card>
       </PageContainer>

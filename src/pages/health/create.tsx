@@ -238,6 +238,7 @@ export default function HealthRecordCreate() {
               value={guardian}
               onChange={setGuardian}
               placeholder="选择家属"
+              style={{width: 400}}
               options={[{ value: '沈晓晨（女儿）', label: '沈晓晨（女儿）' }]}
             />
             <div className="hr-create__agree">

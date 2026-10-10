@@ -23,6 +23,8 @@ export default function TeamList() {
   const navigate = useNavigate()
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
   const [applied, setApplied] = useState<Filters>({ keyword: '' })
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   const applyFilters = () => setApplied(filters)
 
@@ -155,15 +157,23 @@ export default function TeamList() {
         </Card>
 
         {/* 团队表格 */}
-        <Card variant="borderless" className="list-card">
+        <Card variant="borderless" className="list-card table-fill">
           <Table<MockTeamRow>
             rowKey="id"
             columns={columns}
             dataSource={filtered}
-            pagination={false}
+            pagination={{
+              current: page,
+              pageSize,
+              total: filtered.length,
+              onChange: (nextPage, nextPageSize) => {
+                setPage(nextPage)
+                setPageSize(nextPageSize)
+              },
+              showTotal: (total) => `共 ${total} 条`,
+            }}
           />
           <div className="team-list__footer">
-            <span>共 8 个团队　1 / 1</span>
             <span className="team-text--danger">
               团队是责任人候选成员池；患者责任关系在健康档案中指定。
             </span>

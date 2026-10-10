@@ -3,9 +3,8 @@
  * 数据当前为 mock（见 ./mock.ts）；接入后端后替换为 memberApi.getMemberList
  */
 import { useMemo, useState } from 'react'
-import type { Key } from 'react'
 import { Avatar, Button, Card, Dropdown, Input, Select, Table } from 'antd'
-import { MoreOutlined, PlusOutlined, SearchOutlined, SettingOutlined, UploadOutlined } from '@ant-design/icons'
+import { MoreOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import { mockRecordList, mockRecordStats, type MockRecordRow } from './mock'
@@ -21,8 +20,6 @@ interface Filters {
 
 const RISK_TEXT = { high: '高风险', mid: '中风险', low: '低风险' } as const
 
-const QUICK_FILTERS = ['高风险', '资料待完善', '待制定方案', '7天内待随访', '同步异常'] as const
-
 export default function HealthRecordList() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -30,9 +27,8 @@ export default function HealthRecordList() {
   const [filters, setFilters] = useState<Filters>(initialFilters)
   const [applied, setApplied] = useState<Filters>(initialFilters)
   const [quick, setQuick] = useState<string>()
-  const [selectedKeys, setSelectedKeys] = useState<Key[]>([])
   const [page, setPage] = useState(1)
-  const pageSize = 20
+  const [pageSize, setPageSize] = useState(20)
 
   const orgOptions = useMemo(() => [...new Set(mockRecordList.map((r) => r.org))], [])
   const diseaseOptions = useMemo(() => [...new Set(mockRecordList.flatMap((r) => r.diseases))], [])
@@ -234,7 +230,7 @@ export default function HealthRecordList() {
         {/* 筛选卡 */}
         <Card variant="borderless" className="filter-bar">
           <Input
-            prefix={<SearchOutlined />}
+            // prefix={<SearchOutlined />}
             placeholder="搜索手机号、会员ID或姓名"
             value={filters.keyword}
             onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
@@ -270,7 +266,7 @@ export default function HealthRecordList() {
           />
           <Button onClick={onReset}>重置</Button>
           <Button type="primary" onClick={applyFilters}>查询</Button>
-          <div className="hr-filters__quick">
+          {/* <div className="hr-filters__quick">
             {QUICK_FILTERS.map((q) => (
               <span
                 key={q}
@@ -283,31 +279,35 @@ export default function HealthRecordList() {
             <Button type="link" className="hr-filters__reset" onClick={onReset}>
               重置筛选
             </Button>
-          </div>
+          </div> */}
         </Card>
 
         {/* 档案列表卡 */}
-        <Card variant="borderless" className="list-card">
-          <div className="hr-list__header">
-            <span className="hr-list__title">档案列表&nbsp;&nbsp;共 {filtered.length.toLocaleString()} 人</span>
-            <Button type="text" icon={<SettingOutlined />}>
+        <Card variant="borderless" className="list-card table-fill">
+          <div className="list-card__header">
+            <span className="list-card__header__title">档案列表</span>
+            {/* <Button type="text" icon={<SettingOutlined />}>
               字段显示设置
-            </Button>
+            </Button> */}
           </div>
           <Table<MockRecordRow>
             rowKey="id"
+            size="small"
             columns={columns}
             dataSource={filtered}
-            rowSelection={{
-              selectedRowKeys: selectedKeys,
-              onChange: setSelectedKeys,
-            }}
+            // rowSelection={{
+            //   selectedRowKeys: selectedKeys,
+            //   onChange: setSelectedKeys,
+            // }}
             pagination={{
               current: page,
               pageSize,
               total: filtered.length,
-              onChange: setPage,
-              showTotal: (total) => `已选择 ${selectedKeys.length} 项 · 每页 ${pageSize} 条 · 共 ${total} 条`,
+              onChange: (nextPage, nextPageSize) => {
+                setPage(nextPage)
+                setPageSize(nextPageSize)
+              },
+              showTotal: (total) => `共 ${total} 条`,
             }}
           />
         </Card>

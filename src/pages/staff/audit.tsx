@@ -43,6 +43,8 @@ export default function StaffAudit() {
   const [role, setRole] = useState<string>()
   const [org, setOrg] = useState<string>()
   const [applied, setApplied] = useState({ keyword: '', role: undefined as string | undefined, org: undefined as string | undefined })
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   const applyFilters = () => setApplied({ keyword, role, org })
 
@@ -173,12 +175,21 @@ export default function StaffAudit() {
         </Card>
 
         {/* 审核表格 */}
-        <Card variant="borderless" className="list-card">
+        <Card variant="borderless" className="list-card table-fill">
           <Table<MockAuditRow>
             rowKey="id"
             columns={columns}
             dataSource={filtered}
-            pagination={false}
+            pagination={{
+              current: page,
+              pageSize,
+              total: filtered.length,
+              onChange: (nextPage, nextPageSize) => {
+                setPage(nextPage)
+                setPageSize(nextPageSize)
+              },
+              showTotal: (total) => `共 ${total} 条`,
+            }}
           />
         </Card>
       </PageContainer>

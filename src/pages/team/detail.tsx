@@ -25,6 +25,8 @@ export default function TeamDetail() {
   const navigate = useNavigate()
   const [filters, setFilters] = useState<Filters>({ keyword: '', patient: '' })
   const [applied, setApplied] = useState<Filters>({ keyword: '', patient: '' })
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   const applyFilters = () => setApplied(filters)
@@ -158,15 +160,23 @@ export default function TeamDetail() {
         </Card>
 
         {/* 成员表格 */}
-        <Card variant="borderless" className="list-card">
+        <Card variant="borderless" className="list-card table-fill">
           <Table<MockTeamMemberRow>
             rowKey="id"
             columns={columns}
             dataSource={filtered}
-            pagination={false}
+            pagination={{
+              current: page,
+              pageSize,
+              total: filtered.length,
+              onChange: (nextPage, nextPageSize) => {
+                setPage(nextPage)
+                setPageSize(nextPageSize)
+              },
+              showTotal: (total) => `共 ${total} 条`,
+            }}
           />
           <div className="team-list__footer">
-            <span>共 6 位成员　1 / 1</span>
             <span className="team-text--danger">{d.footerNote}</span>
           </div>
         </Card>

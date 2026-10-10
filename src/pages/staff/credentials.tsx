@@ -48,6 +48,8 @@ export default function CredentialList() {
   const navigate = useNavigate()
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
   const [applied, setApplied] = useState<Filters>({ keyword: '' })
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   const applyFilters = () => setApplied(filters)
 
@@ -202,15 +204,23 @@ export default function CredentialList() {
         </Card>
 
         {/* 资质表格 */}
-        <Card variant="borderless" className="list-card">
+        <Card variant="borderless" className="list-card table-fill">
           <Table<MockCredentialRow>
             rowKey="id"
             columns={columns}
             dataSource={filtered}
-            pagination={false}
+            pagination={{
+              current: page,
+              pageSize,
+              total: filtered.length,
+              onChange: (nextPage, nextPageSize) => {
+                setPage(nextPage)
+                setPageSize(nextPageSize)
+              },
+              showTotal: (total) => `共 ${total} 条`,
+            }}
           />
           <div className="staff-list__footer">
-            <span>共 256 份　1 / 26</span>
             <span className="staff-text--danger">
               证照到期仅限制依赖该资质的服务，不停用人员账号
             </span>

@@ -28,7 +28,7 @@ export default function GoalList() {
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
   const [applied, setApplied] = useState<Filters>({ keyword: '' })
   const [page, setPage] = useState(1)
-  const pageSize = 20
+  const [pageSize, setPageSize] = useState(20)
 
   const diseaseOptions = useMemo(() => [...new Set(mockGoalList.map((r) => r.disease))], [])
   const doctorOptions = useMemo(() => [...new Set(mockGoalList.map((r) => r.doctor))], [])
@@ -192,7 +192,7 @@ export default function GoalList() {
         </Card>
 
         {/* 目标列表卡 */}
-        <Card variant="borderless" className="list-card">
+        <Card variant="borderless" className="list-card table-fill">
           <Table<MockGoalRow>
             rowKey="id"
             columns={columns}
@@ -201,7 +201,10 @@ export default function GoalList() {
               current: page,
               pageSize,
               total: filtered.length,
-              onChange: setPage,
+              onChange: (nextPage, nextPageSize) => {
+                setPage(nextPage)
+                setPageSize(nextPageSize)
+              },
               showTotal: (total) => `共 ${total} 条`,
             }}
           />

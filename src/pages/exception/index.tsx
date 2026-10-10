@@ -32,7 +32,7 @@ export default function ExceptionList() {
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
   const [applied, setApplied] = useState<Filters>({ keyword: '' })
   const [page, setPage] = useState(1)
-  const pageSize = 20
+  const [pageSize, setPageSize] = useState(20)
 
   const filtered = useMemo(
     () =>
@@ -194,7 +194,7 @@ export default function ExceptionList() {
         </Card>
 
         {/* 异常表格 */}
-        <Card variant="borderless" className="list-card">
+        <Card variant="borderless" className="list-card table-fill">
           <Table<MockExceptionRow>
             rowKey="id"
             columns={columns}
@@ -202,8 +202,11 @@ export default function ExceptionList() {
             pagination={{
               current: page,
               pageSize,
-              total: 49,
-              onChange: setPage,
+              total: filtered.length,
+              onChange: (nextPage, nextPageSize) => {
+                setPage(nextPage)
+                setPageSize(nextPageSize)
+              },
               showTotal: (total) => `共 ${total} 条`,
             }}
           />

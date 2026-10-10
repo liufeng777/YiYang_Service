@@ -248,6 +248,8 @@ function DiseaseTab() {
 /** 用药记录 Tab（设计稿：用药记录.png） */
 function MedicationTab() {
   const [subTab, setSubTab] = useState<'current' | 'history' | 'pending'>('current')
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
   const s = mockMedicationSummary
   const list = mockMedications[subTab]
 
@@ -319,7 +321,16 @@ function MedicationTab() {
             rowKey="id"
             columns={columns}
             dataSource={list}
-            pagination={false}
+            pagination={{
+              current: page,
+              pageSize,
+              total: list.length,
+              onChange: (nextPage, nextPageSize) => {
+                setPage(nextPage)
+                setPageSize(nextPageSize)
+              },
+              showTotal: (total) => `共 ${total} 条`,
+            }}
           />
         </div>
 

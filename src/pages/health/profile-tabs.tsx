@@ -638,6 +638,8 @@ function ExamWizard({ onBack }: { onBack: () => void }) {
 /** 检查检验 Tab 主组件（列表 / 报告详情 / 手动录入） */
 export function ExamTab() {
   const [view, setView] = useState<'list' | 'report' | 'wizard'>('list')
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   if (view === 'report') {
     return <ExamReportView onBack={() => setView('list')} onManualEntry={() => setView('wizard')} />
@@ -727,7 +729,21 @@ export function ExamTab() {
       </div>
 
       <div className="hr-card hr-exam__table">
-        <Table<ExamItem> rowKey="id" columns={columns} dataSource={mockExams} pagination={false} />
+        <Table<ExamItem>
+          rowKey="id"
+          columns={columns}
+          dataSource={mockExams}
+          pagination={{
+            current: page,
+            pageSize,
+            total: mockExams.length,
+            onChange: (nextPage, nextPageSize) => {
+              setPage(nextPage)
+              setPageSize(nextPageSize)
+            },
+            showTotal: (total) => `共 ${total} 条`,
+          }}
+        />
       </div>
 
       <div className="hr-footnote hr-footnote--green">

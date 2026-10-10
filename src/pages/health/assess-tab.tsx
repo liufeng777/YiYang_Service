@@ -2,6 +2,7 @@
  * 健康档案详情 - 「健康力测评」Tab（设计稿：W-HEALTH-P1-07）
  * 最近一次测评卡 + 历次测评记录表；数据来自 assess 模块 mock
  */
+import { useState } from 'react'
 import { Button, Table } from 'antd'
 import { ArrowRightOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
@@ -33,6 +34,8 @@ interface HistoryRow {
 export function AssessTab() {
   const navigate = useNavigate()
   const t = mockProfileAssessTab
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
 
   const columns = [
     { title: '评测日期', dataIndex: 'date', key: 'date' },
@@ -104,7 +107,21 @@ export function AssessTab() {
         <div className="hr-card__header">
           <span className="hr-card__title">历次测评记录</span>
         </div>
-        <Table<HistoryRow> rowKey="id" columns={columns} dataSource={t.history} pagination={false} />
+        <Table<HistoryRow>
+          rowKey="id"
+          columns={columns}
+          dataSource={t.history}
+          pagination={{
+            current: page,
+            pageSize,
+            total: t.history.length,
+            onChange: (nextPage, nextPageSize) => {
+              setPage(nextPage)
+              setPageSize(nextPageSize)
+            },
+            showTotal: (total) => `共 ${total} 条`,
+          }}
+        />
       </div>
 
       <div className="hr-footnote hr-footnote--green">

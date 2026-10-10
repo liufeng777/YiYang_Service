@@ -114,11 +114,12 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: @spacing-md;
+  margin-bottom: 16px;
 }
 
 .hr-stat {
   .card-surface();
-  padding: @spacing-lg @spacing-xl;
+  padding: @spacing-md @spacing-xl;
 
   &__label {
     .text-auxiliary();
@@ -196,16 +197,15 @@
   margin-top: @spacing-md;
   padding: @spacing-sm @spacing-xl @spacing-lg;
 
-  &__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: @spacing-sm 0;
-  }
+  // &__header {
+  //   display: flex;
+  //   align-items: center;
+  //   justify-content: space-between;
+  // }
 
-  &__title {
-    .text-title-card();
-  }
+  // &__title {
+  //   .text-title-card();
+  // }
 }
 
 .hr-row {
@@ -612,7 +612,7 @@
   }
 
   &__disease-search {
-    max-width: 420px;
+    max-width: 400px;
     margin-bottom: @spacing-md;
   }
 

@@ -30,6 +30,8 @@ export default function TeamUnassigned() {
   const navigate = useNavigate()
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
   const [applied, setApplied] = useState<Filters>({ keyword: '' })
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
   const [selected, setSelected] = useState<string[]>([])
 
   const applyFilters = () => setApplied(filters)
@@ -160,12 +162,21 @@ export default function TeamUnassigned() {
         </Card>
 
         {/* 患者表格 */}
-        <Card variant="borderless" className="list-card">
+        <Card variant="borderless" className="list-card table-fill">
           <Table<MockUnassignedRow>
             rowKey="id"
             columns={columns}
             dataSource={filtered}
-            pagination={false}
+            pagination={{
+              current: page,
+              pageSize,
+              total: filtered.length,
+              onChange: (nextPage, nextPageSize) => {
+                setPage(nextPage)
+                setPageSize(nextPageSize)
+              },
+              showTotal: (total) => `共 ${total} 条`,
+            }}
             rowSelection={{
               selectedRowKeys: selected,
               onChange: (keys) => setSelected(keys as string[]),
