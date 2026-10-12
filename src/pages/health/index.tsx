@@ -1,178 +1,161 @@
 /**
  * 健康档案 - 档案列表（设计稿：V2-01 健康档案列表.png）
- * 数据当前为 mock（见 ./mock.ts）；接入后端后替换为 memberApi.getMemberList
+ * 已对接 GET /api/v1/staff/members（服务端分页，支持 keyword / risk_level 筛选）
+ * 接口未覆盖的列（最新健康指标/完整度/同步状态/下次任务）以「-」占位，待后端补充字段
  */
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Avatar, Button, Card, Dropdown, Input, Select, Table } from 'antd'
 import { MoreOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
-import { mockRecordList, mockRecordStats, type MockRecordRow } from './mock'
+import { memberApi } from '@/api'
+import { MEMBER_STATUS_MAP, RISK_LEVEL_MAP, type MemberItem } from '@/api/modules/member'
 import './index.less'
 
-interface Filters {
-  keyword: string
-  org?: string
-  disease?: string
-  risk?: 'high' | 'mid' | 'low'
-  manager?: string
+/** 由生日（ISO 字符串）计算年龄 */
+function calcAge(birthday?: string): number | null {
+  if (!birthday) return null
+  const birth = new Date(birthday).getFullYear()
+  if (Number.isNaN(birth)) return null
+  return new Date().getFullYear() - birth
 }
-
-const RISK_TEXT = { high: '高风险', mid: '中风险', low: '低风险' } as const
 
 export default function HealthRecordList() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const initialFilters: Filters = { keyword: searchParams.get('keyword') ?? '' }
-  const [filters, setFilters] = useState<Filters>(initialFilters)
-  const [applied, setApplied] = useState<Filters>(initialFilters)
-  const [quick, setQuick] = useState<string>()
+  const [keyword, setKeyword] = useState(searchParams.get('keyword') ?? '')
+  const [risk, setRisk] = useState<number>()
+  const [applied, setApplied] = useState<{ keyword: string; risk?: number }>({
+    keyword: searchParams.get('keyword') ?? '',
+  })
+  const [list, setList] = useState<MemberItem[]>([])
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
 
-  const orgOptions = useMemo(() => [...new Set(mockRecordList.map((r) => r.org))], [])
-  const diseaseOptions = useMemo(() => [...new Set(mockRecordList.flatMap((r) => r.diseases))], [])
-  const managerOptions = useMemo(() => [...new Set(mockRecordList.map((r) => r.manager))], [])
+  const fetchList = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await memberApi.getMemberList({
+        page,
+        page_size: pageSize,
+        keyword: applied.keyword || undefined,
+        risk_level: applied.risk,
+      })
+      setList(res.list)
+      setTotal(res.total)
+    } catch {
+      // 错误提示由拦截器统一处理
+    } finally {
+      setLoading(false)
+    }
+  }, [page, pageSize, applied])
 
-  // TODO: 接入后端后替换为 memberApi.getMemberList({ ...applied, page, page_size: pageSize })
-  const filtered = useMemo(
-    () =>
-      mockRecordList.filter((row) => {
-        if (
-          applied.keyword &&
-          !row.name.includes(applied.keyword) &&
-          !row.phone.includes(applied.keyword)
-        ) {
-          return false
-        }
-        if (applied.org && row.org !== applied.org) return false
-        if (applied.disease && !row.diseases.includes(applied.disease)) return false
-        if (applied.risk && row.risk !== applied.risk) return false
-        if (applied.manager && row.manager !== applied.manager) return false
-        if (quick === '高风险' && row.risk !== 'high') return false
-        if (quick === '资料待完善' && row.completeness >= 80) return false
-        if (quick === '待制定方案' && row.planStatus !== '方案待制定') return false
-        if (quick === '7天内待随访' && !row.nextTaskDate) return false
-        if (quick === '同步异常' && row.syncOk) return false
-        return true
-      }),
-    [applied, quick],
-  )
+  useEffect(() => {
+    fetchList()
+  }, [fetchList])
 
   const applyFilters = () => {
-    setApplied(filters)
+    setApplied({ keyword, risk })
     setPage(1)
   }
 
   const onReset = () => {
-    setFilters({ keyword: '' })
+    setKeyword('')
+    setRisk(undefined)
     setApplied({ keyword: '' })
-    setQuick(undefined)
     setPage(1)
   }
-
-  const stats = [
-    { label: '健康档案总数', value: mockRecordStats.total, sub: `较上月 +${mockRecordStats.totalDelta}` },
-    { label: '高风险对象', value: mockRecordStats.highRisk, sub: `今日新增 ${mockRecordStats.highRiskDelta}`, danger: true },
-    { label: '资料待完善', value: mockRecordStats.incomplete, sub: '完整度低于 80%' },
-    { label: '今日同步更新', value: mockRecordStats.todaySync, sub: `医养平台 ${mockRecordStats.platformSync} 条` },
-  ]
 
   const columns = [
     {
       title: '服务对象',
       key: 'member',
-      render: (_: unknown, row: MockRecordRow) => (
-        <div className="hr-row__member">
-          <Avatar className="hr-avatar" size={40}>
-            {row.name.slice(0, 1)}
-          </Avatar>
-          <div>
-            <div className="hr-row__name">{row.name}</div>
-            <div className="hr-row__sub">
-              {row.gender} · {row.age}岁&nbsp;&nbsp;{row.phone}
+      render: (_: unknown, row: MemberItem) => {
+        const age = calcAge(row.birthday)
+        return (
+          <div className="hr-row__member">
+            <Avatar className="hr-avatar" size={40}>
+              {(row.name || '-').slice(0, 1)}
+            </Avatar>
+            <div>
+              <div className="hr-row__name">{row.name || '-'}</div>
+              <div className="hr-row__sub">
+                {row.gender === 1 ? '男' : row.gender === 2 ? '女' : '-'}
+                {age !== null ? ` · ${age}岁` : ''}&nbsp;&nbsp;{row.phone || '-'}
+              </div>
             </div>
           </div>
-        </div>
-      ),
+        )
+      },
     },
     {
       title: '健康概况',
       key: 'health',
-      render: (_: unknown, row: MockRecordRow) => (
-        <div className="hr-row__tags">
-          {row.diseases.map((d) => (
-            <span key={d} className="hr-tag hr-tag--disease">
-              {d}
-            </span>
-          ))}
-          <span className={`hr-tag hr-tag--risk-${row.risk}`}>{RISK_TEXT[row.risk]}</span>
-        </div>
-      ),
+      render: (_: unknown, row: MemberItem) => {
+        const riskValue = row.risk_level?.level_value
+        const riskText =
+          row.risk_level?.level_name || (riskValue ? RISK_LEVEL_MAP[riskValue] : '')
+        const riskCls =
+          riskValue === 3 ? 'high' : riskValue === 2 ? 'mid' : riskValue === 1 ? 'low' : ''
+        return (
+          <div className="hr-row__tags">
+            {row.chronic_disease_count > 0 && (
+              <span className="hr-tag hr-tag--disease">慢病 {row.chronic_disease_count} 项</span>
+            )}
+            {riskText ? (
+              <span className={`hr-tag hr-tag--risk-${riskCls}`}>{riskText}</span>
+            ) : (
+              <span className="hr-row__sub">未评级</span>
+            )}
+          </div>
+        )
+      },
     },
     {
       title: '最新健康指标',
       key: 'metrics',
-      render: (_: unknown, row: MockRecordRow) => (
-        <div>
-          <div className="hr-row__metric">
-            血压 {row.bp} · {row.bpStatus}
-          </div>
-          <div className="hr-row__sub">
-            血糖 {row.glucose} · {row.glucoseStatus}
-          </div>
-          <div className="hr-row__sub">{row.metricTime}</div>
-        </div>
-      ),
+      render: () => <span className="hr-row__sub">-</span>,
     },
     {
       title: '档案与同步',
       key: 'sync',
-      render: (_: unknown, row: MockRecordRow) => (
+      render: (_: unknown, row: MemberItem) => (
         <div>
-          <div className="hr-row__metric">完整度 {row.completeness}%</div>
-          <div className={row.syncOk ? 'hr-row__sub' : 'hr-row__sub hr-row__sub--warn'}>
-            {row.syncStatus}
+          <div className="hr-row__metric">
+            {row.status > 1 ? '已建档' : '待完善'}
+            {row.assessment_count > 0 ? ` · 测评 ${row.assessment_count} 次` : ''}
           </div>
+          <div className="hr-row__sub">同步状态 -</div>
         </div>
       ),
     },
     {
       title: '管理归属',
       key: 'owner',
-      render: (_: unknown, row: MockRecordRow) => (
+      render: (_: unknown, row: MemberItem) => (
         <div>
-          <div className="hr-row__metric">{row.org}</div>
-          <div className="hr-row__sub">
-            {row.manager}
-            {row.planStatus ? ` · ${row.planStatus}` : ''}
-          </div>
+          <div className="hr-row__metric">{MEMBER_STATUS_MAP[row.status] ?? '-'}</div>
+          <div className="hr-row__sub">责任健管师 -</div>
         </div>
       ),
     },
     {
       title: '下次任务',
       key: 'task',
-      render: (_: unknown, row: MockRecordRow) =>
-        row.nextTaskDate ? (
-          <div>
-            <div className="hr-row__metric">{row.nextTaskDate}</div>
-            <div className="hr-row__sub">{row.nextTaskType}</div>
-          </div>
-        ) : (
-          <span className="hr-row__sub">—</span>
-        ),
+      render: () => <span className="hr-row__sub">-</span>,
     },
     {
       title: '操作',
       key: 'action',
       width: 190,
-      render: (_: unknown, row: MockRecordRow) => (
+      render: (_: unknown, row: MemberItem) => (
         <div className="hr-row__actions">
           <Button type="link" size="small" onClick={() => navigate(`/health-record/${row.id}`)}>
             查看档案
           </Button>
-          <Button type="link" size="small">
+          <Button type="link" size="small" onClick={() => navigate('/followup/create')}>
             发起随访
           </Button>
           <Dropdown
@@ -214,100 +197,49 @@ export default function HealthRecordList() {
           </div>
         }
       >
-        {/* 统计卡 */}
-        <div className="hr-stats">
-          {stats.map((s) => (
-            <div key={s.label} className="hr-stat">
-              <div className="hr-stat__label">{s.label}</div>
-              <div className={s.danger ? 'hr-stat__value hr-stat__value--danger' : 'hr-stat__value'}>
-                {s.value.toLocaleString()}
-              </div>
-              <div className={s.danger ? 'hr-stat__sub hr-stat__sub--danger' : 'hr-stat__sub'}>{s.sub}</div>
-            </div>
-          ))}
-        </div>
-
         {/* 筛选卡 */}
         <Card variant="borderless" className="filter-bar">
           <Input
-            // prefix={<SearchOutlined />}
             placeholder="搜索手机号、会员ID或姓名"
-            value={filters.keyword}
-            onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
-            allowClear
-          />
-          <Select
-            placeholder="全部机构"
-            value={filters.org}
-            onChange={(v) => setFilters((f) => ({ ...f, org: v }))}
-            options={orgOptions.map((o) => ({ value: o, label: o }))}
-            allowClear
-          />
-          <Select
-            placeholder="全部病种"
-            value={filters.disease}
-            onChange={(v) => setFilters((f) => ({ ...f, disease: v }))}
-            options={diseaseOptions.map((d) => ({ value: d, label: d }))}
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value.trim())}
+            onPressEnter={applyFilters}
             allowClear
           />
           <Select
             placeholder="全部风险"
-            value={filters.risk}
-            onChange={(v) => setFilters((f) => ({ ...f, risk: v }))}
-            options={Object.entries(RISK_TEXT).map(([value, label]) => ({ value, label }))}
-            allowClear
-          />
-          <Select
-            placeholder="全部责任健管师"
-            value={filters.manager}
-            onChange={(v) => setFilters((f) => ({ ...f, manager: v }))}
-            options={managerOptions.map((m) => ({ value: m, label: m }))}
+            value={risk}
+            onChange={(v) => setRisk(v)}
+            options={Object.entries(RISK_LEVEL_MAP).map(([value, label]) => ({
+              value: Number(value),
+              label,
+            }))}
             allowClear
           />
           <Button onClick={onReset}>重置</Button>
           <Button type="primary" onClick={applyFilters}>查询</Button>
-          {/* <div className="hr-filters__quick">
-            {QUICK_FILTERS.map((q) => (
-              <span
-                key={q}
-                className={quick === q ? 'hr-quick hr-quick--active' : 'hr-quick'}
-                onClick={() => setQuick(quick === q ? undefined : q)}
-              >
-                {q}
-              </span>
-            ))}
-            <Button type="link" className="hr-filters__reset" onClick={onReset}>
-              重置筛选
-            </Button>
-          </div> */}
         </Card>
 
         {/* 档案列表卡 */}
         <Card variant="borderless" className="list-card table-fill">
           <div className="list-card__header">
             <span className="list-card__header__title">档案列表</span>
-            {/* <Button type="text" icon={<SettingOutlined />}>
-              字段显示设置
-            </Button> */}
           </div>
-          <Table<MockRecordRow>
+          <Table<MemberItem>
             rowKey="id"
             size="small"
             columns={columns}
-            dataSource={filtered}
-            // rowSelection={{
-            //   selectedRowKeys: selectedKeys,
-            //   onChange: setSelectedKeys,
-            // }}
+            dataSource={list}
+            loading={loading}
             pagination={{
               current: page,
               pageSize,
-              total: filtered.length,
+              total,
               onChange: (nextPage, nextPageSize) => {
                 setPage(nextPage)
                 setPageSize(nextPageSize)
               },
-              showTotal: (total) => `共 ${total} 条`,
+              showTotal: (t) => `共 ${t} 条`,
             }}
           />
         </Card>

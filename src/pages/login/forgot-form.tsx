@@ -36,6 +36,7 @@ export default function ForgotPassword({ onBack }: ForgotPasswordProps) {
   const [step, setStep] = useState(0)
   const [loading, setLoading] = useState(false)
   const [form] = Form.useForm()
+  const phone = Form.useWatch('phone', form)
 
   /** 步骤条 */
   const stepBar = (
@@ -89,7 +90,7 @@ export default function ForgotPassword({ onBack }: ForgotPasswordProps) {
           >
             <div className="login-form__code-row">
               <Input placeholder="请输入6位验证码" maxLength={6} />
-              <SmsCodeButton />
+              <SmsCodeButton phone={phone} scene="login" />
             </div>
           </Form.Item>
           <Button type="primary" htmlType="submit" block className="login-form__submit">

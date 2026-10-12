@@ -1,0 +1,4176 @@
+{
+  "schemes": [],
+  "swagger": "2.0",
+  "info": {
+      "description": "院内医护/健管师 Web 协同工作台全部接口文档。围绕「线索→建档→评估→方案→随访→服务排单派单→工单→预约到院」全链路。\n认证：Authorization Bearer <token>（staff 登录，仅 staff_type=1）。接口权限码见各接口标注。",
+      "title": "幸福颐养数智化平台 API 网关 - 协同工作台端（staff）",
+      "contact": {},
+      "version": "1.0"
+  },
+  "host": "",
+  "basePath": "",
+  "paths": {
+      "/api/v1/staff/appointments": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-预约服务"
+              ],
+              "summary": "预约/咨询列表",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "类型",
+                      "name": "appoint_type",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "状态",
+                      "name": "status",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "member_id",
+                      "in": "query"
+                  },
+                  {
+                      "type": "string",
+                      "description": "关键字",
+                      "name": "keyword",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "页码",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数",
+                      "name": "page_size",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-预约咨询"
+              ],
+              "summary": "预约创建（staff 端）",
+              "parameters": [
+                  {
+                      "description": "预约创建信息",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.appointmentCreateReq"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/appointments/{id}": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-预约咨询"
+              ],
+              "summary": "预约详情",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "预约ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-预约咨询"
+              ],
+              "summary": "预约更新（staff 端）",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "预约ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "预约更新信息",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.appointmentCreateReq"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "delete": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-预约咨询"
+              ],
+              "summary": "预约删除",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "预约ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/appointments/{id}/cancel": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-预约咨询"
+              ],
+              "summary": "取消预约",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "预约ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "取消信息",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/appointments/{id}/status": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-预约咨询"
+              ],
+              "summary": "预约状态回写",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "预约ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "状态信息",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/appointments/{id}/visit": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-预约咨询"
+              ],
+              "summary": "到院/上门接送登记",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "预约ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "登记信息",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/assessments/{id}": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康评估"
+              ],
+              "summary": "评估详情",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "评估ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/assessments/{id}/confirm": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康评估"
+              ],
+              "summary": "评估完成/确认",
+              "parameters": [
+                  {
+                      "description": "评估ID",
+                      "name": "id",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "integer"
+                      }
+                  },
+                  {
+                      "description": "评估结果",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/auth/change-password": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "登录后修改密码（校验旧密码），成功后生效。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "医护认证"
+              ],
+              "summary": "修改密码",
+              "parameters": [
+                  {
+                      "description": "修改密码请求",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.StaffChangePasswordRequest"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/auth/login": {
+          "post": {
+              "description": "协同工作台：手机号+密码登录，签发 JWT，同时返回岗位及声明式功能权限点",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "医护认证"
+              ],
+              "summary": "医护管理人员登录",
+              "parameters": [
+                  {
+                      "description": "登录请求",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.StaffLoginRequest"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  },
+                  "400": {
+                      "description": "参数错误",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  },
+                  "401": {
+                      "description": "认证失败",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/auth/logout": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "医护认证"
+              ],
+              "summary": "登出",
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/auth/profile": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "返回当前登录医护管理人员基本信息与权限点",
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "医护认证"
+              ],
+              "summary": "获取当前医护用户信息",
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/auth/refresh": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "医护认证"
+              ],
+              "summary": "刷新令牌",
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/auth/sms-code": {
+          "post": {
+              "description": "发送登录/修改密码用短信验证码；未配置短信通道时返回明确 503（不伪造成功）。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "医护认证"
+              ],
+              "summary": "发送短信验证码",
+              "parameters": [
+                  {
+                      "description": "发送验证码请求",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.StaffSmsCodeRequest"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  },
+                  "503": {
+                      "description": "短信通道未配置",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/auth/sms-login": {
+          "post": {
+              "description": "校验验证码并签发 JWT。sminiapp 端在调用方可叠加 staff_type 限制。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "医护认证"
+              ],
+              "summary": "短信验证码登录",
+              "parameters": [
+                  {
+                      "description": "短信登录请求",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.StaffSmsLoginRequest"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  },
+                  "401": {
+                      "description": "验证码错误或账号异常",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  },
+                  "503": {
+                      "description": "短信通道未配置",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/consultations": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-预约咨询"
+              ],
+              "summary": "咨询列表",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "状态",
+                      "name": "status",
+                      "in": "query"
+                  },
+                  {
+                      "type": "string",
+                      "description": "关键字",
+                      "name": "keyword",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "页码",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数",
+                      "name": "page_size",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-预约咨询"
+              ],
+              "summary": "咨询创建（staff 端）",
+              "parameters": [
+                  {
+                      "description": "咨询创建信息",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.consultationCreateReq"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/consultations/{id}": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-预约咨询"
+              ],
+              "summary": "咨询详情",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "咨询ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-预约咨询"
+              ],
+              "summary": "咨询更新",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "咨询ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "咨询更新信息",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "delete": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-预约咨询"
+              ],
+              "summary": "咨询删除",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "咨询ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/credentials/{id}": {
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-人员管理"
+              ],
+              "summary": "资质状态/到期",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "资质ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "资质信息",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/dashboard/overview": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "聚合 home 我的今日任务与机构今日排班（服务排期）为工作台核心待办视图；lead/appointment/health/visit 各域暂无 home 聚合源，计数为 0。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-工作台"
+              ],
+              "summary": "今日工作概览",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "当前员工ID",
+                      "name": "staff_id",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/dashboard/warnings": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "透传 health 预警精简列表（本机构内分页常用顶部分页）。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-工作台"
+              ],
+              "summary": "首页预警快捷提示",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "页码",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数",
+                      "name": "page_size",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "等级筛选",
+                      "name": "severity",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/followups": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "本机构随访待办，含系统与手动。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-随访回访"
+              ],
+              "summary": "随访列表",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "随访状态",
+                      "name": "status",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "member_id",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "负责人ID",
+                      "name": "staff_id",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "机构ID",
+                      "name": "institution_id",
+                      "in": "query"
+                  },
+                  {
+                      "type": "string",
+                      "description": "下次随访日期",
+                      "name": "next_followup_date",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "页码",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数",
+                      "name": "page_size",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/followups/{id}/complete": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-随访回访"
+              ],
+              "summary": "随访完成",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "随访ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/goals/{id}/items": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康方案"
+              ],
+              "summary": "健康目标指标项更新",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "目标ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "指标项达成",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/leads": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-线索"
+              ],
+              "summary": "线索列表（本机构）",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "页码，默认1，选填",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数，默认10，选填",
+                      "name": "page_size",
+                      "in": "query"
+                  },
+                  {
+                      "type": "string",
+                      "description": "关键字(联系人/手机号)，选填",
+                      "name": "keyword",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "来源类型，选填",
+                      "name": "source_type",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "线索状态，选填",
+                      "name": "status",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "线索列表",
+                      "schema": {
+                          "type": "object",
+                          "additionalProperties": true
+                      }
+                  }
+              }
+          },
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-线索"
+              ],
+              "summary": "新增线索（本机构）",
+              "parameters": [
+                  {
+                      "description": "新增线索参数",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffCreateLead"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/leads/batch-transfer": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-线索"
+              ],
+              "summary": "线索批量转派",
+              "parameters": [
+                  {
+                      "description": "批量转派参数",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffBatchTransferLeads"
+                      }
+                  },
+                  {
+                      "type": "string",
+                      "description": "操作原因/备注，选填",
+                      "name": "remark",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/leads/export": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "按当前列表筛选条件导出本机构线索（全量导出，不止当前页）。列：线索编号/联系人/联系电话/机构名称/来源类型/任务类型/线索状态/负责人/创建时间/备注；跟进记录与转派留痕不导出。返回 UTF-8 BOM 的 CSV 文件流，Excel/WPS 可直接打开。",
+              "produces": [
+                  "text/plain"
+              ],
+              "tags": [
+                  "staff-线索"
+              ],
+              "summary": "导出线索CSV（本机构）",
+              "parameters": [
+                  {
+                      "type": "string",
+                      "description": "联系人/电话模糊匹配",
+                      "name": "keyword",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "来源类型筛选",
+                      "name": "source_type",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "线索状态筛选：1待跟进 2跟进中 3已转化 4转化失败 9流失",
+                      "name": "status",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "CSV文件（UTF-8 BOM）",
+                      "schema": {
+                          "type": "file"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/leads/import": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "multipart上传CSV，列：name(必填)/phone(必填)/source_type(选填,整数)；institution_name 列即使填写也被忽略，所有线索强制归属本人所在机构。\n校验策略：任一行存在数据错误（缺必填、source_type非整数）则整批拒绝、不导入任何数据，响应返回全部错误行明细；\n库内或同批重复手机号不视为错误，按跳过处理；校验通过后经 activity 服务单事务批量写入，任一条写失败整体回滚。",
+              "consumes": [
+                  "multipart/form-data"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-线索"
+              ],
+              "summary": "线索CSV导入（本机构）",
+              "parameters": [
+                  {
+                      "type": "file",
+                      "description": "CSV文件（首行表头，UTF-8，扩展名.csv）",
+                      "name": "file",
+                      "in": "formData",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/leads/{id}": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-线索"
+              ],
+              "summary": "线索详情",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "线索ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "type": "object",
+                          "additionalProperties": true
+                      }
+                  },
+                  "403": {
+                      "description": "该线索不属于本机构",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/leads/{id}/assign": {
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "登记某人对线索的认领；仅待跟进/转化失败状态可认领，跟进中/已转化/流失请走转派。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-线索"
+              ],
+              "summary": "线索认领",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "线索ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "认领参数（assignee=认领人）",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffAssignLead"
+                      }
+                  },
+                  {
+                      "type": "string",
+                      "description": "操作原因/备注，选填",
+                      "name": "remark",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/leads/{id}/convert": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "刷新判断该线索是否已转化成功：按线索任务类型复核转化条件（注册/绑健康对象/绑健管师/恢复活跃），已达成则更新为已转化，未达成则线索状态保持不变。",
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-线索"
+              ],
+              "summary": "线索转化刷新复核",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "线索ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/leads/{id}/followup": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-线索"
+              ],
+              "summary": "线索跟进记录",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "线索ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "跟进参数",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffFollowupLead"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/leads/{id}/lost": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-线索"
+              ],
+              "summary": "线索流失/无效",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "线索ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "流失状态参数",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffMarkLeadLost"
+                      }
+                  },
+                  {
+                      "type": "string",
+                      "description": "操作原因/备注，选填",
+                      "name": "remark",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/leads/{id}/transfer": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-线索"
+              ],
+              "summary": "线索转派",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "线索ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "转派参数",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffTransferLead"
+                      }
+                  },
+                  {
+                      "type": "string",
+                      "description": "操作原因/备注，选填",
+                      "name": "remark",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/member-staff-relations": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "查看当前机构会员与医护人员（健管师）的绑定关系。可按当前员工(staff_id)、岗位、会员、是否生效过滤。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健管师绑定"
+              ],
+              "summary": "机构会员健管师绑定列表",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "会员ID，选填",
+                      "name": "member_id",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "当前员工ID（某健管师），选填",
+                      "name": "staff_id",
+                      "in": "query"
+                  },
+                  {
+                      "type": "string",
+                      "description": "医护岗位编码，选填（健管师岗位等）",
+                      "name": "staff_position_code",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "仅看生效(1)/全部(0)，默认1",
+                      "name": "active_only",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "页码",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数",
+                      "name": "page_size",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "本机构医护人员（健管师）绑定会员。绑定来源固定为医护人员指定(2)。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健管师绑定"
+              ],
+              "summary": "绑定会员健管师",
+              "parameters": [
+                  {
+                      "description": "绑定参数",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.StaffBindMemberStaffReq"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/member-staff-relations/{id}/unbind": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "解绑当前机构医护人员与会员的绑定关系（软删除）。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健管师绑定"
+              ],
+              "summary": "解绑会员健管师",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "绑定记录ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/members": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "健康档案会员分页，含当前风险/照护等级。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康评估"
+              ],
+              "summary": "会员列表（健档索引）",
+              "parameters": [
+                  {
+                      "type": "string",
+                      "description": "关键字",
+                      "name": "keyword",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "风险等级",
+                      "name": "risk_level",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "照护等级",
+                      "name": "care_level",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "机构ID",
+                      "name": "institution_id",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "页码",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数",
+                      "name": "page_size",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康评估"
+              ],
+              "summary": "建档",
+              "parameters": [
+                  {
+                      "description": "会员档案",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/members/active-status": {
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "staff 端更新会员活跃状态。取值：1-非活跃 2-活跃 3-挂起 4-拉黑 5-注销",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康评估"
+              ],
+              "summary": "设置会员活跃状态",
+              "parameters": [
+                  {
+                      "description": "请求体",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  },
+                  {
+                      "description": "会员ID",
+                      "name": "member_id",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "integer"
+                      }
+                  },
+                  {
+                      "description": "活跃状态",
+                      "name": "active_status",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "integer"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/members/{id}/assessments": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康评估"
+              ],
+              "summary": "评估列表",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "页码",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数",
+                      "name": "page_size",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康评估"
+              ],
+              "summary": "发起评估",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "评估信息",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/members/{id}/followups": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-随访回访"
+              ],
+              "summary": "手动创建随访",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "随访信息",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/members/{id}/goals": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康方案"
+              ],
+              "summary": "健康目标列表",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "页码",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数",
+                      "name": "page_size",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康方案"
+              ],
+              "summary": "健康目标新增",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "目标信息",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/members/{id}/health-profile": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康评估"
+              ],
+              "summary": "会员健康档案详情",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/members/{id}/health-records": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康评估"
+              ],
+              "summary": "健康指标录入",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "指标列表",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/members/{id}/plans": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康方案"
+              ],
+              "summary": "健康方案列表",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "页码",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数",
+                      "name": "page_size",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/members/{id}/plans/ai-generate": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "以会员档案为输入调用 AI，生成方案草稿（status=1-created）。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康方案"
+              ],
+              "summary": "AI 健康方案生成",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "方案信息",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/orders/pending-confirm": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "order_status=2 待确定订单分页。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-订单排单"
+              ],
+              "summary": "待确定订单列表",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "页码",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数",
+                      "name": "page_size",
+                      "in": "query"
+                  },
+                  {
+                      "type": "string",
+                      "description": "关键字",
+                      "name": "keyword",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/orders/{id}": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "含服务/耗材/工单。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-订单排单"
+              ],
+              "summary": "订单详情",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "订单ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/orders/{id}/confirm": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "待确定(2)→生效中(3)。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-订单排单"
+              ],
+              "summary": "订单确认",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "订单ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "确认信息",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/orders/{id}/reject": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-订单排单"
+              ],
+              "summary": "订单关闭/拒绝",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "订单ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "拒绝信息",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/plans/{id}": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康方案"
+              ],
+              "summary": "方案详情",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "方案ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/plans/{id}/abandon": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康方案"
+              ],
+              "summary": "方案废弃",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "方案ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/plans/{id}/confirm": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康方案"
+              ],
+              "summary": "方案确认",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "方案ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/positions": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-人员管理"
+              ],
+              "summary": "岗位配置列表",
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/refunds": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "返回当前登录健管师所在机构的退款申请列表（经 OrderID 反查 service_orders 机构）。",
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-订单排单"
+              ],
+              "summary": "退款单列表（本机构）",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "页码",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数",
+                      "name": "page_size",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "退款状态过滤，选填",
+                      "name": "status",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "开始时间(UTC秒)，选填",
+                      "name": "start_time",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "结束时间(UTC秒)，选填",
+                      "name": "end_time",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "退款单列表",
+                      "schema": {
+                          "type": "object",
+                          "additionalProperties": true
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/refunds/{id}": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-订单排单"
+              ],
+              "summary": "退款单详情",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "退款单ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "退款单详情",
+                      "schema": {
+                          "type": "object",
+                          "additionalProperties": true
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/refunds/{id}/approve": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "医护管理员对用户退款申请做第一层审批：同意→流转财务层；拒绝→退款终止，订单回生效中。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-订单排单"
+              ],
+              "summary": "退款审批（医护管理员-第1层）",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "退款单ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "审批参数(通过/拒绝)",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffApproveRefund"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/refunds/{id}/logs": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-订单排单"
+              ],
+              "summary": "退款审批留痕",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "退款单ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "type": "string",
+                      "description": "审批角色过滤: staff/finance，选填",
+                      "name": "approver_type",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/schedules": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "机构 service_schedules（服务排期）维度排班列表，按日期范围查询。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-排班"
+              ],
+              "summary": "机构排班表",
+              "parameters": [
+                  {
+                      "type": "string",
+                      "description": "视图: day|week|month",
+                      "name": "view",
+                      "in": "query"
+                  },
+                  {
+                      "type": "string",
+                      "description": "基准日期 YYYY-MM-DD",
+                      "name": "date",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "人员ID",
+                      "name": "staff_id",
+                      "in": "query"
+                  },
+                  {
+                      "type": "string",
+                      "description": "结束日期 YYYY-MM-DD",
+                      "name": "end_date",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "页码",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数",
+                      "name": "page_size",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-排班"
+              ],
+              "summary": "新增排班",
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/schedules/{id}": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-排班"
+              ],
+              "summary": "排班详情",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "排班ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-排班"
+              ],
+              "summary": "编辑排班",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "排班ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "delete": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-排班"
+              ],
+              "summary": "停用/删除排班",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "排班ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/service-schedules/{id}/cancel": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-工单"
+              ],
+              "summary": "取消排单",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "排单ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "取消信息",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/service-schedules/{id}/reassign": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-工单"
+              ],
+              "summary": "改派",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "排单ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "改派信息",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/staffs": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-人员管理"
+              ],
+              "summary": "人员列表",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "人员类型",
+                      "name": "staff_type",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "在职状态",
+                      "name": "status",
+                      "in": "query"
+                  },
+                  {
+                      "type": "string",
+                      "description": "岗位编码(Admin/Doctor/HealthMgr/Caregiver)",
+                      "name": "position_code",
+                      "in": "query"
+                  },
+                  {
+                      "type": "string",
+                      "description": "关键字",
+                      "name": "keyword",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "页码",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数",
+                      "name": "page_size",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-人员管理"
+              ],
+              "summary": "新增人员",
+              "parameters": [
+                  {
+                      "description": "人员信息",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/staffs/{id}": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-人员管理"
+              ],
+              "summary": "人员详情",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "人员ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-人员管理"
+              ],
+              "summary": "编辑人员",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "人员ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "人员信息",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "delete": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-人员管理"
+              ],
+              "summary": "删除人员",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "人员ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/staffs/{id}/credentials": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-人员管理"
+              ],
+              "summary": "资质列表",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "人员ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-人员管理"
+              ],
+              "summary": "资质新增",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "人员ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "资质信息",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/warnings": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-预警随访"
+              ],
+              "summary": "预警列表",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "预警状态",
+                      "name": "status",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "等级",
+                      "name": "severity",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "来源",
+                      "name": "warning_source",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "member_id",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "页码",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数",
+                      "name": "page_size",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/warnings/{id}": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-高危预警"
+              ],
+              "summary": "预警详情",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "预警ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/warnings/{id}/handle": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-高危预警"
+              ],
+              "summary": "预警处置",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "预警ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "处置信息；warning_status取值: 3-ignored已忽略(继续服务) 4-handled_goon已处置-继续服务 5-handled_stop已处置-中止服务; 处置为stop(5)时sminiapp抓取会置工单中止",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/warnings/{id}/ignore": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-高危预警"
+              ],
+              "summary": "预警忽略",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "预警ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/work-orders": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-工单"
+              ],
+              "summary": "工单列表",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "工单状态",
+                      "name": "wo_status",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "服务人员ID",
+                      "name": "staff_id",
+                      "in": "query"
+                  },
+                  {
+                      "type": "string",
+                      "description": "服务日期",
+                      "name": "service_date",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "member_id",
+                      "in": "query"
+                  },
+                  {
+                      "type": "string",
+                      "description": "关键字",
+                      "name": "keyword",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "页码",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数",
+                      "name": "page_size",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/work-orders/pending-dispatch": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "wo_status=1 待排单。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-工单"
+              ],
+              "summary": "待排单队列",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "页码",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数",
+                      "name": "page_size",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/work-orders/{id}": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-工单"
+              ],
+              "summary": "工单详情",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "工单ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/work-orders/{id}/dispatch": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-工单"
+              ],
+              "summary": "派单",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "工单ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "派单信息",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/work-orders/{id}/reminder": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-工单"
+              ],
+              "summary": "催单",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "工单ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "催办信息",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      }
+  },
+  "definitions": {
+      "pkg.Meta": {
+          "type": "object",
+          "properties": {
+              "request_id": {
+                  "type": "string"
+              },
+              "timestamp": {
+                  "type": "integer"
+              }
+          }
+      },
+      "pkg.Response": {
+          "type": "object",
+          "properties": {
+              "code": {
+                  "type": "integer"
+              },
+              "data": {},
+              "message": {
+                  "type": "string"
+              },
+              "meta": {
+                  "$ref": "#/definitions/pkg.Meta"
+              }
+          }
+      },
+      "staff.ReqStaffApproveRefund": {
+          "type": "object",
+          "required": [
+              "approve"
+          ],
+          "properties": {
+              "approve": {
+                  "description": "true-通过 false-拒绝，必填",
+                  "type": "boolean"
+              },
+              "opinion": {
+                  "description": "审批意见，选填",
+                  "type": "string"
+              }
+          }
+      },
+      "staff.ReqStaffAssignLead": {
+          "type": "object",
+          "required": [
+              "assignee"
+          ],
+          "properties": {
+              "assignee": {
+                  "description": "认领人(员工)ID，必填",
+                  "type": "integer"
+              }
+          }
+      },
+      "staff.ReqStaffBatchTransferLeads": {
+          "type": "object",
+          "required": [
+              "lead_ids",
+              "new_assignee"
+          ],
+          "properties": {
+              "lead_ids": {
+                  "description": "线索ID数组，必填",
+                  "type": "array",
+                  "items": {
+                      "type": "integer"
+                  }
+              },
+              "new_assignee": {
+                  "description": "新负责人(员工)ID，必填",
+                  "type": "integer"
+              },
+              "reason": {
+                  "description": "转派原因（留痕），选填",
+                  "type": "string"
+              }
+          }
+      },
+      "staff.ReqStaffCreateLead": {
+          "type": "object",
+          "required": [
+              "name",
+              "phone"
+          ],
+          "properties": {
+              "name": {
+                  "description": "联系人，必填",
+                  "type": "string"
+              },
+              "phone": {
+                  "description": "联系电话，必填",
+                  "type": "string"
+              },
+              "remark": {
+                  "description": "备注，选填",
+                  "type": "string"
+              },
+              "source_id": {
+                  "description": "来源关联ID，选填",
+                  "type": "integer"
+              },
+              "source_type": {
+                  "description": "来源类型(活动/咨询/预约/转介绍等)，选填",
+                  "type": "integer"
+              }
+          }
+      },
+      "staff.ReqStaffFollowupLead": {
+          "type": "object",
+          "required": [
+              "content"
+          ],
+          "properties": {
+              "content": {
+                  "description": "跟进内容，必填",
+                  "type": "string"
+              },
+              "followup_type": {
+                  "description": "跟进方式，选填：1-语音 2-文字 3-视频 4-在店 5-上门（models.LeanFollowupAction*）",
+                  "type": "integer"
+              }
+          }
+      },
+      "staff.ReqStaffMarkLeadLost": {
+          "type": "object",
+          "required": [
+              "status"
+          ],
+          "properties": {
+              "reason": {
+                  "description": "流失原因，选填",
+                  "type": "string"
+              },
+              "status": {
+                  "description": "目标状态，必填：9-流失(models.LeanStatusLost)，无效可复用 4-转化失败",
+                  "type": "integer"
+              }
+          }
+      },
+      "staff.ReqStaffTransferLead": {
+          "type": "object",
+          "required": [
+              "new_assignee"
+          ],
+          "properties": {
+              "new_assignee": {
+                  "description": "新负责人(员工)ID，必填",
+                  "type": "integer"
+              },
+              "reason": {
+                  "description": "转派原因（留痕），选填",
+                  "type": "string"
+              }
+          }
+      },
+      "staff.StaffBindMemberStaffReq": {
+          "type": "object",
+          "required": [
+              "member_id",
+              "staff_id"
+          ],
+          "properties": {
+              "comment": {
+                  "description": "绑定备注，选填",
+                  "type": "string"
+              },
+              "member_id": {
+                  "description": "会员ID，必填",
+                  "type": "integer"
+              },
+              "staff_id": {
+                  "description": "医护人员(健管师)ID，必填",
+                  "type": "integer"
+              },
+              "staff_position_code": {
+                  "description": "医护岗位编码，选填",
+                  "type": "string"
+              }
+          }
+      },
+      "staff.StaffChangePasswordRequest": {
+          "type": "object",
+          "required": [
+              "new_password",
+              "old_password"
+          ],
+          "properties": {
+              "new_password": {
+                  "type": "string",
+                  "minLength": 6,
+                  "example": "654321"
+              },
+              "old_password": {
+                  "type": "string",
+                  "example": "123456"
+              }
+          }
+      },
+      "staff.StaffLoginRequest": {
+          "type": "object",
+          "required": [
+              "password",
+              "phone"
+          ],
+          "properties": {
+              "password": {
+                  "type": "string",
+                  "example": "123456"
+              },
+              "phone": {
+                  "type": "string",
+                  "example": "13800000000"
+              }
+          }
+      },
+      "staff.StaffSmsCodeRequest": {
+          "type": "object",
+          "required": [
+              "phone",
+              "scene"
+          ],
+          "properties": {
+              "phone": {
+                  "type": "string",
+                  "example": "13800000000"
+              },
+              "scene": {
+                  "description": "login | reset",
+                  "type": "string",
+                  "example": "login"
+              }
+          }
+      },
+      "staff.StaffSmsLoginRequest": {
+          "type": "object",
+          "required": [
+              "code",
+              "phone"
+          ],
+          "properties": {
+              "code": {
+                  "type": "string",
+                  "example": "123456"
+              },
+              "phone": {
+                  "type": "string",
+                  "example": "13800000000"
+              }
+          }
+      },
+      "staff.appointmentCreateReq": {
+          "type": "object",
+          "properties": {
+              "appointment_date": {
+                  "description": "YYYY-MM-DD",
+                  "type": "string"
+              },
+              "appointment_type": {
+                  "description": "1-咨询 2-体检 3-参观 4-服务",
+                  "type": "integer"
+              },
+              "assigned_staff_id": {
+                  "type": "integer"
+              },
+              "contact_name": {
+                  "type": "string"
+              },
+              "contact_phone": {
+                  "type": "string"
+              },
+              "institution_id": {
+                  "type": "integer"
+              },
+              "remark": {
+                  "type": "string"
+              },
+              "service_interest": {
+                  "type": "string"
+              },
+              "status": {
+                  "type": "integer"
+              },
+              "time_slot": {
+                  "type": "string"
+              }
+          }
+      },
+      "staff.consultationCreateReq": {
+          "type": "object",
+          "properties": {
+              "answer": {
+                  "type": "string"
+              },
+              "consultation_type": {
+                  "type": "integer"
+              },
+              "contact_name": {
+                  "type": "string"
+              },
+              "contact_phone": {
+                  "type": "string"
+              },
+              "institution_id": {
+                  "type": "integer"
+              },
+              "question": {
+                  "type": "string"
+              },
+              "satisfaction_score": {
+                  "type": "integer"
+              }
+          }
+      }
+  },
+  "securityDefinitions": {
+      "BearerAuth": {
+          "type": "apiKey",
+          "name": "Authorization",
+          "in": "header"
+      }
+  }
+}

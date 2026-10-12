@@ -9,18 +9,18 @@ export interface Result<T = unknown> {
   data: T
 }
 
-/** 分页返回结构 */
+/** 分页返回结构（服务端实际字段：page / page_size） */
 export interface PageResult<T = unknown> {
   list: T[]
   total: number
   page: number
-  pageSize: number
+  page_size: number
 }
 
-/** 分页查询参数 */
+/** 分页查询参数（服务端实际字段：page / page_size） */
 export interface PageParams {
   page: number
-  pageSize: number
+  page_size: number
   [key: string]: unknown
 }
 

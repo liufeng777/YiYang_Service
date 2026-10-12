@@ -51,6 +51,8 @@ export interface MainPanelConfig {
   /** dot：左侧圆点列表（任务类）；plain：无圆点（活动/负荷类） */
   variant: 'dot' | 'plain'
   items: ListItem[]
+  /** 列表为空时的提示文案（默认「暂无数据」） */
+  emptyText?: string
 }
 
 /** 右侧统计面板（在管患者概况 / 漏斗等） */

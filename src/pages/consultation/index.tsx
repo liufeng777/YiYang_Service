@@ -1,101 +1,123 @@
 /**
- * 咨询管理 - 电话咨询列表（设计稿：电话咨询列表.png）
- * 统一记录由机构接听并登记的电话咨询
- * TODO: 接入后端后替换为 consultApi.getConsultations（API §10.4）
+ * 咨询管理 - 咨询记录列表（设计稿：电话咨询列表.png）
+ * 已对接 GET /api/v1/staff/consultations（服务端分页，支持 status 筛选）
+ * 人工回复已对接 POST /api/v1/staff/consultations/:id/reply
+ * 说明：顶部统计卡无对应接口，已移除；「登记电话咨询」接口待后端补充
  */
-import { useMemo, useState } from 'react'
-import { Button, Card, DatePicker, Input, Select, Table } from 'antd'
-import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
+import { useCallback, useEffect, useState } from 'react'
+import { Button, Card, Input, Modal, Select, Table, App } from 'antd'
+import { PlusOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
+import dayjs from 'dayjs'
 import PageContainer from '@/components/PageContainer'
-import {
-  CONSULT_LEAD_TEXT,
-  mockConsultList,
-  mockConsultStats,
-  type MockConsultRow,
-} from './mock'
+import { consultApi } from '@/api'
+import type { ConsultationItem } from '@/api/modules/consult'
 import './index.less'
 
-interface Filters {
-  keyword: string
-  type?: string
-  date?: string
-}
+const STATUS_MAP: Record<number, string> = { 1: '待回复', 2: '已回复' }
+/** 咨询类型（服务端字典待确认，先按常见值展示） */
+const TYPE_MAP: Record<number, string> = { 1: 'AI 健康管家', 2: '人工客服', 3: '电话咨询' }
 
 export default function ConsultationList() {
   const navigate = useNavigate()
-  const [filters, setFilters] = useState<Filters>({ keyword: '' })
-  const [applied, setApplied] = useState<Filters>({ keyword: '' })
+  const { message } = App.useApp()
+  const [status, setStatus] = useState<number>()
+  const [appliedStatus, setAppliedStatus] = useState<number>()
+  const [list, setList] = useState<ConsultationItem[]>([])
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
+  const [replyTarget, setReplyTarget] = useState<ConsultationItem | null>(null)
+  const [answer, setAnswer] = useState('')
+  const [replying, setReplying] = useState(false)
 
-  const applyFilters = () => setApplied(filters)
-
-  const resetFilters = () => {
-    const init: Filters = { keyword: '' }
-    setFilters(init)
-    setApplied(init)
-  }
-
-  const filtered = useMemo(
-    () =>
-      mockConsultList.filter(
-        (row) =>
-          !applied.keyword ||
-          [row.caller, row.target, row.content].some((v) => v.includes(applied.keyword)),
-      ),
-    [applied],
-  )
-
-  const stats = [
-    { label: '今日来电', value: mockConsultStats.today, note: mockConsultStats.todayNote },
-    { label: '需继续跟进', value: mockConsultStats.followup, note: mockConsultStats.followupNote },
-    { label: '已关联档案', value: mockConsultStats.linkedProfile, note: mockConsultStats.linkedProfileNote },
-    { label: '重复线索合并', value: mockConsultStats.merged, note: mockConsultStats.mergedNote },
-  ]
-
-  const renderAction = (row: MockConsultRow) => {
-    if (row.leadResult === 'linked') {
-      return (
-        <Button type="link" size="small" onClick={() => navigate('/leads')}>
-          查看线索
-        </Button>
-      )
+  const fetchList = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await consultApi.getConsultations({
+        page,
+        page_size: pageSize,
+        status: appliedStatus,
+      })
+      setList(res.list)
+      setTotal(res.total)
+    } catch {
+      // 错误提示由拦截器统一处理
+    } finally {
+      setLoading(false)
     }
-    if (row.leadResult === 'none') {
-      return (
-        <Button type="link" size="small" onClick={() => navigate('/health-record')}>
-          查看档案
-        </Button>
-      )
+  }, [page, pageSize, appliedStatus])
+
+  useEffect(() => {
+    fetchList()
+  }, [fetchList])
+
+  const onReply = async () => {
+    if (!replyTarget || !answer.trim()) {
+      message.warning('请输入回复内容')
+      return
     }
-    return (
-      <Button type="link" size="small" onClick={() => navigate('/leads')}>
-        查看
-      </Button>
-    )
+    setReplying(true)
+    try {
+      await consultApi.replyConsultation(replyTarget.id, { answer: answer.trim() })
+      message.success('回复成功')
+      setReplyTarget(null)
+      setAnswer('')
+      fetchList()
+    } catch {
+      // 错误提示由拦截器统一处理
+    } finally {
+      setReplying(false)
+    }
   }
 
   const columns = [
-    { title: '来电时间', dataIndex: 'time', key: 'time', width: 110 },
     {
-      title: '来电人 / 实际服务对象',
-      key: 'caller',
-      render: (_: unknown, row: MockConsultRow) => (
+      title: '咨询时间',
+      dataIndex: 'created_at',
+      key: 'created_at',
+      width: 150,
+      render: (v: number) => (v ? dayjs(v * 1000).format('YYYY-MM-DD HH:mm') : '-'),
+    },
+    {
+      title: '咨询人',
+      key: 'contact',
+      render: (_: unknown, row: ConsultationItem) => (
         <span className="cs-row__name">
-          {row.caller} <span className="cs-row__sub">/ {row.target}</span>
+          {row.contact_name || '-'} <span className="cs-row__sub">{row.contact_phone || ''}</span>
         </span>
       ),
     },
-    { title: '咨询来源', dataIndex: 'source', key: 'source' },
-    { title: '咨询内容', dataIndex: 'content', key: 'content' },
-    { title: '身份校验', dataIndex: 'identity', key: 'identity' },
     {
-      title: '线索结果',
-      key: 'leadResult',
-      render: (_: unknown, row: MockConsultRow) => (
-        <span className={row.leadResult === 'none' ? undefined : 'cs-text--warn'}>
-          {CONSULT_LEAD_TEXT[row.leadResult]}
+      title: '咨询类型',
+      dataIndex: 'consultation_type',
+      key: 'consultation_type',
+      width: 120,
+      render: (v: number) => TYPE_MAP[v] ?? `类型 ${v}`,
+    },
+    { title: '咨询内容', dataIndex: 'question', key: 'question', ellipsis: true },
+    {
+      title: '回复内容',
+      key: 'answer',
+      ellipsis: true,
+      render: (_: unknown, row: ConsultationItem) =>
+        row.answer ? (
+          <span>
+            {row.answer}
+            {row.responder_name ? <span className="cs-row__sub">（{row.responder_name}）</span> : null}
+          </span>
+        ) : (
+          <span className="cs-row__sub">-</span>
+        ),
+    },
+    {
+      title: '状态',
+      key: 'status',
+      width: 90,
+      render: (_: unknown, row: ConsultationItem) => (
+        <span className={row.status === 1 ? 'cs-text--warn' : undefined}>
+          {STATUS_MAP[row.status] ?? '-'}
         </span>
       ),
     },
@@ -103,7 +125,23 @@ export default function ConsultationList() {
       title: '操作',
       key: 'action',
       width: 100,
-      render: (_: unknown, row: MockConsultRow) => renderAction(row),
+      render: (_: unknown, row: ConsultationItem) =>
+        row.status === 1 ? (
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              setReplyTarget(row)
+              setAnswer('')
+            }}
+          >
+            回复
+          </Button>
+        ) : (
+          <Button type="link" size="small" disabled>
+            已回复
+          </Button>
+        ),
     },
   ]
 
@@ -130,63 +168,49 @@ export default function ConsultationList() {
           </div>
         </div>
 
-        {/* 统计卡 */}
-        <div className="cs-stats">
-          {stats.map((s) => (
-            <div key={s.label} className="cs-stat">
-              <div className="cs-stat__label">{s.label}</div>
-              <div className="cs-stat__body">
-                <span className="cs-stat__value">{s.value}</span>
-                <span className="cs-stat__note">{s.note}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-
         {/* 筛选 */}
         <Card variant="borderless" className="filter-bar">
-          <Input
-            prefix={<SearchOutlined />}
-            placeholder="姓名 / 手机号"
-            value={filters.keyword}
-            onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
-            allowClear
-          />
           <Select
-            placeholder="咨询机构：全部"
-            options={[{ value: 'current', label: '咨询机构：当前机构' }]}
-            defaultValue="current"
-          />
-          <Select
-            placeholder="咨询类型：全部"
-            value={filters.type}
-            onChange={(v) => setFilters((f) => ({ ...f, type: v }))}
-            options={['护理院介绍页', '驿站介绍页', 'AI健康管家', '机构电话'].map((v) => ({
-              value: v,
-              label: `咨询类型：${v}`,
+            placeholder="全部状态"
+            value={status}
+            onChange={setStatus}
+            options={Object.entries(STATUS_MAP).map(([value, label]) => ({
+              value: Number(value),
+              label,
             }))}
             allowClear
           />
-          <DatePicker
-            placeholder="登记日期"
-            onChange={(_, ds) =>
-              setFilters((f) => ({ ...f, date: typeof ds === 'string' ? ds : undefined }))
-            }
-          />
-          <Button type="primary" onClick={applyFilters}>查询</Button>
-          <Button onClick={resetFilters}>重置</Button>
+          <Button
+            type="primary"
+            onClick={() => {
+              setAppliedStatus(status)
+              setPage(1)
+            }}
+          >
+            查询
+          </Button>
+          <Button
+            onClick={() => {
+              setStatus(undefined)
+              setAppliedStatus(undefined)
+              setPage(1)
+            }}
+          >
+            重置
+          </Button>
         </Card>
 
         {/* 咨询表格 */}
         <Card variant="borderless" className="list-card table-fill">
-          <Table<MockConsultRow>
+          <Table<ConsultationItem>
             rowKey="id"
             columns={columns}
-            dataSource={filtered}
+            dataSource={list}
+            loading={loading}
             pagination={{
               current: page,
               pageSize,
-              total: filtered.length,
+              total,
               onChange: (nextPage, nextPageSize) => {
                 setPage(nextPage)
                 setPageSize(nextPageSize)
@@ -196,6 +220,27 @@ export default function ConsultationList() {
           />
         </Card>
       </PageContainer>
+
+      <Modal
+        title="人工回复"
+        open={!!replyTarget}
+        onOk={onReply}
+        onCancel={() => setReplyTarget(null)}
+        confirmLoading={replying}
+        okText="提交回复"
+        cancelText="取消"
+      >
+        <div style={{ marginBottom: 12 }}>
+          <strong>咨询内容：</strong>
+          {replyTarget?.question}
+        </div>
+        <Input.TextArea
+          rows={4}
+          placeholder="请输入回复内容"
+          value={answer}
+          onChange={(e) => setAnswer(e.target.value)}
+        />
+      </Modal>
     </div>
   )
 }

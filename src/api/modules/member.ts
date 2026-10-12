@@ -36,11 +36,17 @@ export interface MemberItem {
   /** 见 MEMBER_STATUS_MAP */
   status: number
   risk_level?: {
-    level_type: string
+    level_type: string | number
     level_value: number
     level_name: string
+    prev_level_value?: number
   } | null
-  care_level?: string
+  care_level?: {
+    level_type: string | number
+    level_value: number
+    level_name: string
+    prev_level_value?: number
+  } | null
   chronic_disease_count: number
   assessment_count: number
   /** UTC 秒 */
@@ -68,20 +74,26 @@ export interface LatestMetric {
   is_abnormal: boolean
 }
 
-/** 健康档案聚合详情（GET /members/:id/health-profile 出参） */
+/** 健康档案聚合详情（GET /members/:id/health-profile 出参，字段对齐服务端实际返回） */
 export interface HealthProfile {
-  member: MemberItem & {
+  member: Partial<MemberItem> & {
+    id: number
+    name: string
     id_card?: string
     emergency_contact?: string
     emergency_phone?: string
   }
   contact?: {
-    name: string
-    phone: string
-    relation: string
+    name?: string
+    phone?: string
+    relation?: string
+    emergency_contact?: string
+    emergency_phone?: string
   }
   addresses?: Array<{ type: string; detail: string }>
-  levels?: Array<{ level_type: string; level_value: number; level_name: string }>
+  levels?:
+    | { care_level?: number; risk_level?: number }
+    | Array<{ level_type: string; level_value: number; level_name: string }>
   risk_tags?: Array<{ tag: string; source: string }>
   chronic_diseases: ChronicDisease[]
   latest_metrics: LatestMetric[]

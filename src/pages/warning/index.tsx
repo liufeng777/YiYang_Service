@@ -1,52 +1,61 @@
 /**
  * 预警管理 - 预警列表（设计稿：预警列表.png）
- * 同一健康事件只生成一个医生处置单；由该事件派生的层级变化作为影响结果合并展示
- * TODO: 接入后端后替换为 warningApi.getWarnings（API §6.1）
+ * 已对接 GET /api/v1/staff/warnings（服务端分页，支持 status / severity 筛选）
+ * 说明：预警类型（健康异常/层级变更）Tabs 与统计卡无对应接口，已移除；
+ * 关键字筛选 API 未提供参数，已移除
  */
-import { useMemo, useState } from 'react'
-import { Button, Card, DatePicker, Input, Select, Table, message } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
+import { Button, Card, Select, Table } from 'antd'
 import { useNavigate } from 'react-router-dom'
+import dayjs from 'dayjs'
 import PageContainer from '@/components/PageContainer'
+import { warningApi } from '@/api'
 import {
-  WARNING_STATUS_TEXT,
-  WARNING_TYPE_TEXT,
-  mockWarningList,
-  mockWarningStats,
-  type MockWarningRow,
-  type WarningStatus,
-  type WarningType,
-} from './mock'
+  WARNING_SEVERITY_MAP,
+  WARNING_STATUS_MAP,
+  type WarningItem,
+} from '@/api/modules/warning'
 import './index.less'
 
+const SEVERITY_TONE: Record<number, string> = { 1: 'green', 2: 'orange', 3: 'red' }
+const STATUS_TONE: Record<number, string> = { 1: 'red', 2: 'blue', 3: 'green', 4: 'green' }
+
 interface Filters {
-  keyword: string
-  status?: WarningStatus
-  type?: WarningType
-  level?: string
-  date?: string
+  status?: number
+  severity?: number
 }
 
 export default function WarningList() {
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState<WarningType | 'all'>('all')
-  const [filters, setFilters] = useState<Filters>({ keyword: '' })
-  const [applied, setApplied] = useState<Filters>({ keyword: '' })
+  const [filters, setFilters] = useState<Filters>({})
+  const [applied, setApplied] = useState<Filters>({})
+  const [list, setList] = useState<WarningItem[]>([])
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
 
-  const filtered = useMemo(
-    () =>
-      mockWarningList.filter((row) => {
-        if (activeTab !== 'all' && row.type !== activeTab) return false
-        if (applied.keyword && ![row.id, row.content].some((v) => v.includes(applied.keyword)))
-          return false
-        if (applied.status && row.status !== applied.status) return false
-        if (applied.type && row.type !== applied.type) return false
-        if (applied.level && row.currentLevel !== applied.level) return false
-        return true
-      }),
-    [activeTab, applied],
-  )
+  const fetchList = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await warningApi.getWarnings({
+        page,
+        page_size: pageSize,
+        status: applied.status,
+        severity: applied.severity,
+      })
+      setList(res.list)
+      setTotal(res.total)
+    } catch {
+      // 错误提示由拦截器统一处理
+    } finally {
+      setLoading(false)
+    }
+  }, [page, pageSize, applied])
+
+  useEffect(() => {
+    fetchList()
+  }, [fetchList])
 
   const applyFilters = () => {
     setApplied(filters)
@@ -54,59 +63,52 @@ export default function WarningList() {
   }
 
   const onReset = () => {
-    setFilters({ keyword: '' })
-    setApplied({ keyword: '' })
-    setActiveTab('all')
+    setFilters({})
+    setApplied({})
     setPage(1)
   }
 
-  const stats = [
-    { label: '待处理', value: mockWarningStats.pending, note: mockWarningStats.pendingNote, noteTone: 'red' },
-    { label: '医生复核', value: mockWarningStats.reviewing, note: mockWarningStats.reviewingNote, noteTone: 'orange' },
-    { label: '已关闭', value: mockWarningStats.closed, note: mockWarningStats.closedNote, noteTone: 'green' },
-    { label: '高风险', value: mockWarningStats.highRisk, note: mockWarningStats.highRiskNote, noteTone: 'red' },
-  ]
-
   const columns = [
-    { title: '预警编号', dataIndex: 'id', key: 'id' },
-    { title: '预警内容', dataIndex: 'content', key: 'content' },
+    { title: '预警编号', dataIndex: 'id', key: 'id', width: 100 },
+    { title: '预警内容', dataIndex: 'title', key: 'title' },
     {
-      title: '数据来源',
-      dataIndex: 'source',
-      key: 'source',
-      render: (v: string) => <span className="wn-text--primary">{v}</span>,
+      title: '服务对象',
+      key: 'member',
+      render: (_: unknown, row: WarningItem) => row.member_name || `会员 #${row.member_id}`,
     },
-    { title: '当前分层', dataIndex: 'currentLevel', key: 'currentLevel' },
-    { title: '触发时间', dataIndex: 'triggeredAt', key: 'triggeredAt' },
     {
-      title: '预警类型',
-      key: 'type',
-      render: (_: unknown, row: MockWarningRow) => (
-        <span className={`wn-tag wn-tag--${row.type === 'health' ? 'red' : 'blue'}`}>
-          {WARNING_TYPE_TEXT[row.type]}
+      title: '预警等级',
+      key: 'severity',
+      render: (_: unknown, row: WarningItem) => (
+        <span className={`wn-tag wn-tag--${SEVERITY_TONE[row.severity] ?? 'blue'}`}>
+          {WARNING_SEVERITY_MAP[row.severity] ?? '-'}
         </span>
       ),
     },
     {
       title: '处理状态',
       key: 'status',
-      render: (_: unknown, row: MockWarningRow) => (
-        <span
-          className={`wn-tag wn-tag--${row.status === 'pending' ? 'red' : row.status === 'reviewing' ? 'blue' : 'green'}`}
-        >
-          {WARNING_STATUS_TEXT[row.status]}
+      render: (_: unknown, row: WarningItem) => (
+        <span className={`wn-tag wn-tag--${STATUS_TONE[row.warning_status] ?? 'blue'}`}>
+          {WARNING_STATUS_MAP[row.warning_status] ?? '-'}
         </span>
       ),
+    },
+    {
+      title: '触发时间',
+      dataIndex: 'created_at',
+      key: 'created_at',
+      render: (v: number) => (v ? dayjs(v * 1000).format('YYYY-MM-DD HH:mm') : '-'),
     },
     {
       title: '操作',
       key: 'action',
       width: 90,
-      render: (_: unknown, row: MockWarningRow) => (
+      render: (_: unknown, row: WarningItem) => (
         <Button
           size="small"
           onClick={() =>
-            navigate(`/warning/${row.id}/${row.status === 'closed' ? 'close' : 'handle'}`)
+            navigate(`/warning/${row.id}/${row.warning_status === 3 ? 'close' : 'handle'}`)
           }
         >
           查看
@@ -120,77 +122,28 @@ export default function WarningList() {
       <PageContainer
         title="预警管理"
         description="同一健康事件只生成一个医生处置单；由该事件派生的层级变化作为影响结果合并展示"
-        extra={<Button onClick={() => message.success('导出任务已创建，完成后可下载')}>导出记录</Button>}
       >
-        {/* 类型 Tabs */}
-        <div className="wn-tabs">
-          {(
-            [
-              { key: 'all', label: '全部预警' },
-              { key: 'health', label: '健康异常预警' },
-              { key: 'level', label: '层级变更' },
-            ] as const
-          ).map((t) => (
-            <span
-              key={t.key}
-              className={t.key === activeTab ? 'wn-tabs__item wn-tabs__item--active' : 'wn-tabs__item'}
-              onClick={() => {
-                setActiveTab(t.key)
-                setPage(1)
-              }}
-            >
-              {t.label}
-            </span>
-          ))}
-        </div>
-
-        {/* 统计卡 */}
-        <div className="wn-stats">
-          {stats.map((s) => (
-            <div key={s.label} className="wn-stat">
-              <div className="wn-stat__label">{s.label}</div>
-              <div className="wn-stat__body">
-                <span className="wn-stat__value">{s.value}</span>
-                <span className={`wn-tag wn-tag--${s.noteTone}`}>{s.note}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-
         {/* 筛选 */}
         <Card variant="borderless" className="filter-bar">
-          <Input
-            placeholder="姓名 / 会员ID / 预警编号"
-            value={filters.keyword}
-            onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
-            allowClear
-          />
           <Select
             placeholder="全部状态"
             value={filters.status}
             onChange={(v) => setFilters((f) => ({ ...f, status: v }))}
-            options={Object.entries(WARNING_STATUS_TEXT).map(([value, label]) => ({ value, label }))}
-            allowClear
-          />
-          <Select
-            placeholder="全部类型"
-            value={filters.type}
-            onChange={(v) => setFilters((f) => ({ ...f, type: v }))}
-            options={Object.entries(WARNING_TYPE_TEXT).map(([value, label]) => ({ value, label }))}
+            options={Object.entries(WARNING_STATUS_MAP).map(([value, label]) => ({
+              value: Number(value),
+              label,
+            }))}
             allowClear
           />
           <Select
             placeholder="全部风险"
-            value={filters.level}
-            onChange={(v) => setFilters((f) => ({ ...f, level: v }))}
-            options={['高风险', '中风险', '低风险'].map((v) => ({ value: v, label: v }))}
+            value={filters.severity}
+            onChange={(v) => setFilters((f) => ({ ...f, severity: v }))}
+            options={Object.entries(WARNING_SEVERITY_MAP).map(([value, label]) => ({
+              value: Number(value),
+              label,
+            }))}
             allowClear
-          />
-          <DatePicker
-            placeholder="触发日期"
-            onChange={(_, ds) =>
-              setFilters((f) => ({ ...f, date: typeof ds === 'string' ? ds : undefined }))
-            }
           />
           <Button onClick={onReset}>重置</Button>
           <Button type="primary" onClick={applyFilters}>查询</Button>
@@ -198,14 +151,15 @@ export default function WarningList() {
 
         {/* 预警表格 */}
         <Card variant="borderless" className="list-card table-fill">
-          <Table<MockWarningRow>
+          <Table<WarningItem>
             rowKey="id"
             columns={columns}
-            dataSource={filtered}
+            dataSource={list}
+            loading={loading}
             pagination={{
               current: page,
               pageSize,
-              total: filtered.length,
+              total,
               onChange: (nextPage, nextPageSize) => {
                 setPage(nextPage)
                 setPageSize(nextPageSize)

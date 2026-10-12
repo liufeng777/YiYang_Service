@@ -1,6 +1,6 @@
 /**
  * 登录表单：密码登录 / 验证码登录 双 Tab
- * 当前为 mock 登录：任意合法手机号 + 任意密码/6位验证码可登录
+ * 已对接真实登录接口（auth/login、auth/sms-login、auth/sms-code）
  */
 import { useState } from 'react'
 import { Button, Form, Input, Tabs, App } from 'antd'
@@ -34,6 +34,8 @@ export default function LoginForm({ onForgot }: LoginFormProps) {
   const [loading, setLoading] = useState(false)
   const [tab, setTab] = useState<'password' | 'sms'>('password')
   const login = useUserStore((state) => state.login)
+  const [smsForm] = Form.useForm<SmsForm>()
+  const smsPhone = Form.useWatch('phone', smsForm)
 
   const doLogin = async (params: { phone: string; password?: string; code?: string }) => {
     setLoading(true)
@@ -96,7 +98,7 @@ export default function LoginForm({ onForgot }: LoginFormProps) {
             key: 'sms',
             label: '验证码登录',
             children: (
-              <Form<SmsForm> size="large" onFinish={onSmsFinish}>
+              <Form<SmsForm> form={smsForm} size="large" onFinish={onSmsFinish}>
                 <Form.Item name="phone" rules={phoneRules}>
                   <Input placeholder="请输入登录手机号" maxLength={11} />
                 </Form.Item>
@@ -109,7 +111,7 @@ export default function LoginForm({ onForgot }: LoginFormProps) {
                 >
                   <div className="login-form__code-row">
                     <Input placeholder="请输入6位验证码" maxLength={6} />
-                    <SmsCodeButton />
+                    <SmsCodeButton phone={smsPhone} scene="login" />
                   </div>
                 </Form.Item>
                 <p className="login-form__helper">验证码将发送至账号绑定手机号，有效期5分钟</p>

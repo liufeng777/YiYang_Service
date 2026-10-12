@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { authApi } from '@/api'
 
 /**
  * 岗位编码（对齐登录接口 staff.position.position_code）
@@ -131,7 +132,7 @@ const POSITION_PERMISSIONS: Record<PositionCode, string[]> = {
   ],
 }
 
-/** 各岗位显示名（mock） */
+/** 各岗位显示名（后端未返回岗位名时回退使用） */
 const POSITION_NAMES: Record<PositionCode, string> = {
   HEALTH_MANAGER: '健康管理师',
   CARE_CONSULTANT: '养老顾问',
@@ -142,17 +143,21 @@ const POSITION_NAMES: Record<PositionCode, string> = {
 }
 
 /**
- * Mock：按手机号尾号模拟岗位（便于预览不同工作台模板与侧边栏）：
- *   尾号 0002 → 健康驿站运营专员；0003 → 护理院养老顾问；0005 → 机构管理员；
- *   0006 → 平台管理员；0007 → 审核医生；其余 → 健康管理师
+ * 后端 position_code（如 Admin / Doctor / HealthMgr / Caregiver / NURSE_HEAD）
+ * → 前端岗位编码映射；未识别时回退健康管理师（权限最少的工作台模板之一由权限码兜底）
  */
-function mockPositionByPhone(phone: string): PositionCode {
-  if (phone.endsWith('0002')) return POSITIONS.STATION_OPERATOR
-  if (phone.endsWith('0003')) return POSITIONS.CARE_CONSULTANT
-  if (phone.endsWith('0005')) return POSITIONS.ORG_ADMIN
-  if (phone.endsWith('0006')) return POSITIONS.PLATFORM_ADMIN
-  if (phone.endsWith('0007')) return POSITIONS.REVIEW_DOCTOR
-  return POSITIONS.HEALTH_MANAGER
+const BACKEND_POSITION_MAP: Record<string, PositionCode> = {
+  Admin: POSITIONS.ORG_ADMIN,
+  Doctor: POSITIONS.REVIEW_DOCTOR,
+  HealthMgr: POSITIONS.HEALTH_MANAGER,
+  Nurse: POSITIONS.HEALTH_MANAGER,
+  Caregiver: POSITIONS.HEALTH_MANAGER,
+}
+
+function resolvePositionCode(code?: string): PositionCode {
+  if (!code) return POSITIONS.HEALTH_MANAGER
+  if ((Object.values(POSITIONS) as string[]).includes(code)) return code as PositionCode
+  return BACKEND_POSITION_MAP[code] ?? POSITIONS.HEALTH_MANAGER
 }
 
 export const useUserStore = create<UserState>()(
@@ -164,26 +169,40 @@ export const useUserStore = create<UserState>()(
       setToken: (token) => set({ token }),
       setUserInfo: (userInfo) => set({ userInfo }),
       setCurrentOrg: (currentOrg) => set({ currentOrg }),
+      /**
+       * 登录（已对接真实接口）
+       * - 密码登录：POST /api/v1/staff/auth/login
+       * - 验证码登录：POST /api/v1/staff/auth/sms-login
+       * 登录出参 staff.permissions 驱动侧边栏；后端未下发权限码时按岗位码回退预置权限集
+       */
       login: async (params) => {
-        // TODO: 接入真实登录接口后替换为：
-        // const res = await authApi.login(params)
-        // set({ token: res.token, userInfo: 由 res.staff 映射 })
-        const positionCode = mockPositionByPhone(params.phone)
+        const res = params.password
+          ? await authApi.login({ phone: params.phone, password: params.password })
+          : await authApi.smsLogin({ phone: params.phone, sms_code: params.code ?? '' })
+        const staff = res.staff
+        const positionCode = resolvePositionCode(staff?.position?.position_code)
         set({
-          token: `mock-token-${Date.now()}`,
+          token: res.token,
           currentOrg: null,
           userInfo: {
-            id: 1,
-            phone: params.phone,
-            nickname: `用户${params.phone.slice(-4)}`,
+            id: staff?.id ?? 0,
+            phone: staff?.phone || params.phone,
+            nickname: staff?.name || `用户${params.phone.slice(-4)}`,
             positionCode,
-            positionName: POSITION_NAMES[positionCode],
-            institutionName: '幸福护理院',
-            permissions: POSITION_PERMISSIONS[positionCode],
+            positionName: staff?.position?.position_name || POSITION_NAMES[positionCode],
+            institutionName: staff?.institution_name,
+            permissions:
+              staff?.permissions && staff.permissions.length > 0
+                ? staff.permissions
+                : POSITION_PERMISSIONS[positionCode],
           },
         })
       },
-      logout: () => set({ token: '', userInfo: null, currentOrg: null }),
+      logout: () => {
+        // 服务端注销 token（失败不阻塞本地登出）
+        authApi.logout().catch(() => undefined)
+        set({ token: '', userInfo: null, currentOrg: null })
+      },
     }),
     {
       name: 'yiyang_user',

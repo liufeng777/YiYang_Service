@@ -6,21 +6,22 @@
 import { http } from '@/utils/request'
 import type { PageParams, PageResult } from '@/types/api'
 
-/** 人员列表项（§7.1） */
+/** 人员列表项（§7.1，字段对齐服务端实际出参） */
 export interface StaffItem {
   id: number
   institution_id: number
   /** 1-本端协同人员 2-小程序服务人员 */
-  staff_type: 1 | 2
+  staff_type: number
   name: string
   phone: string
   avatar_url: string
-  position_id: number
+  position_code?: string
   position_name: string
   title: string
-  service_categories: number[]
+  service_ids?: number[]
+  referral_code?: string
   /** 0-停用 1-启用 */
-  status: 0 | 1
+  status: number
   /** 是否有即将到期资质 */
   upcoming_credential_expire: boolean
 }
@@ -46,11 +47,13 @@ export interface CredentialItem {
   audited_at?: string
 }
 
-/** 岗位配置 */
+/** 岗位配置（对齐服务端实际出参） */
 export interface PositionItem {
   id: number
-  name: string
-  staff_type: 1 | 2
+  position_code: string
+  position_name: string
+  description?: string
+  status?: number
 }
 
 /** 人员分页列表 */
@@ -62,40 +65,40 @@ export function getStaffList(
     keyword?: string
   },
 ) {
-  return http.get<PageResult<StaffItem>>('/staff/staffs', { ...params })
+  return http.get<PageResult<StaffItem>>('/v1/staff/staffs', { ...params })
 }
 
 /** 人员详情 */
 export function getStaffDetail(id: number) {
-  return http.get<StaffDetail>(`/staff/staffs/${id}`)
+  return http.get<StaffDetail>(`/v1/staff/staffs/${id}`)
 }
 
 /** 新增人员（phone 唯一，新增时设定初始密码，首次登录强制改密） */
 export function createStaff(data: Partial<StaffItem> & { password?: string }) {
-  return http.post<StaffItem>('/staff/staffs', data)
+  return http.post<StaffItem>('/v1/staff/staffs', data)
 }
 
 /** 编辑人员 */
 export function updateStaff(id: number, data: Partial<StaffItem>) {
-  return http.put<null>(`/staff/staffs/${id}`, data)
+  return http.put<null>(`/v1/staff/staffs/${id}`, data)
 }
 
 /** 资质列表 */
 export function getStaffCredentials(id: number) {
-  return http.get<CredentialItem[]>(`/staff/staffs/${id}/credentials`)
+  return http.get<CredentialItem[]>(`/v1/staff/staffs/${id}/credentials`)
 }
 
 /** 资质新增 */
 export function createCredential(id: number, data: Partial<CredentialItem>) {
-  return http.post<CredentialItem>(`/staff/staffs/${id}/credentials`, data)
+  return http.post<CredentialItem>(`/v1/staff/staffs/${id}/credentials`, data)
 }
 
 /** 资质状态/到期更新 */
 export function updateCredential(id: number, data: Partial<CredentialItem>) {
-  return http.put<null>(`/staff/credentials/${id}`, data)
+  return http.put<null>(`/v1/staff/credentials/${id}`, data)
 }
 
 /** 岗位配置列表 */
 export function getPositions() {
-  return http.get<PositionItem[]>('/staff/positions')
+  return http.get<PageResult<PositionItem>>('/v1/staff/positions')
 }

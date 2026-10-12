@@ -1,27 +1,27 @@
 /**
  * 线索管理 - 线索登记列表（设计稿：线索列表.png）
- * 数据当前为 mock（见 ./mock.ts）；接入后端后替换为 leadApi.getLeadList
+ * 已对接 GET /api/v1/staff/leads（服务端分页，支持 keyword / status / source_type 筛选）
+ * 说明：意向类型与登记日期筛选 API 未提供查询参数，已移除；
+ * 当前线索管理已从侧边栏隐藏（由健康会员替代），页面保留
  */
-import { useMemo, useState } from 'react'
-import { Button, Card, DatePicker, Input, Select, Table } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
+import { Button, Card, Input, Select, Table } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 import PageContainer from '@/components/PageContainer'
+import { leadApi } from '@/api'
 import {
-  CONTACT_IDENTITY_MAP,
-  LEAD_DEMAND_MAP,
   LEAD_SOURCE_MAP,
+  LEAD_STATUS_MAP,
   type LeadItem,
 } from '@/api/modules/lead'
-import { mockLeads } from './mock'
 import './index.less'
 
 interface Filters {
   keyword: string
   source_type?: number
-  demand_type?: number
-  date?: string
+  status?: number
 }
 
 export default function LeadList() {
@@ -31,29 +31,34 @@ export default function LeadList() {
   const initialFilters: Filters = { keyword: searchParams.get('keyword') ?? '' }
   const [filters, setFilters] = useState<Filters>(initialFilters)
   const [applied, setApplied] = useState<Filters>(initialFilters)
+  const [list, setList] = useState<LeadItem[]>([])
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
 
-  // TODO: 接入后端后替换为 leadApi.getLeadList({ ...applied, page, page_size: pageSize })
-  const filtered = useMemo(
-    () =>
-      mockLeads.filter((lead) => {
-        if (
-          applied.keyword &&
-          !lead.contact_name.includes(applied.keyword) &&
-          !lead.contact_phone.includes(applied.keyword)
-        ) {
-          return false
-        }
-        if (applied.source_type && lead.source_type !== applied.source_type) return false
-        if (applied.demand_type && lead.demand_type !== applied.demand_type) return false
-        if (applied.date && dayjs(lead.created_at * 1000).format('YYYY-MM-DD') !== applied.date) {
-          return false
-        }
-        return true
-      }),
-    [applied],
-  )
+  const fetchList = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await leadApi.getLeadList({
+        page,
+        page_size: pageSize,
+        keyword: applied.keyword || undefined,
+        source_type: applied.source_type,
+        status: applied.status,
+      })
+      setList(res.list)
+      setTotal(res.total)
+    } catch {
+      // 错误提示由拦截器统一处理
+    } finally {
+      setLoading(false)
+    }
+  }, [page, pageSize, applied])
+
+  useEffect(() => {
+    fetchList()
+  }, [fetchList])
 
   const onSearch = () => {
     setApplied(filters)
@@ -71,15 +76,9 @@ export default function LeadList() {
       key: 'contact',
       render: (_: unknown, record: LeadItem) => (
         <span className="lead-table__contact">
-          {record.contact_name} {record.contact_phone}
+          {record.contact_name || record.name || '-'} {record.contact_phone || record.phone || ''}
         </span>
       ),
-    },
-    {
-      title: '咨询人身份',
-      dataIndex: 'contact_identity',
-      key: 'contact_identity',
-      render: (v?: number) => (v ? CONTACT_IDENTITY_MAP[v] : '-'),
     },
     {
       title: '来源',
@@ -91,19 +90,32 @@ export default function LeadList() {
       title: '意向类型',
       dataIndex: 'demand_type',
       key: 'demand_type',
-      render: (v: number) => LEAD_DEMAND_MAP[v] ?? '-',
+      render: (v: number) => (v ? `类型 ${v}` : '-'),
     },
     {
       title: '需求摘要',
       dataIndex: 'demand_detail',
       key: 'demand_detail',
       ellipsis: true,
+      render: (v: string | undefined, record: LeadItem) => v || record.remark || '-',
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      key: 'status',
+      render: (v: number) => LEAD_STATUS_MAP[v] ?? '-',
+    },
+    {
+      title: '负责人',
+      dataIndex: 'owner_staff_name',
+      key: 'owner_staff_name',
+      render: (v: string | undefined, record: LeadItem) => v || record.assignee_name || '-',
     },
     {
       title: '登记时间',
       dataIndex: 'created_at',
       key: 'created_at',
-      render: (v: number) => dayjs(v * 1000).format('MM-DD HH:mm'),
+      render: (v: number) => (v ? dayjs(v * 1000).format('MM-DD HH:mm') : '-'),
     },
     {
       title: '操作',
@@ -128,14 +140,6 @@ export default function LeadList() {
           </Button>
         }
       >
-        {/* 页签（预留多页签扩展，当前仅线索登记） */}
-        {/* <div className="lead-page__tabs">
-          <Tabs
-            activeKey="register"
-            items={[{ key: 'register', label: '线索登记' }]}
-          />
-        </div> */}
-
         {/* 筛选区 */}
         <Card variant="borderless" className="filter-bar">
           <Input
@@ -155,20 +159,13 @@ export default function LeadList() {
             allowClear
           />
           <Select
-            placeholder="意向类型"
-            value={filters.demand_type}
-            onChange={(v) => setFilters((f) => ({ ...f, demand_type: v }))}
-            options={Object.entries(LEAD_DEMAND_MAP).map(([value, label]) => ({
+            placeholder="线索状态"
+            value={filters.status}
+            onChange={(v) => setFilters((f) => ({ ...f, status: v }))}
+            options={Object.entries(LEAD_STATUS_MAP).map(([value, label]) => ({
               value: Number(value),
               label,
             }))}
-            allowClear
-          />
-          <DatePicker
-            placeholder='登记日期'
-            value={filters.date ? dayjs(filters.date) : null}
-            onChange={(d) => setFilters((f) => ({ ...f, date: d ? d.format('YYYY-MM-DD') : undefined }))}
-            style={{ flex: '1 1 140px', minWidth: 140 }}
             allowClear
           />
           <Button onClick={onReset}>重置</Button>
@@ -178,17 +175,18 @@ export default function LeadList() {
         {/* 列表 */}
         <Card variant="borderless" className="list-card table-fill">
           <div className="list-card__header">
-            <span className='list-card__header__title'>线索列表</span>
+            <span className="list-card__header__title">线索列表</span>
           </div>
           <Table<LeadItem>
             rowKey="id"
             columns={columns}
-            dataSource={filtered}
+            dataSource={list}
+            loading={loading}
             size="small"
             pagination={{
               current: page,
               pageSize,
-              total: filtered.length,
+              total,
               onChange: (nextPage, nextPageSize) => {
                 setPage(nextPage)
                 setPageSize(nextPageSize)

@@ -23,6 +23,9 @@ export interface ConsultationItem {
   /** 回复内容 */
   answer?: string | null
   responder_name?: string
+  /** 咨询人姓名 / 电话（服务端实际出参） */
+  contact_name?: string
+  contact_phone?: string
   /** 状态：1-待回复 2-已回复 */
   status: number
   created_at: number

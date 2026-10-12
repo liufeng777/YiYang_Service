@@ -3,6 +3,7 @@
  * 页面中请按需从 @/api 引入，避免全量引入
  */
 export * as dashboardApi from './modules/dashboard'
+export * as authApi from './modules/auth'
 export * as workbenchApi from './modules/workbench'
 export * as leadApi from './modules/lead'
 export * as memberApi from './modules/member'

@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => {
       proxy: {
         // 开发环境代理：/api -> 后端服务
         [env.VITE_API_BASE_URL || '/api']: {
-          target: 'http://localhost:8080',
+          target: 'http://121.40.29.162:9090',
           changeOrigin: true,
         },
       },

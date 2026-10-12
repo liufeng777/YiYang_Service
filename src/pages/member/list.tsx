@@ -1,26 +1,49 @@
 /**
  * 健康会员 - 健康会员列表（设计稿：2.健康会员/健康会员列表.png）
- * 管理已通过系统实名认证的服务对象、健康档案状态与专业团队归属
- * TODO: 接入后端后对齐 API §4.1 GET /api/v1/staff/members
+ * 已对接 GET /api/v1/staff/members（服务端分页）
+ * 接口未覆盖的列（关联注册会员/健康管理团队/最近随访）以「-」占位，待后端补充字段
  */
-import { useMemo, useState } from 'react'
-import { Button, DatePicker, Input, Select, Table, message } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
+import { Button, Input, Select, Table, App } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
-import { RISK_LAYER, mockMembers, type MemberItem } from './mock'
+import { memberApi } from '@/api'
+import type { MemberItem } from '@/api/modules/member'
+import { MEMBER_STATUS_MAP, RISK_LEVEL_MAP } from '@/api/modules/member'
 import './index.less'
 
 export default function MemberList() {
   const navigate = useNavigate()
+  const { message } = App.useApp()
   const [keyword, setKeyword] = useState('')
+  const [appliedKeyword, setAppliedKeyword] = useState('')
+  const [list, setList] = useState<MemberItem[]>([])
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
 
-  const list = useMemo(
-    () => mockMembers.filter((m) => !keyword || m.name.includes(keyword) || m.phone.includes(keyword)),
-    [keyword],
-  )
+  const fetchList = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await memberApi.getMemberList({
+        page,
+        page_size: pageSize,
+        keyword: appliedKeyword || undefined,
+      })
+      setList(res.list)
+      setTotal(res.total)
+    } catch {
+      // 错误提示由拦截器统一处理
+    } finally {
+      setLoading(false)
+    }
+  }, [page, pageSize, appliedKeyword])
+
+  useEffect(() => {
+    fetchList()
+  }, [fetchList])
 
   const columns = [
     {
@@ -28,36 +51,51 @@ export default function MemberList() {
       key: 'name',
       render: (_: unknown, row: MemberItem) => (
         <div>
-          <span className="mb-row__name">{row.name}</span>{' '}
-          <span className="mb-row__sub">{row.phone}</span>
+          <span className="mb-row__name">{row.name || '-'}</span>{' '}
+          <span className="mb-row__sub">{row.phone || '-'}</span>
         </div>
       ),
     },
-    { title: '关联注册会员', dataIndex: 'linkedUser', key: 'linkedUser' },
+    {
+      title: '关联注册会员',
+      key: 'linkedUser',
+      render: () => <span className="mb-row__sub">-</span>,
+    },
     {
       title: '健康档案',
-      dataIndex: 'profile',
-      key: 'profile',
-      render: (v: MemberItem['profile']) => (
-        <span className={v === '已建档' ? 'mb-text--ok' : 'mb-text--warn'}>{v}</span>
-      ),
+      dataIndex: 'status',
+      key: 'status',
+      render: (v: number) =>
+        v > 1 ? (
+          <span className="mb-text--ok">已建档</span>
+        ) : (
+          <span className="mb-text--warn">待完善</span>
+        ),
     },
     {
       title: '风险分层',
-      dataIndex: 'risk',
       key: 'risk',
-      render: (v: MemberItem['risk']) => (
-        <span className={`mb-text--risk-${v}`}>{RISK_LAYER[v].text}</span>
-      ),
+      render: (_: unknown, row: MemberItem) => {
+        const text =
+          row.risk_level?.level_name ||
+          (row.risk_level?.level_value ? RISK_LEVEL_MAP[row.risk_level.level_value] : '')
+        if (!text) return <span className="mb-row__sub">未评级</span>
+        const cls =
+          row.risk_level?.level_value === 3
+            ? 'mb-text--risk-high'
+            : row.risk_level?.level_value === 2
+              ? 'mb-text--risk-mid'
+              : 'mb-text--risk-low'
+        return <span className={cls}>{text}</span>
+      },
     },
     {
       title: '健康管理团队',
+      dataIndex: 'status',
       key: 'team',
-      render: (_: unknown, row: MemberItem) =>
-        row.team ? (
-          <span>
-            {row.team} <span className="mb-row__sub">· 已纳管</span>
-          </span>
+      render: (v: number) =>
+        v === 3 ? (
+          <span>{MEMBER_STATUS_MAP[v]} <span className="mb-row__sub">· 已纳管</span></span>
         ) : (
           <span className="mb-text--warn">待分配团队</span>
         ),
@@ -65,8 +103,7 @@ export default function MemberList() {
     {
       title: '最近随访',
       key: 'lastFollowup',
-      render: (_: unknown, row: MemberItem) =>
-        row.lastFollowup ?? <span className="mb-row__sub">尚未随访</span>,
+      render: () => <span className="mb-row__sub">-</span>,
     },
     {
       title: '操作',
@@ -85,7 +122,7 @@ export default function MemberList() {
       title="健康会员管理"
       description="管理已通过系统实名认证的服务对象、健康档案状态与专业团队归属"
       extra={
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => message.success('开始导出健康会员（mock）')}>
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => message.info('导出接口暂未提供')}>
           导出健康会员
         </Button>
       }
@@ -103,6 +140,10 @@ export default function MemberList() {
             placeholder="姓名 / 手机号"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value.trim())}
+            onPressEnter={() => {
+              setPage(1)
+              setAppliedKeyword(keyword)
+            }}
             allowClear
           />
         </div>
@@ -113,24 +154,25 @@ export default function MemberList() {
             options={[{ value: 'passed', label: '系统校验通过' }]}
           />
         </div>
-        <div className="mb-filters__field">
-          <span className="mb-filters__label">团队状态</span>
-          <Select
-            defaultValue="all"
-            options={[
-              { value: 'all', label: '全部状态' },
-              { value: 'managed', label: '已纳管' },
-              { value: 'unassigned', label: '待分配团队' },
-            ]}
-          />
-        </div>
-        <div className="mb-filters__field">
-          <span className="mb-filters__label">建档日期</span>
-          <DatePicker placeholder="2026-08-12" />
-        </div>
         <div className="mb-filters__actions">
-          <Button type="primary">查询</Button>
-          <Button onClick={() => setKeyword('')}>重置</Button>
+          <Button
+            type="primary"
+            onClick={() => {
+              setPage(1)
+              setAppliedKeyword(keyword)
+            }}
+          >
+            查询
+          </Button>
+          <Button
+            onClick={() => {
+              setKeyword('')
+              setAppliedKeyword('')
+              setPage(1)
+            }}
+          >
+            重置
+          </Button>
         </div>
       </div>
 
@@ -140,15 +182,16 @@ export default function MemberList() {
           rowKey="id"
           columns={columns}
           dataSource={list}
+          loading={loading}
           pagination={{
             current: page,
             pageSize,
-            total: list.length,
+            total,
             onChange: (nextPage, nextPageSize) => {
               setPage(nextPage)
               setPageSize(nextPageSize)
             },
-            showTotal: (total) => `共 ${total} 条`,
+            showTotal: (t) => `共 ${t} 条`,
           }}
         />
       </div>

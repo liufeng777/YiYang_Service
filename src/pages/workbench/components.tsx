@@ -64,6 +64,9 @@ export function MainPanel({ config }: { config: MainPanelConfig }) {
     <div className="wb-panel">
       <div className="wb-panel__title">{config.title}</div>
       <div className="wb-list">
+        {config.items.length === 0 && (
+          <div className="wb-list__empty">{config.emptyText ?? '暂无数据'}</div>
+        )}
         {config.items.map((item, index) => (
           <div key={index} className="wb-list__row">
             <div className="wb-list__left">

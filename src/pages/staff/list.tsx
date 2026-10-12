@@ -1,115 +1,128 @@
 /**
  * 人员管理 - 人员列表（设计稿：人员列表.png）
- * 机构管理员维护当前机构普通用户、专业服务人员及账号状态
- * TODO: 接口见 @/api/modules/staff（《协同工作台-API设计》§7），待后端联调后替换 mock
+ * 已对接 GET /api/v1/staff/staffs（服务端分页，支持 keyword / staff_type / status / position_id 筛选）
+ * 岗位筛选项对接 GET /api/v1/staff/positions
+ * 说明：顶部统计卡无对应接口，已移除
  */
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Button, Card, Input, Select, Table } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
-import {
-  DISPATCH_TEXT,
-  STAFF_STATUS_TEXT,
-  STAFF_TYPE_TEXT,
-  mockStaffList,
-  mockStaffStats,
-  type MockStaffRow,
-  type StaffStatus,
-  type StaffType,
-} from './mock'
+import { staffApi } from '@/api'
+import type { PositionItem, StaffItem } from '@/api/modules/staff'
 import './index.less'
+
+const STAFF_TYPE_MAP: Record<number, string> = {
+  1: '本端协同人员',
+  2: '小程序服务人员',
+}
+
+const STAFF_STATUS_MAP: Record<number, string> = {
+  0: '停用',
+  1: '启用',
+}
 
 interface Filters {
   keyword: string
-  type?: StaffType
-  org?: string
-  role?: string
-  status?: StaffStatus
+  staff_type?: number
+  position_id?: number
+  status?: number
 }
-
-const ORG_OPTIONS = ['城东护理院', '幸福护理院', '安康康复中心']
-const ROLE_OPTIONS = ['护士', '医师', '护理员', '康复治疗师', '机构健康管理师']
 
 export default function StaffList() {
   const navigate = useNavigate()
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
   const [applied, setApplied] = useState<Filters>({ keyword: '' })
+  const [positions, setPositions] = useState<PositionItem[]>([])
+  const [list, setList] = useState<StaffItem[]>([])
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
 
-  const applyFilters = () => setApplied(filters)
+  const fetchList = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await staffApi.getStaffList({
+        page,
+        page_size: pageSize,
+        keyword: applied.keyword || undefined,
+        staff_type: applied.staff_type,
+        position_id: applied.position_id,
+        status: applied.status,
+      })
+      setList(res.list)
+      setTotal(res.total)
+    } catch {
+      // 错误提示由拦截器统一处理
+    } finally {
+      setLoading(false)
+    }
+  }, [page, pageSize, applied])
+
+  useEffect(() => {
+    fetchList()
+  }, [fetchList])
+
+  useEffect(() => {
+    staffApi
+      .getPositions()
+      .then((res) => setPositions(res.list))
+      .catch(() => {
+        // 错误提示由拦截器统一处理
+      })
+  }, [])
+
+  const applyFilters = () => {
+    setApplied(filters)
+    setPage(1)
+  }
 
   const resetFilters = () => {
     const init: Filters = { keyword: '' }
     setFilters(init)
     setApplied(init)
+    setPage(1)
   }
-
-  const filtered = useMemo(
-    () =>
-      mockStaffList.filter((row) => {
-        if (applied.keyword && ![row.name, row.phone].some((v) => v.includes(applied.keyword)))
-          return false
-        if (applied.type && row.type !== applied.type) return false
-        if (applied.org && row.org !== applied.org) return false
-        if (applied.role && row.role !== applied.role) return false
-        if (applied.status && row.status !== applied.status) return false
-        return true
-      }),
-    [applied],
-  )
-
-  const stats = [
-    { label: '人员总数', value: mockStaffStats.total, note: mockStaffStats.totalNote, noteTone: 'green' },
-    { label: '普通用户', value: mockStaffStats.normal, note: mockStaffStats.normalNote, noteTone: 'blue' },
-    { label: '专业服务人员', value: mockStaffStats.pro, note: mockStaffStats.proNote, noteTone: 'orange' },
-    { label: '派单受限', value: mockStaffStats.restricted, note: mockStaffStats.restrictedNote, noteTone: 'red' },
-  ]
 
   const columns = [
     {
       title: '人员',
       key: 'name',
-      render: (_: unknown, row: MockStaffRow) => (
+      render: (_: unknown, row: StaffItem) => (
         <div>
-          <div className="staff-row__name">{row.name}</div>
-          <div className="staff-row__sub">{row.phone}</div>
+          <div className="staff-row__name">{row.name || '-'}</div>
+          <div className="staff-row__sub">{row.phone || '-'}</div>
         </div>
       ),
     },
     {
       title: '人员类型',
-      key: 'type',
-      render: (_: unknown, row: MockStaffRow) => STAFF_TYPE_TEXT[row.type],
+      key: 'staff_type',
+      render: (_: unknown, row: StaffItem) => STAFF_TYPE_MAP[row.staff_type] ?? '-',
     },
-    { title: '所属机构', dataIndex: 'org', key: 'org' },
-    { title: '人员角色', dataIndex: 'role', key: 'role' },
+    {
+      title: '岗位',
+      key: 'position',
+      render: (_: unknown, row: StaffItem) => row.position_name || row.title || '-',
+    },
     {
       title: '资质与授权',
       key: 'credential',
-      render: (_: unknown, row: MockStaffRow) =>
-        row.credentialTone ? (
-          <span className={`staff-tag staff-tag--${row.credentialTone}`}>{row.credential}</span>
+      render: (_: unknown, row: StaffItem) =>
+        row.upcoming_credential_expire ? (
+          <span className="staff-tag staff-tag--orange">资质即将到期</span>
         ) : (
-          <span className="staff-text--muted">{row.credential}</span>
+          <span className="staff-text--muted">-</span>
         ),
     },
     {
       title: '人员状态',
       key: 'status',
-      render: (_: unknown, row: MockStaffRow) => (
-        <span className={`staff-tag staff-tag--${row.statusTone}`}>
-          {STAFF_STATUS_TEXT[row.status]}
-        </span>
-      ),
-    },
-    {
-      title: '账号·派单',
-      key: 'dispatch',
-      render: (_: unknown, row: MockStaffRow) => (
-        <span className={`staff-tag staff-tag--${row.dispatchTone}`}>
-          {DISPATCH_TEXT[row.dispatch]}
+      render: (_: unknown, row: StaffItem) => (
+        <span className={`staff-tag staff-tag--${row.status === 1 ? 'green' : 'red'}`}>
+          {STAFF_STATUS_MAP[row.status] ?? '-'}
         </span>
       ),
     },
@@ -117,7 +130,7 @@ export default function StaffList() {
       title: '操作',
       key: 'action',
       width: 90,
-      render: (_: unknown, row: MockStaffRow) => (
+      render: (_: unknown, row: StaffItem) => (
         <Button size="small" onClick={() => navigate(`/staff/${row.id}`)}>
           查看
         </Button>
@@ -141,19 +154,6 @@ export default function StaffList() {
           </>
         }
       >
-        {/* 统计卡 */}
-        <div className="staff-stats">
-          {stats.map((s) => (
-            <div key={s.label} className="staff-stat">
-              <div className="staff-stat__label">{s.label}</div>
-              <div className="staff-stat__body">
-                <span className="staff-stat__value">{s.value}</span>
-                <span className={`staff-stat__note staff-stat__note--${s.noteTone}`}>{s.note}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-
         {/* 筛选 */}
         <Card variant="borderless" className="filter-bar">
           <Input
@@ -164,47 +164,48 @@ export default function StaffList() {
           />
           <Select
             placeholder="全部类型"
-            value={filters.type}
-            onChange={(v) => setFilters((f) => ({ ...f, type: v }))}
-            options={Object.entries(STAFF_TYPE_TEXT).map(([value, label]) => ({ value, label }))}
+            value={filters.staff_type}
+            onChange={(v) => setFilters((f) => ({ ...f, staff_type: v }))}
+            options={Object.entries(STAFF_TYPE_MAP).map(([value, label]) => ({
+              value: Number(value),
+              label,
+            }))}
             allowClear
           />
           <Select
-            placeholder="全部机构"
-            value={filters.org}
-            onChange={(v) => setFilters((f) => ({ ...f, org: v }))}
-            options={ORG_OPTIONS.map((v) => ({ value: v, label: v }))}
+            placeholder="全部岗位"
+            value={filters.position_id}
+            onChange={(v) => setFilters((f) => ({ ...f, position_id: v }))}
+            options={positions.map((p) => ({ value: p.id, label: p.position_name }))}
             allowClear
-          />
-          <Select
-            placeholder="全部角色"
-            value={filters.role}
-            onChange={(v) => setFilters((f) => ({ ...f, role: v }))}
-            options={ROLE_OPTIONS.map((v) => ({ value: v, label: v }))}
-            allowClear
+            showSearch
+            optionFilterProp="label"
           />
           <Select
             placeholder="全部状态"
             value={filters.status}
             onChange={(v) => setFilters((f) => ({ ...f, status: v }))}
-            options={Object.entries(STAFF_STATUS_TEXT).map(([value, label]) => ({ value, label }))}
+            options={Object.entries(STAFF_STATUS_MAP).map(([value, label]) => ({
+              value: Number(value),
+              label,
+            }))}
             allowClear
           />
-          
           <Button type="primary" onClick={applyFilters}>查询</Button>
           <Button onClick={resetFilters}>重置</Button>
         </Card>
 
         {/* 人员表格 */}
         <Card variant="borderless" className="list-card table-fill">
-          <Table<MockStaffRow>
+          <Table<StaffItem>
             rowKey="id"
             columns={columns}
-            dataSource={filtered}
+            dataSource={list}
+            loading={loading}
             pagination={{
               current: page,
               pageSize,
-              total: filtered.length,
+              total,
               onChange: (nextPage, nextPageSize) => {
                 setPage(nextPage)
                 setPageSize(nextPageSize)

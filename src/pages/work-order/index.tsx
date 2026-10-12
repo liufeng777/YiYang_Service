@@ -1,84 +1,88 @@
 /**
  * 服务工单 - 工单列表（设计稿：状态Tab.png）
- * 处理运营平台分配至当前机构的订单，完成派单、联系、改期与履约管理
- * TODO: 接入后端后替换为 workOrderApi.getWorkOrders（API §9.2）
+ * 已对接 GET /api/v1/staff/work-orders（服务端分页，支持 wo_status / keyword / service_date 筛选）
+ * 说明：顶部统计卡与服务项目筛选无对应接口，已移除
  */
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Button, Card, DatePicker, Input, Select, Table } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
+import dayjs from 'dayjs'
 import PageContainer from '@/components/PageContainer'
+import { workOrderApi } from '@/api'
 import {
-  CONTACT_STATUS_TEXT,
-  WO_STATUS_TABS,
-  WO_STATUS_TEXT,
-  mockWoStats,
-  mockWorkOrderList,
-  type ContactStatus,
-  type MockWorkOrderRow,
-  type WoStatus,
-} from './mock'
+  WO_CONTACT_STATUS_MAP,
+  WO_STATUS_MAP,
+  type WorkOrderItem,
+} from '@/api/modules/work-order'
 import './index.less'
 
-/** 状态标签配色（wo-tag--*） */
-const STATUS_TONE: Record<WoStatus, string> = {
-  pending_dispatch: 'orange',
-  dispatched: 'blue',
-  pending_contact: 'blue',
-  pending_service: 'green',
-  in_service: 'green',
-  pending_receipt: 'orange',
-  completed: 'green',
-  reschedule: 'purple',
-  exception: 'red',
+/** 工单状态标签配色（wo-tag--*） */
+const STATUS_TONE: Record<number, string> = {
+  1: 'orange',
+  2: 'blue',
+  3: 'blue',
+  4: 'green',
+  5: 'green',
+  6: 'orange',
+  7: 'green',
+  8: 'purple',
+  9: 'red',
 }
 
-const CONTACT_TONE: Record<ContactStatus, string> = {
-  not_due: 'blue',
-  pending: 'orange',
-  confirmed: 'green',
-  unreachable: 'orange',
-  reschedule_request: 'purple',
-  cancelled: 'red',
+const CONTACT_TONE: Record<number, string> = {
+  1: 'blue',
+  2: 'orange',
+  3: 'green',
+  4: 'orange',
+  5: 'purple',
+  6: 'red',
 }
+
+const STATUS_TABS = [
+  { key: 0, label: '全部' },
+  ...Object.entries(WO_STATUS_MAP).map(([value, label]) => ({ key: Number(value), label })),
+]
 
 interface Filters {
   keyword: string
-  status?: WoStatus
-  service?: string
+  status?: number
   date?: string
 }
 
 export default function WorkOrderList() {
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState<WoStatus | 'all'>('all')
+  const [activeTab, setActiveTab] = useState<number>(0)
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
   const [applied, setApplied] = useState<Filters>({ keyword: '' })
+  const [list, setList] = useState<WorkOrderItem[]>([])
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(20)
 
-  const serviceOptions = useMemo(
-    () => [...new Set(mockWorkOrderList.map((r) => r.serviceName))],
-    [],
-  )
+  const fetchList = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await workOrderApi.getWorkOrders({
+        page,
+        page_size: pageSize,
+        wo_status: activeTab || undefined,
+        keyword: applied.keyword || undefined,
+        service_date: applied.date,
+      })
+      setList(res.list)
+      setTotal(res.total)
+    } catch {
+      // 错误提示由拦截器统一处理
+    } finally {
+      setLoading(false)
+    }
+  }, [page, pageSize, activeTab, applied])
 
-  const filtered = useMemo(
-    () =>
-      mockWorkOrderList.filter((row) => {
-        if (activeTab !== 'all' && row.status !== activeTab) return false
-        if (
-          applied.keyword &&
-          ![row.woNo, row.orderNo, row.memberName, row.memberPhone].some((v) =>
-            v.includes(applied.keyword),
-          )
-        )
-          return false
-        if (applied.status && row.status !== applied.status) return false
-        if (applied.service && row.serviceName !== applied.service) return false
-        return true
-      }),
-    [activeTab, applied],
-  )
+  useEffect(() => {
+    fetchList()
+  }, [fetchList])
 
   const applyFilters = () => {
     setApplied(filters)
@@ -88,20 +92,13 @@ export default function WorkOrderList() {
   const onReset = () => {
     setFilters({ keyword: '' })
     setApplied({ keyword: '' })
-    setActiveTab('all')
+    setActiveTab(0)
     setPage(1)
   }
 
-  const stats = [
-    { label: '今日待派单', value: mockWoStats.todayPendingDispatch, tone: 'success' },
-    { label: '明日待联系确认', value: mockWoStats.tomorrowContact, tone: 'info' },
-    { label: '待确认回执', value: mockWoStats.pendingReceipt, tone: 'warn' },
-    { label: '履约异常', value: mockWoStats.exception, tone: 'danger' },
-  ]
-
-  const renderAction = (row: MockWorkOrderRow) => {
-    switch (row.status) {
-      case 'pending_dispatch':
+  const renderAction = (row: WorkOrderItem) => {
+    switch (row.wo_status) {
+      case 1:
         return (
           <Button
             type="primary"
@@ -111,13 +108,13 @@ export default function WorkOrderList() {
             去派单
           </Button>
         )
-      case 'in_service':
+      case 5:
         return (
           <Button size="small" onClick={() => navigate(`/work-order/${row.id}`)}>
             查看进度
           </Button>
         )
-      case 'reschedule':
+      case 8:
         return (
           <Button
             type="primary"
@@ -127,7 +124,7 @@ export default function WorkOrderList() {
             处理改期
           </Button>
         )
-      case 'pending_receipt':
+      case 6:
         return (
           <Button
             type="primary"
@@ -150,46 +147,62 @@ export default function WorkOrderList() {
     {
       title: '工单 / 订单',
       key: 'wo',
-      render: (_: unknown, row: MockWorkOrderRow) => (
+      render: (_: unknown, row: WorkOrderItem) => (
         <div>
-          <div className="wo-row__name">{row.woNo}</div>
-          <div className="wo-row__sub">订单 {row.orderNo}</div>
+          <div className="wo-row__name">{row.wo_no}</div>
+          <div className="wo-row__sub">订单 {row.order_no || '-'}</div>
         </div>
       ),
     },
     {
       title: '服务对象',
       key: 'member',
-      render: (_: unknown, row: MockWorkOrderRow) => (
+      render: (_: unknown, row: WorkOrderItem) => (
         <div>
-          <div>{row.memberName}</div>
-          <div className="wo-row__sub">{row.memberPhone}</div>
+          <div>{row.member_name || '-'}</div>
+          <div className="wo-row__sub">{row.member_phone || row.contact_phone || '-'}</div>
         </div>
       ),
     },
-    { title: '服务项目', dataIndex: 'serviceName', key: 'serviceName' },
-    { title: '预约时间', dataIndex: 'appointment', key: 'appointment' },
+    { title: '服务项目', dataIndex: 'service_name', key: 'service_name' },
+    {
+      title: '预约时间',
+      key: 'appointment',
+      render: (_: unknown, row: WorkOrderItem) =>
+        row.expected_start_at
+          ? `${dayjs(row.expected_start_at * 1000).format('MM-DD HH:mm')} ~ ${dayjs(
+              (row.expected_stop_at || row.expected_start_at) * 1000,
+            ).format('HH:mm')}`
+          : '-',
+    },
     {
       title: '服务人员',
       key: 'staff',
-      render: (_: unknown, row: MockWorkOrderRow) =>
-        row.staffName ? <span>{row.staffName}</span> : <span className="wo-row__sub">—</span>,
+      render: (_: unknown, row: WorkOrderItem) =>
+        row.expect_staff_name ? (
+          <span>{row.expect_staff_name}</span>
+        ) : (
+          <span className="wo-row__sub">—</span>
+        ),
     },
     {
       title: '联系状态',
       key: 'contactStatus',
-      render: (_: unknown, row: MockWorkOrderRow) => (
-        <span className={`wo-tag wo-tag--${CONTACT_TONE[row.contactStatus]}`}>
-          {CONTACT_STATUS_TEXT[row.contactStatus]}
-        </span>
-      ),
+      render: (_: unknown, row: WorkOrderItem) =>
+        row.contact_status ? (
+          <span className={`wo-tag wo-tag--${CONTACT_TONE[row.contact_status] ?? 'blue'}`}>
+            {WO_CONTACT_STATUS_MAP[row.contact_status] ?? '-'}
+          </span>
+        ) : (
+          <span className="wo-row__sub">—</span>
+        ),
     },
     {
       title: '工单状态',
       key: 'status',
-      render: (_: unknown, row: MockWorkOrderRow) => (
-        <span className={`wo-tag wo-tag--${STATUS_TONE[row.status]}`}>
-          {WO_STATUS_TEXT[row.status]}
+      render: (_: unknown, row: WorkOrderItem) => (
+        <span className={`wo-tag wo-tag--${STATUS_TONE[row.wo_status] ?? 'blue'}`}>
+          {WO_STATUS_MAP[row.wo_status] ?? '-'}
         </span>
       ),
     },
@@ -197,7 +210,7 @@ export default function WorkOrderList() {
       title: '操作',
       key: 'action',
       width: 110,
-      render: (_: unknown, row: MockWorkOrderRow) => renderAction(row),
+      render: (_: unknown, row: WorkOrderItem) => renderAction(row),
     },
   ]
 
@@ -207,16 +220,6 @@ export default function WorkOrderList() {
         title="服务工单"
         description="处理运营平台分配至当前机构的订单，完成派单、联系、改期与履约管理"
       >
-        {/* 统计卡 */}
-        <div className="wo-stats">
-          {stats.map((s) => (
-            <div key={s.label} className="wo-stat">
-              <div className="wo-stat__label">{s.label}</div>
-              <div className={`wo-stat__value wo-stat__value--${s.tone}`}>{s.value}</div>
-            </div>
-          ))}
-        </div>
-
         {/* 规则提示 */}
         <div className="wo-banner">
           预约日期与时段来自 C 端订单（至少提前一天）；机构无需再次与用户确认预约后才派单。
@@ -224,7 +227,7 @@ export default function WorkOrderList() {
 
         {/* 状态 Tabs */}
         <div className="wo-tabs">
-          {WO_STATUS_TABS.map((t) => (
+          {STATUS_TABS.map((t) => (
             <span
               key={t.key}
               className={t.key === activeTab ? 'wo-tabs__item wo-tabs__item--active' : 'wo-tabs__item'}
@@ -250,21 +253,21 @@ export default function WorkOrderList() {
           <Select
             placeholder="工单状态：全部"
             value={filters.status}
-            onChange={(v) => setFilters((f) => ({ ...f, status: v }))}
-            options={Object.entries(WO_STATUS_TEXT).map(([value, label]) => ({ value, label }))}
-            allowClear
-          />
-          <Select
-            placeholder="服务项目：全部"
-            value={filters.service}
-            onChange={(v) => setFilters((f) => ({ ...f, service: v }))}
-            options={serviceOptions.map((s) => ({ value: s, label: s }))}
+            onChange={(v) => {
+              setFilters((f) => ({ ...f, status: v }))
+              setActiveTab(v ?? 0)
+              setPage(1)
+            }}
+            options={Object.entries(WO_STATUS_MAP).map(([value, label]) => ({
+              value: Number(value),
+              label,
+            }))}
             allowClear
           />
           <DatePicker
             placeholder="预约日期"
-            onChange={(_, ds) =>
-              setFilters((f) => ({ ...f, date: typeof ds === 'string' ? ds : undefined }))
+            onChange={(d) =>
+              setFilters((f) => ({ ...f, date: d ? d.format('YYYY-MM-DD') : undefined }))
             }
           />
           <Button onClick={onReset}>重置</Button>
@@ -273,14 +276,15 @@ export default function WorkOrderList() {
 
         {/* 工单表格 */}
         <Card variant="borderless" className="list-card table-fill">
-          <Table<MockWorkOrderRow>
+          <Table<WorkOrderItem>
             rowKey="id"
             columns={columns}
-            dataSource={filtered}
+            dataSource={list}
+            loading={loading}
             pagination={{
               current: page,
               pageSize,
-              total: filtered.length,
+              total,
               onChange: (nextPage, nextPageSize) => {
                 setPage(nextPage)
                 setPageSize(nextPageSize)

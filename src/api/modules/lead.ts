@@ -68,6 +68,12 @@ export interface LeadItem {
   last_followup_at?: number
   /** UTC 秒 */
   created_at: number
+  /** 以下为服务端实际出参别名字段（与文档字段并存，前端兜底展示） */
+  name?: string
+  phone?: string
+  task_type?: number
+  assignee_name?: string
+  remark?: string
 }
 
 /** 跟进记录（lead.followup_records JSON 数组元素） */
