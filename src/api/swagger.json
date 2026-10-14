@@ -686,6 +686,57 @@
               }
           }
       },
+      "/api/v1/staff/auth/switch-institution": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "多机构人员可在在职机构间切换，返回绑定到目标机构的新 JWT 及该机构岗位。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "医护认证"
+              ],
+              "summary": "切换当前机构",
+              "parameters": [
+                  {
+                      "description": "目标机构",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.SwitchInstitutionRequest"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  },
+                  "400": {
+                      "description": "参数错误",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  },
+                  "403": {
+                      "description": "无权访问该机构",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
       "/api/v1/staff/consultations": {
           "get": {
               "security": [
@@ -4099,6 +4150,18 @@
               "phone": {
                   "type": "string",
                   "example": "13800000000"
+              }
+          }
+      },
+      "staff.SwitchInstitutionRequest": {
+          "type": "object",
+          "required": [
+              "institution_id"
+          ],
+          "properties": {
+              "institution_id": {
+                  "type": "integer",
+                  "example": 1
               }
           }
       },

@@ -12,12 +12,18 @@ import type { PageParams, PageResult } from '@/types/api'
  * - 预警处置若调整等级，写 risk_level_changes(change_source=2-预警处置) 并重排随访周期
  */
 
-/** 预警处理状态（health_warnings.warning_status） */
+/**
+ * 预警处理状态（health_warnings.warning_status）
+ * swagger 处置入参说明：3-ignored已忽略 4-handled_goon已处置-继续服务 5-handled_stop已处置-中止服务
+ * 列表数据中 0/1 为待处理、2 为已处理（兼容展示）
+ */
 export const WARNING_STATUS_MAP: Record<number, string> = {
+  0: '待处理',
   1: '待处理',
   2: '已处理',
-  3: '已关闭',
-  4: '已忽略',
+  3: '已忽略',
+  4: '已处置（继续服务）',
+  5: '已处置（中止服务）',
 }
 
 /** 预警等级（health_warnings.severity） */
@@ -43,11 +49,11 @@ export interface WarningItem {
   created_at: number
 }
 
-/** 预警列表查询参数（§6.1） */
+/** 预警列表查询参数（swagger：status / severity / warning_source / member_id / 分页） */
 export interface WarningListParams extends PageParams {
   status?: number
   severity?: number
-  warning_source?: string
+  warning_source?: number
   member_id?: number
 }
 
@@ -61,11 +67,16 @@ export function getWarningDetail(id: number | string) {
   return http.get<WarningItem>(`/v1/staff/warnings/${id}`)
 }
 
-/** 预警处置（权限 warn:handle，对齐 §6.2，处置并可选调整风险/照护等级） */
+/**
+ * 预警处置（权限 warn:handle，对齐 swagger）
+ * warning_status 取值：3-已忽略(继续服务) 4-已处置-继续服务 5-已处置-中止服务；
+ * 处置为 5 时小程序端会抓取并中止关联工单
+ */
 export function handleWarning(
   id: number | string,
   data: {
-    handled_reason: string
+    warning_status: 3 | 4 | 5
+    handled_reason?: string
     adjust_risk_level?: number
     adjust_care_level?: number
     note?: string

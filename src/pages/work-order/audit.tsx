@@ -1,36 +1,69 @@
 /**
  * 服务工单 - 医生审核（设计稿：医生审核.png）
  * 审核服务适用性、患者风险、医嘱依据与上门实施条件
- * TODO: 服务订单医生审核接口 API v0.1 未定义，待后端补充（见 api/modules/work-order.ts）
+ * 已对接：GET /orders/{id}（订单详情）、POST /orders/{id}/confirm（审核通过）、
+ *         POST /orders/{id}/reject（审核不通过 / 退回补充）
+ * 说明：审核要点 / 订单审核项为系统校验清单展示，暂无对应接口，保留设计稿静态项
  */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button, Input, message } from 'antd'
 import { ArrowLeftOutlined } from '@ant-design/icons'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import { orderApi } from '@/api'
+import type { OrderDetail } from '@/api/modules/order'
 import { mockWoAudit } from './mock'
 import './index.less'
 
 export default function WorkOrderAudit() {
   const navigate = useNavigate()
+  const { id } = useParams<{ id: string }>()
   const [opinion, setOpinion] = useState(mockWoAudit.opinion)
+  const [order, setOrder] = useState<OrderDetail | null>(null)
+  const [submitting, setSubmitting] = useState(false)
   const a = mockWoAudit
   const m = a.member
 
-  const onApprove = () => {
-    // TODO: 审核通过接口待后端补充
-    message.success('审核通过，工单进入待派单')
-    navigate(`/work-order/${a.woNo}/audit-result`)
+  useEffect(() => {
+    if (!id) return
+    orderApi
+      .getOrderDetail(id)
+      .then(setOrder)
+      .catch(() => {
+        // 错误提示由拦截器统一处理
+      })
+  }, [id])
+
+  const onApprove = async () => {
+    if (!id) return
+    setSubmitting(true)
+    try {
+      await orderApi.confirmOrder(id, { opinion: opinion.trim() || undefined })
+      message.success('审核通过，工单进入待派单')
+      navigate(`/work-order/${id}/audit-result`)
+    } catch {
+      // 错误提示由拦截器统一处理
+    } finally {
+      setSubmitting(false)
+    }
   }
 
-  const onReject = (text: string) => {
+  const onReject = async (text: string) => {
     if (!opinion.trim()) {
       message.warning('请填写审核意见')
       return
     }
-    // TODO: 审核不通过 / 退回补充接口待后端补充
-    message.success(text)
-    navigate('/work-order')
+    if (!id) return
+    setSubmitting(true)
+    try {
+      await orderApi.rejectOrder(id, { opinion: opinion.trim(), reason: text })
+      message.success(text)
+      navigate('/work-order')
+    } catch {
+      // 错误提示由拦截器统一处理
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -49,18 +82,19 @@ export default function WorkOrderAudit() {
         <div className="wo-member">
           <div className="wo-member__main">
             <div>
-              <div className="wo-member__name">{m.name}</div>
+              <div className="wo-member__name">{order?.member_name || m.name}</div>
               <div className="wo-member__meta">
-                {m.gender} · {m.age}岁 · {m.diseases.join(' / ')}
+                {order ? `会员 #${order.member_id ?? '-'}` : `${m.gender} · ${m.age}岁 · ${m.diseases.join(' / ')}`}
               </div>
             </div>
           </div>
           <div className="wo-member__side">
             <span>
-              服务项目 {a.service} · 预约 {a.appointment}
+              服务项目 {order?.service_name || a.service}
+              {order ? '' : ` · 预约 ${a.appointment}`}
             </span>
             <span>
-              订单 {a.orderNo} · {a.orderSource}
+              订单 {order?.order_no || `#${id}`} · {order ? '待确定' : a.orderSource}
             </span>
             <span>待医生审核</span>
           </div>
@@ -163,13 +197,21 @@ export default function WorkOrderAudit() {
         </div>
 
         <div className="wo-audit__actions">
-          <Button danger onClick={() => onReject('已记录审核不通过原因，本次订单已结束')}>
+          <Button
+            danger
+            loading={submitting}
+            onClick={() => onReject('已记录审核不通过原因，本次订单已结束')}
+          >
             审核不通过
           </Button>
-          <Button danger onClick={() => onReject('已退回补充，工单保持未派单')}>
+          <Button
+            danger
+            loading={submitting}
+            onClick={() => onReject('已退回补充，工单保持未派单')}
+          >
             退回补充
           </Button>
-          <Button type="primary" onClick={onApprove}>
+          <Button type="primary" loading={submitting} onClick={onApprove}>
             审核通过
           </Button>
         </div>

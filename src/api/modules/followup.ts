@@ -72,12 +72,15 @@ export function createFollowup(
   return http.post<{ id: number }>(`/v1/staff/members/${id}/followups`, data)
 }
 
-/** 随访完成（权限 staff:followup，对齐 §6.5，记录内容并可调级） */
+/**
+ * 随访完成（权限 staff:followup，对齐 swagger：仅路径参数，无请求体）
+ * 问卷结构化内容接口待后端补充；body 参数保留兼容，默认不发送
+ */
 export function completeFollowup(
   id: number | string,
-  data: {
-    followup_time: number
-    followup_content: string
+  data?: {
+    followup_time?: number
+    followup_content?: string
     vital_signs?: number[]
     risk_flag?: string[]
     severity?: number

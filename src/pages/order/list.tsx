@@ -7,7 +7,7 @@ import PageContainer from '@/components/PageContainer'
 export default function OrderList() {
   return (
     <PageContainer title="订单列表" description="查询与管理平台订单">
-      <Card bordered={false}>订单列表表格（预留，使用 orderApi.getOrderList + exportOrder）</Card>
+      <Card bordered={false}>订单列表表格（预留，待确定订单审核见工单审核页 orderApi.getPendingConfirmOrders）</Card>
     </PageContainer>
   )
 }

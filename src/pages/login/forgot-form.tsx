@@ -90,7 +90,7 @@ export default function ForgotPassword({ onBack }: ForgotPasswordProps) {
           >
             <div className="login-form__code-row">
               <Input placeholder="请输入6位验证码" maxLength={6} />
-              <SmsCodeButton phone={phone} scene="login" />
+              <SmsCodeButton phone={phone} scene="reset" />
             </div>
           </Form.Item>
           <Button type="primary" htmlType="submit" block className="login-form__submit">

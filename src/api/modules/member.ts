@@ -101,18 +101,31 @@ export interface HealthProfile {
   recent_goals?: Array<{ id: number; name: string; status: number }>
 }
 
-/** 会员列表查询参数 */
+/** 会员列表查询参数（对齐 swagger：keyword / risk_level / care_level / institution_id） */
 export interface MemberListParams extends PageParams {
   keyword?: string
-  status?: number
   risk_level?: number
-  nursing_home_id?: number
-  station_id?: number
+  care_level?: number
+  institution_id?: number
 }
 
 /** 会员（健康档案）分页列表（权限 health:view） */
 export function getMemberList(params: MemberListParams) {
   return http.get<PageResult<MemberItem>>('/v1/staff/members', { ...params })
+}
+
+/** 会员活跃状态：1-非活跃 2-活跃 3-挂起 4-拉黑 5-注销 */
+export const MEMBER_ACTIVE_STATUS_MAP: Record<number, string> = {
+  1: '非活跃',
+  2: '活跃',
+  3: '挂起',
+  4: '拉黑',
+  5: '注销',
+}
+
+/** 设置会员活跃状态（PUT /members/active-status） */
+export function setMemberActiveStatus(data: { member_id: number; active_status: number }) {
+  return http.put<null>('/v1/staff/members/active-status', data)
 }
 
 /** 健康档案聚合详情（权限 health:view） */
@@ -160,6 +173,16 @@ export function getAssessments(id: number | string, params?: PageParams) {
 
 export function createAssessment(id: number | string, data: { type: string; answers: unknown }) {
   return http.post<{ id: number }>(`/v1/staff/members/${id}/assessments`, data)
+}
+
+/** 评估详情（GET /assessments/{id}） */
+export function getAssessmentDetail(id: number | string) {
+  return http.get<Record<string, unknown>>(`/v1/staff/assessments/${id}`)
+}
+
+/** 评估专业确认（POST /assessments/{id}/confirm） */
+export function confirmAssessment(id: number | string, data?: Record<string, unknown>) {
+  return http.post<null>(`/v1/staff/assessments/${id}/confirm`, data)
 }
 
 /**

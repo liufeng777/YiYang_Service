@@ -4,14 +4,16 @@
  */
 import { Button } from 'antd'
 import { CheckCircleFilled } from '@ant-design/icons'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import { mockWoAuditResult } from './mock'
 import './index.less'
 
 export default function WorkOrderAuditResult() {
   const navigate = useNavigate()
+  const { id } = useParams<{ id: string }>()
   const r = mockWoAuditResult
+  const orderNo = id ?? r.woNo
 
   return (
     <div className="wo-page">
@@ -23,7 +25,7 @@ export default function WorkOrderAuditResult() {
         <div className="wo-card wo-result">
           <CheckCircleFilled className="wo-result__icon" />
           <div className="wo-result__title">服务订单审核通过</div>
-          <div className="wo-result__sub">工单编号：{r.woNo}</div>
+          <div className="wo-result__sub">工单编号：{orderNo}</div>
 
           <div className="wo-result__member">
             <div className="wo-result__member-name">
@@ -47,7 +49,7 @@ export default function WorkOrderAuditResult() {
             <Button onClick={() => navigate('/work-order')}>返回工单列表</Button>
             <Button
               type="primary"
-              onClick={() => navigate(`/work-order/${r.woNo}?dispatch=1`)}
+              onClick={() => navigate(`/work-order/${orderNo}?dispatch=1`)}
             >
               进入派单
             </Button>

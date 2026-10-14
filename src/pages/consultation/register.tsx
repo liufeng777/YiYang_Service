@@ -1,12 +1,13 @@
 /**
  * 咨询管理 - 来电登记（设计稿：来电登记.png）
  * 登记来电人与实际服务对象；保存后系统自动关联档案或生成线索
- * TODO: 电话咨询登记接口 API v0.1 未定义，待后端补充（见 api/modules/consult.ts TODO）
+ * 已对接 POST /api/v1/staff/consultations（consultation_type=3 电话）
  */
 import { useState } from 'react'
 import { Button, Input, message } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import { consultApi } from '@/api'
 import { mockConsultRegister } from './mock'
 import './index.less'
 
@@ -23,8 +24,9 @@ export default function ConsultationRegister() {
   const [content, setContent] = useState(c.defaultContent)
   const [result, setResult] = useState(c.defaultResult)
   const [nextFollowup, setNextFollowup] = useState(c.defaultNextFollowup)
+  const [submitting, setSubmitting] = useState(false)
 
-  const onSave = () => {
+  const onSave = async () => {
     if (!callerPhone.trim()) {
       message.warning('请填写来电号码')
       return
@@ -33,9 +35,33 @@ export default function ConsultationRegister() {
       message.warning('请填写咨询内容')
       return
     }
-    // TODO: 电话咨询登记接口待后端补充；保存后系统自动关联档案或生成线索
-    message.success('咨询记录已保存，已创建“待跟进”线索并带入登记信息')
-    navigate('/consultation')
+    setSubmitting(true)
+    try {
+      await consultApi.createConsultation({
+        contact_name: callerName.trim() || '来电咨询',
+        contact_phone: callerPhone.trim(),
+        question: [
+          topic ? `【${topic}】` : '',
+          content.trim(),
+          targetType !== '来电人本人' && targetName.trim()
+            ? `\n服务对象：${targetName.trim()} ${targetPhone.trim()}（${targetType}）`
+            : '',
+          source ? `\n来源：${source}` : '',
+          nextFollowup.trim() ? `\n下次跟进：${nextFollowup.trim()}` : '',
+        ]
+          .filter(Boolean)
+          .join(''),
+        answer: result.trim() || undefined,
+        /** 3-电话咨询 */
+        consultation_type: 3,
+      })
+      message.success('咨询记录已保存')
+      navigate('/consultation')
+    } catch {
+      // 错误提示由拦截器统一处理
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -134,7 +160,7 @@ export default function ConsultationRegister() {
               />
             </div>
             <div className="cs-register__submit">
-              <Button type="primary" onClick={onSave}>
+              <Button type="primary" onClick={onSave} loading={submitting}>
                 保存咨询记录
               </Button>
             </div>

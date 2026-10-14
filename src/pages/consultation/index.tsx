@@ -1,12 +1,12 @@
 /**
  * 咨询管理 - 咨询记录列表（设计稿：电话咨询列表.png）
- * 已对接 GET /api/v1/staff/consultations（服务端分页，支持 status 筛选）
- * 人工回复已对接 POST /api/v1/staff/consultations/:id/reply
- * 说明：顶部统计卡无对应接口，已移除；「登记电话咨询」接口待后端补充
+ * 已对接 GET /api/v1/staff/consultations（服务端分页，支持 status / keyword 筛选）
+ * 人工回复已对接 PUT /api/v1/staff/consultations/:id
+ * 「登记电话咨询」已对接 POST /api/v1/staff/consultations
  */
 import { useCallback, useEffect, useState } from 'react'
 import { Button, Card, Input, Modal, Select, Table, App } from 'antd'
-import { PlusOutlined } from '@ant-design/icons'
+import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 import PageContainer from '@/components/PageContainer'
@@ -28,6 +28,8 @@ export default function ConsultationList() {
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
+  const [keyword, setKeyword] = useState('')
+  const [appliedKeyword, setAppliedKeyword] = useState('')
   const [replyTarget, setReplyTarget] = useState<ConsultationItem | null>(null)
   const [answer, setAnswer] = useState('')
   const [replying, setReplying] = useState(false)
@@ -39,6 +41,7 @@ export default function ConsultationList() {
         page,
         page_size: pageSize,
         status: appliedStatus,
+        keyword: appliedKeyword || undefined,
       })
       setList(res.list)
       setTotal(res.total)
@@ -47,7 +50,7 @@ export default function ConsultationList() {
     } finally {
       setLoading(false)
     }
-  }, [page, pageSize, appliedStatus])
+  }, [page, pageSize, appliedStatus, appliedKeyword])
 
   useEffect(() => {
     fetchList()
@@ -60,7 +63,7 @@ export default function ConsultationList() {
     }
     setReplying(true)
     try {
-      await consultApi.replyConsultation(replyTarget.id, { answer: answer.trim() })
+      await consultApi.updateConsultation(replyTarget.id, { answer: answer.trim(), status: 2 })
       message.success('回复成功')
       setReplyTarget(null)
       setAnswer('')
@@ -170,6 +173,13 @@ export default function ConsultationList() {
 
         {/* 筛选 */}
         <Card variant="borderless" className="filter-bar">
+          <Input
+            prefix={<SearchOutlined />}
+            placeholder="姓名 / 手机号 / 咨询内容"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value.trim())}
+            allowClear
+          />
           <Select
             placeholder="全部状态"
             value={status}
@@ -184,6 +194,7 @@ export default function ConsultationList() {
             type="primary"
             onClick={() => {
               setAppliedStatus(status)
+              setAppliedKeyword(keyword)
               setPage(1)
             }}
           >
@@ -193,6 +204,8 @@ export default function ConsultationList() {
             onClick={() => {
               setStatus(undefined)
               setAppliedStatus(undefined)
+              setKeyword('')
+              setAppliedKeyword('')
               setPage(1)
             }}
           >

@@ -7,6 +7,7 @@ import { useMemo } from 'react'
 import { ArrowRightOutlined } from '@ant-design/icons'
 import { Link } from 'react-router-dom'
 import { useUserStore } from '@/store/modules/user'
+import { ALL_MANAGE_PERMISSION } from '@/router/menu'
 import type {
   BannerConfig,
   MetricItem,
@@ -144,7 +145,7 @@ export function TrendPanel({ config }: { config: TrendPanelConfig }) {
   )
 }
 
-/** 快捷入口（受目录权限控制：按权限码过滤） */
+/** 快捷入口（受目录权限控制：按权限码过滤；all:manage 全量放行） */
 export function QuickLinksRow({ title, links }: { title: string; links: QuickLink[] }) {
   const permissions = useUserStore((state) => state.userInfo?.permissions ?? EMPTY_PERMISSIONS)
 
@@ -154,6 +155,7 @@ export function QuickLinksRow({ title, links }: { title: string; links: QuickLin
         (link) =>
           !link.permissions ||
           link.permissions.length === 0 ||
+          permissions.includes(ALL_MANAGE_PERMISSION) ||
           link.permissions.some((code) => permissions.includes(code)),
       ),
     [links, permissions],

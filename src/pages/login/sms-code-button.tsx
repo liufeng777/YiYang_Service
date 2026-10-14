@@ -9,8 +9,8 @@ import { authApi } from '@/api'
 interface SmsCodeButtonProps {
   /** 接收验证码的手机号（必填校验通过后才可发送） */
   phone?: string
-  /** 验证码场景：login / change-phone */
-  scene?: 'login' | 'change-phone'
+  /** 验证码场景（swagger：login | reset） */
+  scene?: 'login' | 'reset'
 }
 
 export default function SmsCodeButton({ phone, scene = 'login' }: SmsCodeButtonProps) {

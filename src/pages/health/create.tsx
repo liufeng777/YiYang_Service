@@ -1,23 +1,33 @@
 /**
  * 健康档案 - 新建健康档案（设计稿：关联会员.png / 进入完善档案.png）
- * 关联实名会员 → 基础信息 → 健康概况 → 家属授权 → 创建成功
- * 会员查询 / 创建当前为 mock；接入后端后替换为 memberApi.createMember
+ * 已对接：
+ * - GET  /api/v1/staff/members  会员查询（按关键字检索是否已建档）
+ * - POST /api/v1/staff/members  创建健康档案（§4）
+ * 说明：民族/常住地址/疾病标签/家属授权书 API v0.1 未提供落库字段，仅作界面录入不参与提交
  */
 import { useState } from 'react'
-import { Button, Checkbox, DatePicker, Input, Select } from 'antd'
+import { Button, Checkbox, DatePicker, Input, Select, App } from 'antd'
 import { CheckCircleFilled, CheckOutlined, LeftOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
-import dayjs from 'dayjs'
+import dayjs, { type Dayjs } from 'dayjs'
 import PageContainer from '@/components/PageContainer'
-import { mockCreateSuccess, mockVerifiedMember } from './mock'
+import { memberApi } from '@/api'
+import type { MemberItem } from '@/api/modules/member'
 import './index.less'
 
 const DISEASE_OPTIONS = ['高血压', '糖尿病', '冠心病', '慢阻肺', '骨质疏松']
 
+interface CreatedInfo {
+  id: number
+  name: string
+  gender: number
+  birthday: string
+}
+
 /** 创建成功视图（设计稿：进入完善档案.png） */
-function CreateSuccess({ onAgain }: { onAgain: () => void }) {
+function CreateSuccess({ info, onAgain }: { info: CreatedInfo; onAgain: () => void }) {
   const navigate = useNavigate()
-  const s = mockCreateSuccess
+  const age = dayjs().diff(dayjs(info.birthday), 'year')
   return (
     <div className="hr-success">
       <div className="hr-success__card">
@@ -25,39 +35,22 @@ function CreateSuccess({ onAgain }: { onAgain: () => void }) {
           <CheckOutlined />
         </div>
         <div className="hr-success__title">健康档案创建成功</div>
-        <div className="hr-success__subtitle">档案编号：{s.profileNo}</div>
+        <div className="hr-success__subtitle">档案编号：{info.id}</div>
 
         <div className="hr-success__member">
-          <div className="hr-success__avatar">{s.name.slice(0, 1)}</div>
+          <div className="hr-success__avatar">{info.name.slice(0, 1)}</div>
           <div>
             <div className="hr-success__name">
-              {s.name} · {s.gender} · {s.age}岁
+              {info.name} · {info.gender === 1 ? '男' : '女'} · {age}岁
             </div>
-            <div className="hr-success__meta">
-              {s.org} · {s.identity} · 建档来源：{s.source}
-            </div>
-            <div className="hr-success__tags">
-              {s.tags.map((t) => (
-                <span key={t} className="hr-tag hr-tag--risk-low">
-                  {t}
-                </span>
-              ))}
-            </div>
+            <div className="hr-success__meta">建档来源：机构手动建档</div>
           </div>
-        </div>
-
-        <div className="hr-success__banner">
-          <div>
-            <div className="hr-success__banner-title">基础档案同步成功</div>
-            <div className="hr-success__banner-sub">已同步运营所需字段，医疗健康明细仍按专业权限管理</div>
-          </div>
-          <span className="hr-success__banner-status">同步正常</span>
         </div>
 
         <div className="hr-success__note">基础建档已完成，待分配管理团队。</div>
         <div className="hr-success__actions">
           <Button onClick={onAgain}>继续新增</Button>
-          <Button type="primary" onClick={() => navigate('/health-record/1/assign')}>
+          <Button type="primary" onClick={() => navigate(`/health-record/${info.id}/assign`)}>
             分配管理团队
           </Button>
         </div>
@@ -68,24 +61,86 @@ function CreateSuccess({ onAgain }: { onAgain: () => void }) {
 
 export default function HealthRecordCreate() {
   const navigate = useNavigate()
-  const [keyword, setKeyword] = useState('138****4628')
-  const [verified, setVerified] = useState(false)
+  const { message } = App.useApp()
+  const [keyword, setKeyword] = useState('')
+  const [querying, setQuerying] = useState(false)
+  const [matched, setMatched] = useState<MemberItem | null>(null)
+  const [name, setName] = useState('')
+  const [gender, setGender] = useState<number>()
+  const [birthday, setBirthday] = useState<Dayjs | null>(null)
+  const [phone, setPhone] = useState('')
+  const [emergencyContact, setEmergencyContact] = useState('')
+  const [emergencyPhone, setEmergencyPhone] = useState('')
   const [diseases, setDiseases] = useState<string[]>([])
-  const [guardian, setGuardian] = useState<string>()
   const [agreed, setAgreed] = useState(false)
-  const [created, setCreated] = useState(false)
-
-  const m = verified ? mockVerifiedMember : null
+  const [submitting, setSubmitting] = useState(false)
+  const [created, setCreated] = useState<CreatedInfo | null>(null)
 
   const toggleDisease = (d: string) =>
     setDiseases((list) => (list.includes(d) ? list.filter((x) => x !== d) : [...list, d]))
 
+  /** 查询是否已有会员 / 档案（命中则提示并带入基础信息） */
+  const onQuery = async () => {
+    if (!keyword) {
+      message.warning('请输入手机号 / 会员ID / 姓名')
+      return
+    }
+    setQuerying(true)
+    try {
+      const res = await memberApi.getMemberList({ page: 1, page_size: 1, keyword })
+      const hit = res.list[0] ?? null
+      setMatched(hit)
+      if (hit) {
+        setName(hit.name || '')
+        setGender(hit.gender || undefined)
+        setBirthday(hit.birthday ? dayjs(hit.birthday) : null)
+        setPhone(hit.phone || '')
+        message.info('已存在该会员档案，可直接查看或继续完善')
+      } else {
+        message.success('未查询到已建档会员，请填写基础信息创建档案')
+      }
+    } catch {
+      // 错误提示由拦截器统一处理
+    } finally {
+      setQuerying(false)
+    }
+  }
+
+  const onSubmit = async () => {
+    if (!name || !gender || !birthday || !phone) {
+      message.warning('请完整填写姓名、性别、出生日期、手机号')
+      return
+    }
+    setSubmitting(true)
+    try {
+      const res = await memberApi.createMember({
+        name,
+        gender,
+        birthday: birthday.format('YYYY-MM-DD'),
+        phone,
+        emergency_contact: emergencyContact || undefined,
+        emergency_phone: emergencyPhone || undefined,
+      })
+      message.success('健康档案创建成功')
+      setCreated({ id: res.id, name, gender, birthday: birthday.format('YYYY-MM-DD') })
+    } catch {
+      // 错误提示由拦截器统一处理
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   const reset = () => {
-    setCreated(false)
-    setVerified(false)
+    setCreated(null)
+    setMatched(null)
     setKeyword('')
+    setName('')
+    setGender(undefined)
+    setBirthday(null)
+    setPhone('')
+    setEmergencyContact('')
+    setEmergencyPhone('')
     setDiseases([])
-    setGuardian(undefined)
     setAgreed(false)
   }
 
@@ -101,7 +156,7 @@ export default function HealthRecordCreate() {
             </Button>
           }
         >
-          <CreateSuccess onAgain={reset} />
+          <CreateSuccess info={created} onAgain={reset} />
         </PageContainer>
       </div>
     )
@@ -132,18 +187,20 @@ export default function HealthRecordCreate() {
                 placeholder="手机号 / 会员ID / 姓名"
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value.trim())}
+                onPressEnter={onQuery}
               />
-              <Button type="primary" onClick={() => keyword && setVerified(true)}>
+              <Button type="primary" onClick={onQuery} loading={querying}>
                 查询会员
               </Button>
             </div>
-            {m && (
+            {matched && (
               <div className="hr-create__verified">
                 <div>
-                  <CheckCircleFilled /> 已关联实名会员：{m.name} · {m.gender} · {m.age}岁 · 会员ID{' '}
-                  {m.memberId}
+                  <CheckCircleFilled /> 已存在会员档案：{matched.name} · 会员ID {matched.id}
                 </div>
-                <div className="hr-create__verified-sub">当前机构尚未建立健康档案，可继续创建</div>
+                <div className="hr-create__verified-sub">
+                  重复建档可能被服务端拒绝，建议直接前往档案详情完善
+                </div>
               </div>
             )}
 
@@ -154,19 +211,19 @@ export default function HealthRecordCreate() {
                 <div className="hr-create__field-label">
                   姓名 <span className="hr-required">*</span>
                 </div>
-                <Input value={m?.name} placeholder="姓名" disabled={!verified} />
+                <Input value={name} onChange={(e) => setName(e.target.value.trim())} placeholder="姓名" />
               </div>
               <div className="hr-create__field">
                 <div className="hr-create__field-label">
                   性别 <span className="hr-required">*</span>
                 </div>
                 <Select
-                  value={m?.gender}
+                  value={gender}
+                  onChange={setGender}
                   placeholder="性别"
-                  disabled={!verified}
                   options={[
-                    { value: '女', label: '女' },
-                    { value: '男', label: '男' },
+                    { value: 2, label: '女' },
+                    { value: 1, label: '男' },
                   ]}
                 />
               </div>
@@ -175,9 +232,9 @@ export default function HealthRecordCreate() {
                   出生日期 <span className="hr-required">*</span>
                 </div>
                 <DatePicker
-                  value={m ? dayjs('1959-03-12') : null}
+                  value={birthday}
+                  onChange={setBirthday}
                   placeholder="出生日期"
-                  disabled={!verified}
                   format="YYYY年M月D日"
                 />
               </div>
@@ -185,22 +242,29 @@ export default function HealthRecordCreate() {
                 <div className="hr-create__field-label">
                   手机号 <span className="hr-required">*</span>
                 </div>
-                <Input value={m?.phone} placeholder="手机号" disabled />
-              </div>
-              <div className="hr-create__field">
-                <div className="hr-create__field-label">民族</div>
-                <Select
-                  value={m?.nation}
-                  placeholder="民族"
-                  disabled={!verified}
-                  options={[{ value: '汉族', label: '汉族' }]}
+                <Input
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value.trim())}
+                  placeholder="手机号"
+                  maxLength={11}
                 />
               </div>
               <div className="hr-create__field">
-                <div className="hr-create__field-label">
-                  常住地址 <span className="hr-required">*</span>
-                </div>
-                <Input value={m?.address} placeholder="常住地址" disabled={!verified} />
+                <div className="hr-create__field-label">紧急联系人</div>
+                <Input
+                  value={emergencyContact}
+                  onChange={(e) => setEmergencyContact(e.target.value.trim())}
+                  placeholder="紧急联系人姓名"
+                />
+              </div>
+              <div className="hr-create__field">
+                <div className="hr-create__field-label">紧急联系电话</div>
+                <Input
+                  value={emergencyPhone}
+                  onChange={(e) => setEmergencyPhone(e.target.value.trim())}
+                  placeholder="紧急联系电话"
+                  maxLength={11}
+                />
               </div>
             </div>
 
@@ -228,19 +292,6 @@ export default function HealthRecordCreate() {
               </span>
             </div>
 
-            {/* 4. 家属授权 */}
-            <div className="hr-create__section-title">4. 家属授权（如由家属代办）</div>
-            <div className="hr-create__section-desc">
-              建档阶段仅记录授权对象及授权书勾选，不设置授权有效期
-            </div>
-            <div className="hr-create__field-label">授权给</div>
-            <Select
-              value={guardian}
-              onChange={setGuardian}
-              placeholder="选择家属"
-              style={{width: 400}}
-              options={[{ value: '沈晓晨（女儿）', label: '沈晓晨（女儿）' }]}
-            />
             <div className="hr-create__agree">
               <Checkbox checked={agreed} onChange={(e) => setAgreed(e.target.checked)}>
                 已阅读并同意<span className="hr-create__agree-link">《健康档案及敏感个人信息授权书》</span>
@@ -251,8 +302,12 @@ export default function HealthRecordCreate() {
               说明：健康档案创建后进入待分配患者，由机构管理员分配健康管理团队。
             </div>
             <div className="hr-create__actions">
-              <Button>保存草稿</Button>
-              <Button type="primary" disabled={!verified || !agreed} onClick={() => setCreated(true)}>
+              <Button
+                type="primary"
+                disabled={!agreed}
+                loading={submitting}
+                onClick={onSubmit}
+              >
                 创建健康档案
               </Button>
             </div>
@@ -265,12 +320,14 @@ export default function HealthRecordCreate() {
               <div className="hr-summary">
                 <div className="hr-summary__row">
                   <span className="hr-summary__label">会员身份</span>
-                  <span className="hr-summary__value hr-text--primary">{m ? '实名会员' : '—'}</span>
+                  <span className="hr-summary__value hr-text--primary">
+                    {matched ? '已建档会员' : '新建档'}
+                  </span>
                 </div>
                 <div className="hr-summary__row">
                   <span className="hr-summary__label">服务对象</span>
                   <span className="hr-summary__value">
-                    {m ? `${m.name} · ${m.age}岁` : '—'}
+                    {name ? `${name}${birthday ? ` · ${dayjs().diff(birthday, 'year')}岁` : ''}` : '—'}
                   </span>
                 </div>
                 <div className="hr-summary__row">
@@ -280,8 +337,8 @@ export default function HealthRecordCreate() {
                   </span>
                 </div>
                 <div className="hr-summary__row">
-                  <span className="hr-summary__label">家属授权</span>
-                  <span className="hr-summary__value">{guardian ?? '—'}</span>
+                  <span className="hr-summary__label">紧急联系人</span>
+                  <span className="hr-summary__value">{emergencyContact || '—'}</span>
                 </div>
               </div>
               <div className="hr-create__flow">

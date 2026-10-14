@@ -24,7 +24,7 @@ const healthManager: WorkbenchConfig = {
   },
   metrics: [
     { label: '待完善档案', value: 8, linkText: '查看待办', path: '/health-record' },
-    { label: 'AI方案待初审', value: 6, linkText: '查看待办', path: '/plan' },
+    { label: '待回复咨询', value: 6, linkText: '查看待办', path: '/consultation' },
     { label: '今日随访', value: 12, linkText: '查看待办', path: '/followup' },
     { label: '医生意见待跟进', value: 4, linkText: '查看待办', path: '/warning' },
   ],
@@ -268,8 +268,8 @@ const reviewDoctor: WorkbenchConfig = {
   },
   metrics: [
     { label: '待审核服务订单', value: 7, linkText: '进入处理', path: '/work-order' },
-    { label: '待制定管理目标', value: 9, linkText: '进入处理', path: '/goal' },
-    { label: '待审核健康管理方案', value: 6, linkText: '进入处理', path: '/plan' },
+    { label: '待确认健康评估', value: 9, linkText: '进入处理', path: '/assessment' },
+    { label: '待回复咨询', value: 6, linkText: '进入处理', path: '/consultation' },
     { label: '待处理预警', value: 5, danger: true, linkText: '进入处理', path: '/warning' },
   ],
   main: {
@@ -299,7 +299,6 @@ const reviewDoctor: WorkbenchConfig = {
     { label: '检查检验', path: '/health-record', tone: 'info', permissions: [PERMISSIONS.HEALTH_VIEW] },
     { label: '用药记录', path: '/health-record', tone: 'info', permissions: [PERMISSIONS.HEALTH_VIEW] },
     { label: '分层分级', path: '/assessment', tone: 'info', permissions: [PERMISSIONS.HEALTH_ASSESS] },
-    { label: '历史审核', path: '/plan', tone: 'info', permissions: [PERMISSIONS.HEALTH_PLAN] },
   ],
 }
 

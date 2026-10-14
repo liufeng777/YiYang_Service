@@ -1,6 +1,6 @@
 /**
  * 人员管理 - 人员列表（设计稿：人员列表.png）
- * 已对接 GET /api/v1/staff/staffs（服务端分页，支持 keyword / staff_type / status / position_id 筛选）
+ * 已对接 GET /api/v1/staff/staffs（服务端分页，支持 keyword / staff_type / status / position_code 筛选）
  * 岗位筛选项对接 GET /api/v1/staff/positions
  * 说明：顶部统计卡无对应接口，已移除
  */
@@ -26,7 +26,7 @@ const STAFF_STATUS_MAP: Record<number, string> = {
 interface Filters {
   keyword: string
   staff_type?: number
-  position_id?: number
+  position_code?: string
   status?: number
 }
 
@@ -49,7 +49,7 @@ export default function StaffList() {
         page_size: pageSize,
         keyword: applied.keyword || undefined,
         staff_type: applied.staff_type,
-        position_id: applied.position_id,
+        position_code: applied.position_code,
         status: applied.status,
       })
       setList(res.list)
@@ -105,7 +105,8 @@ export default function StaffList() {
     {
       title: '岗位',
       key: 'position',
-      render: (_: unknown, row: StaffItem) => row.position_name || row.title || '-',
+      render: (_: unknown, row: StaffItem) =>
+        row.institutions?.[0]?.position_name || row.title || '-',
     },
     {
       title: '资质与授权',
@@ -174,9 +175,9 @@ export default function StaffList() {
           />
           <Select
             placeholder="全部岗位"
-            value={filters.position_id}
-            onChange={(v) => setFilters((f) => ({ ...f, position_id: v }))}
-            options={positions.map((p) => ({ value: p.id, label: p.position_name }))}
+            value={filters.position_code}
+            onChange={(v) => setFilters((f) => ({ ...f, position_code: v }))}
+            options={positions.map((p) => ({ value: p.position_code, label: p.position_name }))}
             allowClear
             showSearch
             optionFilterProp="label"

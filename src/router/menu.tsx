@@ -6,6 +6,9 @@
 import type { MenuProps } from 'antd'
 import { routes, type RouteConfig, type RouteMeta } from './routes'
 
+/** 机构管理员全量权限码（后端 staffPermissions 中的 all:manage） */
+export const ALL_MANAGE_PERMISSION = 'all:manage'
+
 export type MenuItems = NonNullable<MenuProps['items']>
 
 /** 拼接子路由完整路径 */
@@ -17,10 +20,12 @@ function joinPath(parent: string, child: string) {
 /**
  * 判断用户权限是否可访问某个路由 meta
  * - meta.permissions 未配置 / 为空数组：所有登录用户可访问
+ * - 用户拥有 all:manage（机构管理员全量权限）：放行所有导航
  * - 配置后：用户拥有任一指定权限码即可访问
  */
 export function hasAccess(meta: RouteMeta, userPermissions: string[]): boolean {
   if (!meta.permissions || meta.permissions.length === 0) return true
+  if (userPermissions.includes(ALL_MANAGE_PERMISSION)) return true
   return meta.permissions.some((code) => userPermissions.includes(code))
 }
 

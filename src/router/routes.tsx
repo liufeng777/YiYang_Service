@@ -7,9 +7,11 @@
  *   2. component 使用 React.lazy 懒加载，页面文件放在 src/pages 对应目录
  *   3. meta.hideInMenu = true 表示不进菜单（如详情页）
  *   4. meta.group 配置侧边栏分组标题（如「客户与健康管理」），数组顺序即菜单顺序
- *   5. meta.permissions 控制访问权限（对齐《协同工作台-API设计》权限码模型）：
- *      登录接口返回 permissions 权限码数组（如 lead:view / health:plan），
+ *   5. meta.permissions 控制访问权限（对齐后端 staffPermissions 权限码模型，
+ *      见 src/utils/permissions.ts）：
+ *      登录 / 切换机构接口返回 permissions 权限码数组（如 lead:view / plan:edit），
  *      用户拥有任一指定权限码即可在侧边栏看到并访问该导航；
+ *      all:manage 为机构管理员全量权限，放行所有导航；
  *      不配置表示所有登录用户可见/可访问
  * - 菜单结构按设计稿（医养服务工作台）：工作台 + 客户与健康管理 / 服务履约 /
  *   活动与客户运营 / 组织与人员 四个分组
@@ -22,14 +24,13 @@ import {
   AimOutlined,
   FolderOutlined,
   ExperimentOutlined,
-  FlagOutlined,
-  ProfileOutlined,
   ScheduleOutlined,
   AlertOutlined,
   ToolOutlined,
   WarningOutlined,
   CarryOutOutlined,
   MessageOutlined,
+  HomeOutlined,
   BankOutlined,
   UserOutlined,
   TeamOutlined,
@@ -40,40 +41,37 @@ import type { LazyExoticComponent, ComponentType } from 'react'
 export type LazyComponent = LazyExoticComponent<ComponentType>
 
 /**
- * 权限码常量（与后端 permissions.code 保持一致，见《协同工作台-API设计》§0.2）
- * 侧边栏菜单、路由守卫、工作台快捷入口共用此权限码过滤
+ * 权限码常量（与后端 permissions 保持一致，见 src/utils/permissions.ts staffPermissions）
+ * 侧边栏菜单、路由守卫、工作台快捷入口共用此权限码过滤；
+ * 后端返回 all:manage 时表示机构管理员全量权限（menu.hasAccess 中特判放行）
  */
 export const PERMISSIONS = {
   /** 工作台首页 */
-  DASHBOARD: 'staff:dashboard',
+  DASHBOARD: 'dashboard:view',
   /** 线索 */
   LEAD_VIEW: 'lead:view',
-  /** 健康档案 */
-  HEALTH_VIEW: 'health:view',
+  /** 健康会员 / 健康档案 */
+  HEALTH_VIEW: 'member:view',
   /** 健康力测评（评估） */
-  HEALTH_ASSESS: 'health:assess',
-  /** 管理目标 */
-  HEALTH_GOAL: 'health:goal',
-  /** 健康管理方案 */
-  HEALTH_PLAN: 'health:plan',
-  /** AI 方案生成 */
-  HEALTH_PLAN_AI: 'health:plan-ai',
+  HEALTH_ASSESS: 'assessment:view',
   /** 随访管理 */
-  FOLLOWUP: 'staff:followup',
+  FOLLOWUP: 'followup:view',
   /** 预警管理 */
-  WARN_VIEW: 'warn:view',
+  WARN_VIEW: 'warning:view',
   /** 服务工单 */
-  WO_VIEW: 'wo:view',
+  WO_VIEW: 'work_order:view',
   /** 异常处理（派单/改派/催单） */
-  WO_DISPATCH: 'wo:dispatch',
+  WO_DISPATCH: 'work_order:edit',
   /** 健康活动（运营后台域，预留权限码） */
   ACTIVITY_VIEW: 'activity:view',
   /** 咨询管理 */
-  CONSULT_VIEW: 'consult:view',
+  CONSULT_VIEW: 'consultation:view',
+  /** 预约到访（入住协同复用） */
+  APPT_VIEW: 'appointment:view',
   /** 机构管理（运营后台域，预留权限码） */
   ORG_VIEW: 'org:view',
   /** 人员管理 */
-  STAFFMGR_VIEW: 'staffmgr:view',
+  STAFFMGR_VIEW: 'staff:view',
   /** 团队管理（预留权限码） */
   TEAM_VIEW: 'team:view',
   /** 角色管理（运营后台域，预留权限码） */
@@ -256,68 +254,6 @@ export const routes: RouteConfig[] = [
     ],
   },
   {
-    path: '/goal',
-    meta: { title: '管理目标', icon: <FlagOutlined />, group: '客户与健康管理', permissions: [PERMISSIONS.HEALTH_GOAL] },
-    children: [
-      {
-        path: '',
-        meta: { title: '目标列表' },
-        component: lazy(() => import('@/pages/goal/index')),
-      },
-      {
-        path: 'create',
-        meta: { title: '发起目标制定', hideInMenu: true },
-        component: lazy(() => import('@/pages/goal/create')),
-      },
-      {
-        path: 'design',
-        meta: { title: '制定管理目标', hideInMenu: true },
-        component: lazy(() => import('@/pages/goal/design')),
-      },
-    ],
-  },
-  {
-    path: '/plan',
-    meta: { title: '健康管理方案', icon: <ProfileOutlined />, group: '客户与健康管理', permissions: [PERMISSIONS.HEALTH_PLAN] },
-    children: [
-      {
-        path: '',
-        meta: { title: '方案列表' },
-        component: lazy(() => import('@/pages/plan/index')),
-      },
-      {
-        path: 'generate',
-        meta: { title: 'AI方案生成', hideInMenu: true, permissions: [PERMISSIONS.HEALTH_PLAN_AI] },
-        component: lazy(() => import('@/pages/plan/generate')),
-      },
-      {
-        path: ':id',
-        meta: { title: '方案详情', hideInMenu: true },
-        component: lazy(() => import('@/pages/plan/detail')),
-      },
-      {
-        path: ':id/review',
-        meta: { title: '审核健康管理方案', hideInMenu: true },
-        component: lazy(() => import('@/pages/plan/review')),
-      },
-      {
-        path: ':id/returned',
-        meta: { title: '方案已退回修改', hideInMenu: true },
-        component: lazy(() => import('@/pages/plan/returned')),
-      },
-      {
-        path: ':id/revise',
-        meta: { title: '返修方案并重新提交', hideInMenu: true },
-        component: lazy(() => import('@/pages/plan/revise')),
-      },
-      {
-        path: ':id/execution',
-        meta: { title: '执行详情', hideInMenu: true },
-        component: lazy(() => import('@/pages/plan/execution')),
-      },
-    ],
-  },
-  {
     path: '/followup',
     meta: { title: '随访管理', icon: <ScheduleOutlined />, group: '客户与健康管理', permissions: [PERMISSIONS.FOLLOWUP] },
     children: [
@@ -459,6 +395,24 @@ export const routes: RouteConfig[] = [
         path: 'register',
         meta: { title: '登记电话咨询', hideInMenu: true },
         component: lazy(() => import('@/pages/consultation/register')),
+      },
+    ],
+  },
+  {
+    // 入住协同：登记会员入住意向并持续跟进（设计稿：16.入住协同）
+    // swagger 无对应接口，页面以本地 mock 演示完整交互（见 BasicLayout NO_API_PREFIXES）
+    path: '/admission',
+    meta: {
+      title: '入住协同',
+      icon: <HomeOutlined />,
+      group: '活动与客户运营',
+      permissions: [PERMISSIONS.APPT_VIEW, PERMISSIONS.LEAD_VIEW],
+    },
+    children: [
+      {
+        path: '',
+        meta: { title: '入住协同' },
+        component: lazy(() => import('@/pages/admission/index')),
       },
     ],
   },

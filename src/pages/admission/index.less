@@ -1,0 +1,158 @@
+/**
+ * 入住协同（意向列表 + 新增意向抽屉 + 跟进记录抽屉）
+ * 设计稿：16.入住协同；配色/字号变量见 variables.less
+ */
+
+/* ===== 统计卡 ===== */
+.ad-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: @spacing-md;
+}
+
+.ad-stat {
+  .card-surface();
+  padding: @spacing-md @spacing-xl;
+
+  &__label {
+    .text-auxiliary();
+    font-size: @font-size-label;
+  }
+
+  &__value {
+    .text-metric();
+    margin-top: @spacing-2xs;
+    display: flex;
+    align-items: baseline;
+    gap: @spacing-sm;
+  }
+
+  &__sub {
+    .text-auxiliary();
+    font-weight: @font-weight-body;
+
+    &--warn {
+      color: @color-risk-mid;
+    }
+
+    &--info {
+      color: @color-info;
+    }
+
+    &--success {
+      color: @color-primary;
+    }
+  }
+}
+
+/* ===== 抽屉表单 ===== */
+.ad-section__title {
+  font-size: @font-size-body;
+  font-weight: @font-weight-body-medium;
+  color: @color-text-primary;
+  margin: @spacing-md 0 @spacing-sm;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.ad-form__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: @spacing-sm @spacing-md;
+  margin-bottom: @spacing-sm;
+}
+
+.ad-field {
+  margin-bottom: @spacing-sm;
+
+  &__label {
+    .text-auxiliary();
+    font-size: @font-size-label;
+    margin-bottom: @spacing-2xs;
+  }
+
+  .ant-select {
+    width: 100%;
+  }
+}
+
+.ad-note {
+  margin-top: @spacing-sm;
+  padding: @spacing-sm @spacing-md;
+  background: @color-health-banner-bg;
+  border-radius: @radius-md;
+  color: @color-primary-dark;
+  font-size: @font-size-auxiliary;
+  line-height: @line-height-auxiliary;
+}
+
+.ad-drawer__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: @spacing-sm;
+}
+
+/* ===== 跟进抽屉 ===== */
+.ad-follow__member {
+  .card-surface();
+  padding: @spacing-md;
+
+  &-main {
+    display: flex;
+    align-items: baseline;
+    gap: @spacing-md;
+    font-size: @font-size-body;
+    color: @color-text-primary;
+  }
+
+  &-name {
+    font-weight: @font-weight-body-medium;
+  }
+
+  &-sub {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+}
+
+.ad-records {
+  .card-surface();
+  padding: @spacing-md;
+
+  &__empty {
+    .text-auxiliary();
+    text-align: center;
+    padding: @spacing-md 0;
+  }
+}
+
+.ad-record {
+  & + & {
+    margin-top: @spacing-md;
+    padding-top: @spacing-md;
+    border-top: 1px solid @color-border;
+  }
+
+  &__head {
+    display: flex;
+    align-items: baseline;
+    gap: @spacing-md;
+  }
+
+  &__time {
+    .text-auxiliary();
+  }
+
+  &__title {
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+    color: @color-text-primary;
+  }
+
+  &__content {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+}

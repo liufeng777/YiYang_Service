@@ -17,15 +17,13 @@ const { Sider, Content } = Layout
  */
 const NO_API_PREFIXES = [
   // 整个模块无接口
-  '/goal',
-  '/plan',
   '/assess',
   '/activity',
+  '/admission',
   '/institution',
   '/team',
   '/role',
   '/exception',
-  '/select-org',
   // 健康档案子页面（列表 /health 已对接）
   '/health/import',
   '/health/profile',
@@ -37,10 +35,6 @@ const NO_API_PREFIXES = [
   '/followup/create',
   // 预警（列表与处置已对接，关闭页接口待补充）
   '/warning/close',
-  // 工单（列表与详情已对接，医生审核接口待补充）
-  '/work-order/audit',
-  // 咨询（列表已对接，来电登记接口待补充）
-  '/consultation/register',
   // 人员管理子页面（列表/新增/详情已对接）
   '/staff/credentials',
   '/staff/qualification',

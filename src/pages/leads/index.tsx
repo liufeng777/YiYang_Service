@@ -5,8 +5,8 @@
  * 当前线索管理已从侧边栏隐藏（由健康会员替代），页面保留
  */
 import { useCallback, useEffect, useState } from 'react'
-import { Button, Card, Input, Select, Table } from 'antd'
-import { PlusOutlined } from '@ant-design/icons'
+import { Button, Card, Input, Select, Table, message } from 'antd'
+import { PlusOutlined, DownloadOutlined } from '@ant-design/icons'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 import PageContainer from '@/components/PageContainer'
@@ -68,6 +68,30 @@ export default function LeadList() {
     setFilters({ keyword: '' })
     setApplied({ keyword: '' })
     setPage(1)
+  }
+
+  /** 导出线索 CSV（GET /leads/export，按当前筛选条件） */
+  const [exporting, setExporting] = useState(false)
+  const onExport = async () => {
+    setExporting(true)
+    try {
+      const res = await leadApi.exportLeads({
+        keyword: applied.keyword || undefined,
+        source_type: applied.source_type,
+        status: applied.status,
+      })
+      const blob = res.data
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `线索导出_${dayjs().format('YYYYMMDDHHmm')}.csv`
+      link.click()
+      URL.revokeObjectURL(url)
+    } catch {
+      message.error('导出失败，请稍后重试')
+    } finally {
+      setExporting(false)
+    }
   }
 
   const columns = [
@@ -135,9 +159,14 @@ export default function LeadList() {
         title="线索管理"
         description="简单记录线上咨询和线下接触中产生的用户意向"
         extra={
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/leads/create')}>
-            新增线索
-          </Button>
+          <>
+            <Button icon={<DownloadOutlined />} loading={exporting} onClick={onExport}>
+              导出
+            </Button>
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/leads/create')}>
+              新增线索
+            </Button>
+          </>
         }
       >
         {/* 筛选区 */}

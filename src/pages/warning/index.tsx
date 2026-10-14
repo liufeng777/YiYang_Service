@@ -18,7 +18,14 @@ import {
 import './index.less'
 
 const SEVERITY_TONE: Record<number, string> = { 1: 'green', 2: 'orange', 3: 'red' }
-const STATUS_TONE: Record<number, string> = { 1: 'red', 2: 'blue', 3: 'green', 4: 'green' }
+const STATUS_TONE: Record<number, string> = {
+  0: 'red',
+  1: 'red',
+  2: 'blue',
+  3: 'green',
+  4: 'green',
+  5: 'orange',
+}
 
 interface Filters {
   status?: number
@@ -107,9 +114,7 @@ export default function WarningList() {
       render: (_: unknown, row: WarningItem) => (
         <Button
           size="small"
-          onClick={() =>
-            navigate(`/warning/${row.id}/${row.warning_status === 3 ? 'close' : 'handle'}`)
-          }
+          onClick={() => navigate(`/warning/${row.id}/handle`)}
         >
           查看
         </Button>

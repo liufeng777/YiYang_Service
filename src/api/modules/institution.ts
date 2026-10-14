@@ -1,44 +1,41 @@
 import { http } from '@/utils/request'
-import type { PageParams, PageResult } from '@/types/api'
 
-export interface InstitutionItem {
+/**
+ * 机构主数据（协同工作台端）
+ * 网关前缀：/api/v1/staff
+ *
+ * 用途：登录返回 staff.institutions 仅含机构 id 与岗位信息，
+ * 选择机构页需要逐个调用机构详情接口渲染机构卡片（名称 / 类型 / 地址等）。
+ * 注意：该端点未出现在 swagger.json 路径清单中，路径按网关前缀约定
+ * 推断为 GET /api/v1/staff/institutions/{id}，如后端实际路径不同仅需改此处。
+ */
+
+/** 机构详情（出参字段按服务端实际返回兼容读取，均为可选） */
+export interface InstitutionDetail {
   id: number
-  name: string
-  contactName: string
-  contactPhone: string
-  status: number // 0 待审核 1 已通过 2 已驳回
-  createdAt: string
+  institution_id?: number
+  name?: string
+  institution_name?: string
+  /** 机构类型，如 医养结合机构 / 护理院 / 健康驿站 */
+  type?: string
+  institution_type?: string
+  address?: string
+  contact_name?: string
+  contact_phone?: string
+  description?: string
+  /** 数据范围说明（如接口提供） */
+  scope?: string
+  scope_detail?: string
+  status?: number
+  [key: string]: unknown
 }
 
-export interface InstitutionDetail extends InstitutionItem {
-  address: string
-  description: string
-  businessLicenseUrl: string
-}
-
-/** 机构分页列表 */
-export function getInstitutionList(params: PageParams) {
-  return http.get<PageResult<InstitutionItem>>('/institution/list', { ...params })
-}
-
-/** 机构详情 */
-export function getInstitutionDetail(id: number) {
-  return http.get<InstitutionDetail>(`/institution/${id}`)
-}
-
-/** 机构审核 */
-export function auditInstitution(id: number, approved: boolean, remark?: string) {
-  return http.post<null>(`/institution/${id}/audit`, { approved, remark })
-}
-
-/** 机构上下架 */
-export function toggleInstitution(id: number, enabled: boolean) {
-  return http.post<null>(`/institution/${id}/toggle`, { enabled })
+/** 机构详情（选择机构页卡片数据源） */
+export function getInstitutionDetail(id: number | string) {
+  return http.get<InstitutionDetail>(`/v1/staff/institutions/${id}`)
 }
 
 /**
- * TODO: 协同工作台端机构主数据接口（平台管理员：机构列表/新增机构/编辑/同步运营平台/同步日志）
- * API v0.1（《协同工作台-API设计》）未定义，机构管理为运营后台域预留权限码（org:view），待后端补充；
- * 当前 src/pages/institution 页面以本地 mock 演示完整交互。
- * 注意：本模块上述接口与本端机构管理页面无对应关系，页面未调用。
+ * TODO: 机构管理页面接口（机构列表/新增机构/编辑/同步运营平台/同步日志）
+ * swagger 未定义，src/pages/institution 页面以本地 mock 演示完整交互。
  */

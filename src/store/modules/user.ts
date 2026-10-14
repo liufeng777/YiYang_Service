@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { authApi } from '@/api'
+import type { StaffInstitution } from '@/api/modules/auth'
 
 /**
  * 岗位编码（对齐登录接口 staff.position.position_code）
@@ -59,6 +60,8 @@ export interface OrgInfo {
 interface UserState {
   token: string
   userInfo: UserInfo | null
+  /** 登录接口返回的可访问机构列表（staff.institutions，选择机构页数据源） */
+  institutions: StaffInstitution[]
   /** 当前进入的机构（登录后在「选择机构」页确定） */
   currentOrg: OrgInfo | null
   setToken: (token: string) => void
@@ -78,57 +81,53 @@ export function maskPhone(phone: string): string {
   return phone.replace(/(\d{3})\d{4}(\d{4})/, '$1****$2')
 }
 
-/** 各岗位的权限码集合（mock，对齐《协同工作台-API设计》权限码前缀） */
+/** 各岗位的权限码集合（后端未下发 permissions 时的兜底，对齐 src/utils/permissions.ts staffPermissions） */
 const POSITION_PERMISSIONS: Record<PositionCode, string[]> = {
   // 健康管理师：客户与健康管理全域 + 工单查看 + 咨询
   HEALTH_MANAGER: [
-    'staff:dashboard',
-    'lead:view', 'lead:followup',
-    'health:view', 'health:record', 'health:profile', 'health:assess',
-    'health:goal', 'health:plan', 'health:plan-ai',
-    'staff:followup', 'warn:view', 'warn:handle',
-    'wo:view', 'consult:view',
+    'dashboard:view',
+    'lead:view', 'lead:edit',
+    'member:view', 'member:edit',
+    'assessment:view', 'assessment:edit',
+    'goal:view', 'goal:edit',
+    'plan:view', 'plan:edit',
+    'followup:view', 'followup:edit',
+    'warning:view', 'warning:edit',
+    'work_order:view', 'consultation:view',
   ],
   // 护理院养老顾问：线索跟进转化 + 预约到访 + 咨询 + 活动 + 工单查看
   CARE_CONSULTANT: [
-    'staff:dashboard',
-    'lead:view', 'lead:assign', 'lead:followup', 'lead:convert',
-    'health:view',
-    'appt:view', 'appt:manage',
-    'consult:view', 'consult:reply',
-    'activity:view', 'wo:view',
+    'dashboard:view',
+    'lead:view', 'lead:edit', 'lead:manage',
+    'member:view',
+    'appointment:view', 'appointment:edit',
+    'consultation:view', 'consultation:edit',
+    'activity:view', 'work_order:view',
   ],
-  // 机构管理员：本机构全域（人员/排班/派单/订单/预约/团队）
-  ORG_ADMIN: [
-    'staff:dashboard',
-    'lead:view', 'lead:assign', 'lead:followup',
-    'health:view',
-    'staff:followup', 'warn:view',
-    'wo:view', 'wo:dispatch', 'order:view', 'order:manage',
-    'schedule:view', 'schedule:manage',
-    'staffmgr:view', 'staffmgr:manage', 'team:view',
-    'appt:view', 'appt:manage', 'consult:view', 'activity:view',
-  ],
+  // 机构管理员：本机构全量权限（后端 all:manage 语义）
+  ORG_ADMIN: ['all:manage'],
   // 健康驿站运营专员：活动 + 线索 + 预约 + 工单查看
   STATION_OPERATOR: [
-    'staff:dashboard',
+    'dashboard:view',
     'activity:view',
-    'lead:view', 'lead:followup', 'lead:convert',
-    'appt:view', 'appt:manage',
-    'consult:view', 'wo:view',
+    'lead:view', 'lead:edit',
+    'appointment:view', 'appointment:edit',
+    'consultation:view', 'work_order:view',
   ],
   // 平台管理员：跨机构视角（机构/角色/人员概况/订单）
   PLATFORM_ADMIN: [
-    'staff:dashboard',
-    'org:view', 'role:view', 'staffmgr:view',
-    'wo:view', 'order:view',
+    'dashboard:view',
+    'org:view', 'role:view', 'staff:view',
+    'work_order:view', 'order:view',
   ],
   // 审核医生：健康预警 + 订单审核 + 目标与方案终审
   REVIEW_DOCTOR: [
-    'staff:dashboard',
-    'health:view', 'health:assess', 'health:goal', 'health:plan',
-    'warn:view', 'warn:handle',
-    'order:view', 'order:manage', 'staff:followup',
+    'dashboard:view',
+    'member:view', 'assessment:view', 'assessment:edit',
+    'goal:view', 'goal:edit', 'goal:manage',
+    'plan:view', 'plan:edit', 'plan:manage',
+    'warning:view', 'warning:edit',
+    'order:view', 'order:edit', 'followup:view',
   ],
 }
 
@@ -154,7 +153,8 @@ const BACKEND_POSITION_MAP: Record<string, PositionCode> = {
   Caregiver: POSITIONS.HEALTH_MANAGER,
 }
 
-function resolvePositionCode(code?: string): PositionCode {
+/** 解析后端岗位编码为前端岗位编码（登录与切换机构共用） */
+export function resolvePositionCode(code?: string): PositionCode {
   if (!code) return POSITIONS.HEALTH_MANAGER
   if ((Object.values(POSITIONS) as string[]).includes(code)) return code as PositionCode
   return BACKEND_POSITION_MAP[code] ?? POSITIONS.HEALTH_MANAGER
@@ -165,6 +165,7 @@ export const useUserStore = create<UserState>()(
     (set) => ({
       token: '',
       userInfo: null,
+      institutions: [],
       currentOrg: null,
       setToken: (token) => set({ token }),
       setUserInfo: (userInfo) => set({ userInfo }),
@@ -178,12 +179,13 @@ export const useUserStore = create<UserState>()(
       login: async (params) => {
         const res = params.password
           ? await authApi.login({ phone: params.phone, password: params.password })
-          : await authApi.smsLogin({ phone: params.phone, sms_code: params.code ?? '' })
+          : await authApi.smsLogin({ phone: params.phone, code: params.code ?? '' })
         const staff = res.staff
         const positionCode = resolvePositionCode(staff?.position?.position_code)
         set({
           token: res.token,
           currentOrg: null,
+          institutions: staff?.institutions ?? [],
           userInfo: {
             id: staff?.id ?? 0,
             phone: staff?.phone || params.phone,
@@ -201,7 +203,7 @@ export const useUserStore = create<UserState>()(
       logout: () => {
         // 服务端注销 token（失败不阻塞本地登出）
         authApi.logout().catch(() => undefined)
-        set({ token: '', userInfo: null, currentOrg: null })
+        set({ token: '', userInfo: null, institutions: [], currentOrg: null })
       },
     }),
     {
@@ -211,7 +213,7 @@ export const useUserStore = create<UserState>()(
       version: 2,
       migrate: (persisted, version) => {
         if (version < 2) {
-          return { token: '', userInfo: null, currentOrg: null } as never
+          return { token: '', userInfo: null, institutions: [], currentOrg: null } as never
         }
         return persisted as never
       },

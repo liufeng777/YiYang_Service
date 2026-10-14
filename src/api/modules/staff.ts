@@ -10,13 +10,16 @@ import type { PageParams, PageResult } from '@/types/api'
 export interface StaffItem {
   id: number
   institution_id: number
+  institutions: {
+    institution_id: number;
+    position_code: string;
+    position_name: string;
+  }[]
   /** 1-本端协同人员 2-小程序服务人员 */
   staff_type: number
   name: string
   phone: string
   avatar_url: string
-  position_code?: string
-  position_name: string
   title: string
   service_ids?: number[]
   referral_code?: string
@@ -56,12 +59,13 @@ export interface PositionItem {
   status?: number
 }
 
-/** 人员分页列表 */
+/** 人员分页列表（swagger：staff_type / status / position_code / keyword / 分页） */
 export function getStaffList(
   params: PageParams & {
     staff_type?: number
     status?: number
-    position_id?: number
+    /** 岗位编码（Admin / Doctor / HealthMgr / Caregiver） */
+    position_code?: string
     keyword?: string
   },
 ) {
@@ -74,7 +78,16 @@ export function getStaffDetail(id: number) {
 }
 
 /** 新增人员（phone 唯一，新增时设定初始密码，首次登录强制改密） */
-export function createStaff(data: Partial<StaffItem> & { password?: string }) {
+export function createStaff(
+  data: Partial<StaffItem> & {
+    password?: string
+    /** 1-男 2-女（服务端入参，StaffItem 出参不含） */
+    gender?: number
+    id_card?: string
+    /** 岗位编码（Admin / Doctor / HealthMgr / Caregiver） */
+    position_code?: string
+  },
+) {
   return http.post<StaffItem>('/v1/staff/staffs', data)
 }
 
