@@ -119,6 +119,7 @@ export function AssessTab() {
               setPage(nextPage)
               setPageSize(nextPageSize)
             },
+            showSizeChanger: true,
             showTotal: (total) => `共 ${total} 条`,
           }}
         />

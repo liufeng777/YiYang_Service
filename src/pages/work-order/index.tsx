@@ -86,6 +86,7 @@ export default function WorkOrderList() {
 
   const applyFilters = () => {
     setApplied(filters)
+    setActiveTab(filters.status ?? 0)
     setPage(1)
   }
 
@@ -233,6 +234,7 @@ export default function WorkOrderList() {
               className={t.key === activeTab ? 'wo-tabs__item wo-tabs__item--active' : 'wo-tabs__item'}
               onClick={() => {
                 setActiveTab(t.key)
+                setFilters((f) => ({ ...f, status: t.key || undefined }))
                 setPage(1)
               }}
             >
@@ -253,11 +255,7 @@ export default function WorkOrderList() {
           <Select
             placeholder="工单状态：全部"
             value={filters.status}
-            onChange={(v) => {
-              setFilters((f) => ({ ...f, status: v }))
-              setActiveTab(v ?? 0)
-              setPage(1)
-            }}
+            onChange={(v) => setFilters((f) => ({ ...f, status: v }))}
             options={Object.entries(WO_STATUS_MAP).map(([value, label]) => ({
               value: Number(value),
               label,
@@ -289,6 +287,7 @@ export default function WorkOrderList() {
                 setPage(nextPage)
                 setPageSize(nextPageSize)
               },
+              showSizeChanger: true,
               showTotal: (total) => `共 ${total} 条`,
             }}
           />

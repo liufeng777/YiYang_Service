@@ -484,7 +484,7 @@ function DispatchModal({
             </div>
             <div className="wo-staff__tags">
               <span className="wo-tag wo-tag--green">
-                {s.institutions?.[0]?.position_name || '-'}
+                {s.position_name || '-'}
               </span>
             </div>
             <div className="wo-staff__slot">

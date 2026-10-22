@@ -239,6 +239,7 @@ export default function HealthRecordList() {
                 setPage(nextPage)
                 setPageSize(nextPageSize)
               },
+              showSizeChanger: true,
               showTotal: (t) => `共 ${t} 条`,
             }}
           />

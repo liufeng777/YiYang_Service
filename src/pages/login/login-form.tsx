@@ -42,8 +42,8 @@ export default function LoginForm({ onForgot }: LoginFormProps) {
     try {
       await login(params)
       message.success('登录成功')
-      // 登录成功后进入「选择机构」页（设计稿流程）
-      navigate('/select-org', { replace: true })
+      // 登录成功直接进入首页：staff.institution_id 为最近登录机构，登录时已设为当前机构
+      navigate('/workbench', { replace: true })
     } finally {
       setLoading(false)
     }

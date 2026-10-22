@@ -6,14 +6,14 @@
  *   1. 导航项 path 为绝对路径；每个导航项为单页（children 中 '' 默认页承载组件）
  *   2. component 使用 React.lazy 懒加载，页面文件放在 src/pages 对应目录
  *   3. meta.hideInMenu = true 表示不进菜单（如详情页）
- *   4. meta.group 配置侧边栏分组标题（如「客户与健康管理」），数组顺序即菜单顺序
+ *   4. meta.group 配置侧边栏分组标题（如「健康管理」），数组顺序即菜单顺序
  *   5. meta.permissions 控制访问权限（对齐后端 staffPermissions 权限码模型，
  *      见 src/utils/permissions.ts）：
  *      登录 / 切换机构接口返回 permissions 权限码数组（如 lead:view / plan:edit），
  *      用户拥有任一指定权限码即可在侧边栏看到并访问该导航；
  *      all:manage 为机构管理员全量权限，放行所有导航；
  *      不配置表示所有登录用户可见/可访问
- * - 菜单结构按设计稿（医养服务工作台）：工作台 + 客户与健康管理 / 服务履约 /
+ * - 菜单结构按设计稿（医养服务工作台）：工作台 + 健康管理 / 服务履约 /
  *   活动与客户运营 / 组织与人员 四个分组
  * ============================================================
  */
@@ -21,8 +21,6 @@ import { lazy } from 'react'
 import type { ReactNode } from 'react'
 import {
   DashboardOutlined,
-  AimOutlined,
-  FolderOutlined,
   ExperimentOutlined,
   ScheduleOutlined,
   AlertOutlined,
@@ -34,7 +32,6 @@ import {
   BankOutlined,
   UserOutlined,
   TeamOutlined,
-  SafetyOutlined,
 } from '@ant-design/icons'
 import type { LazyExoticComponent, ComponentType } from 'react'
 
@@ -121,10 +118,10 @@ export const routes: RouteConfig[] = [
     ],
   },
 
-  /* ===== 客户与健康管理 ===== */
+  /* ===== 健康管理 ===== */
   {
     path: '/member',
-    meta: { title: '健康会员', icon: <TeamOutlined />, group: '客户与健康管理', permissions: [PERMISSIONS.HEALTH_VIEW] },
+    meta: { title: '健康会员', icon: <TeamOutlined />, group: '健康管理', permissions: [PERMISSIONS.HEALTH_VIEW] },
     children: [
       {
         path: '',
@@ -138,88 +135,88 @@ export const routes: RouteConfig[] = [
       },
     ],
   },
-  {
-    // 线索管理：已从侧边栏移除（被「健康会员」替代），路由与代码文件暂时保留，
-    // 全部子级 hideInMenu 使导航不在侧边栏展示，工作台/活动等模块内的既有链接仍可用
-    path: '/leads',
-    meta: { title: '线索管理', icon: <AimOutlined />, group: '客户与健康管理', permissions: [PERMISSIONS.LEAD_VIEW] },
-    children: [
-      {
-        path: '',
-        meta: { title: '线索登记', hideInMenu: true },
-        component: lazy(() => import('@/pages/leads/index')),
-      },
-      {
-        path: 'create',
-        meta: { title: '新增线索', hideInMenu: true },
-        component: lazy(() => import('@/pages/leads/edit')),
-      },
-      {
-        path: 'edit/:id',
-        meta: { title: '编辑线索', hideInMenu: true },
-        component: lazy(() => import('@/pages/leads/edit')),
-      },
-      {
-        path: ':id/verify',
-        meta: { title: '完成实名认证', hideInMenu: true },
-        component: lazy(() => import('@/pages/leads/verify')),
-      },
-      {
-        path: ':id/convert-success',
-        meta: { title: '转档成功', hideInMenu: true },
-        component: lazy(() => import('@/pages/leads/convert-success')),
-      },
-    ],
-  },
-  {
-    path: '/health-record',
-    meta: { title: '健康档案', icon: <FolderOutlined />, group: '客户与健康管理', permissions: [PERMISSIONS.HEALTH_VIEW] },
-    children: [
-      {
-        path: '',
-        meta: { title: '档案列表' },
-        component: lazy(() => import('@/pages/health')),
-      },
-      {
-        path: 'create',
-        meta: { title: '新建健康档案', hideInMenu: true },
-        component: lazy(() => import('@/pages/health/create')),
-      },
-      {
-        path: 'import',
-        meta: { title: '批量导入', hideInMenu: true },
-        component: lazy(() => import('@/pages/health/import')),
-      },
-      {
-        path: ':id',
-        meta: { title: '档案概览', hideInMenu: true },
-        component: lazy(() => import('@/pages/health/profile')),
-      },
-      {
-        path: ':id/disease/:diseaseKey',
-        meta: { title: '专病档案', hideInMenu: true },
-        component: lazy(() => import('@/pages/health/disease')),
-      },
-      {
-        path: ':id/assign',
-        meta: { title: '分配管理团队', hideInMenu: true },
-        component: lazy(() => import('@/pages/health/assign')),
-      },
-      {
-        path: ':id/risk-level',
-        meta: { title: '分层分级详情', hideInMenu: true },
-        component: lazy(() => import('@/pages/health/risk-level')),
-      },
-      {
-        path: ':id/risk-change',
-        meta: { title: '分层变化处理', hideInMenu: true },
-        component: lazy(() => import('@/pages/health/risk-change')),
-      },
-    ],
-  },
+  // {
+  //   // 线索管理：已从侧边栏移除（被「健康会员」替代），路由与代码文件暂时保留，
+  //   // 全部子级 hideInMenu 使导航不在侧边栏展示，工作台/活动等模块内的既有链接仍可用
+  //   path: '/leads',
+  //   meta: { title: '线索管理', icon: <AimOutlined />, group: '健康管理', permissions: [PERMISSIONS.LEAD_VIEW] },
+  //   children: [
+  //     {
+  //       path: '',
+  //       meta: { title: '线索登记', hideInMenu: true },
+  //       component: lazy(() => import('@/pages/leads/index')),
+  //     },
+  //     {
+  //       path: 'create',
+  //       meta: { title: '新增线索', hideInMenu: true },
+  //       component: lazy(() => import('@/pages/leads/edit')),
+  //     },
+  //     {
+  //       path: 'edit/:id',
+  //       meta: { title: '编辑线索', hideInMenu: true },
+  //       component: lazy(() => import('@/pages/leads/edit')),
+  //     },
+  //     {
+  //       path: ':id/verify',
+  //       meta: { title: '完成实名认证', hideInMenu: true },
+  //       component: lazy(() => import('@/pages/leads/verify')),
+  //     },
+  //     {
+  //       path: ':id/convert-success',
+  //       meta: { title: '转档成功', hideInMenu: true },
+  //       component: lazy(() => import('@/pages/leads/convert-success')),
+  //     },
+  //   ],
+  // },
+  // {
+  //   path: '/health-record',
+  //   meta: { title: '健康档案', icon: <FolderOutlined />, group: '健康管理', permissions: [PERMISSIONS.HEALTH_VIEW] },
+  //   children: [
+  //     {
+  //       path: '',
+  //       meta: { title: '档案列表' },
+  //       component: lazy(() => import('@/pages/health')),
+  //     },
+  //     {
+  //       path: 'create',
+  //       meta: { title: '新建健康档案', hideInMenu: true },
+  //       component: lazy(() => import('@/pages/health/create')),
+  //     },
+  //     {
+  //       path: 'import',
+  //       meta: { title: '批量导入', hideInMenu: true },
+  //       component: lazy(() => import('@/pages/health/import')),
+  //     },
+  //     {
+  //       path: ':id',
+  //       meta: { title: '档案概览', hideInMenu: true },
+  //       component: lazy(() => import('@/pages/health/profile')),
+  //     },
+  //     {
+  //       path: ':id/disease/:diseaseKey',
+  //       meta: { title: '专病档案', hideInMenu: true },
+  //       component: lazy(() => import('@/pages/health/disease')),
+  //     },
+  //     {
+  //       path: ':id/assign',
+  //       meta: { title: '分配管理团队', hideInMenu: true },
+  //       component: lazy(() => import('@/pages/health/assign')),
+  //     },
+  //     {
+  //       path: ':id/risk-level',
+  //       meta: { title: '分层分级详情', hideInMenu: true },
+  //       component: lazy(() => import('@/pages/health/risk-level')),
+  //     },
+  //     {
+  //       path: ':id/risk-change',
+  //       meta: { title: '分层变化处理', hideInMenu: true },
+  //       component: lazy(() => import('@/pages/health/risk-change')),
+  //     },
+  //   ],
+  // },
   {
     path: '/assessment',
-    meta: { title: '健康力测评', icon: <ExperimentOutlined />, group: '客户与健康管理', permissions: [PERMISSIONS.HEALTH_ASSESS] },
+    meta: { title: '健康力测评', icon: <ExperimentOutlined />, group: '健康管理', permissions: [PERMISSIONS.HEALTH_ASSESS] },
     children: [
       {
         path: '',
@@ -255,7 +252,7 @@ export const routes: RouteConfig[] = [
   },
   {
     path: '/followup',
-    meta: { title: '随访管理', icon: <ScheduleOutlined />, group: '客户与健康管理', permissions: [PERMISSIONS.FOLLOWUP] },
+    meta: { title: '随访管理', icon: <ScheduleOutlined />, group: '健康管理', permissions: [PERMISSIONS.FOLLOWUP] },
     children: [
       {
         path: '',
@@ -276,7 +273,7 @@ export const routes: RouteConfig[] = [
   },
   {
     path: '/warning',
-    meta: { title: '预警管理', icon: <AlertOutlined />, group: '客户与健康管理', permissions: [PERMISSIONS.WARN_VIEW] },
+    meta: { title: '健康预警', icon: <AlertOutlined />, group: '健康管理', permissions: [PERMISSIONS.WARN_VIEW] },
     children: [
       {
         path: '',
@@ -331,7 +328,7 @@ export const routes: RouteConfig[] = [
   {
     path: '/exception',
     meta: {
-      title: '异常处理',
+      title: '工单异常',
       icon: <WarningOutlined />,
       group: '服务履约',
       permissions: [PERMISSIONS.WO_DISPATCH],
@@ -420,7 +417,7 @@ export const routes: RouteConfig[] = [
   /* ===== 组织与人员 ===== */
   {
     path: '/organization',
-    meta: { title: '机构管理', icon: <BankOutlined />, group: '组织与人员', permissions: [PERMISSIONS.ORG_VIEW] },
+    meta: { title: '机构信息', icon: <BankOutlined />, group: '组织与人员', permissions: [PERMISSIONS.ORG_VIEW] },
     children: [
       {
         path: '',
@@ -520,21 +517,5 @@ export const routes: RouteConfig[] = [
         component: lazy(() => import('@/pages/team/detail')),
       },
     ],
-  },
-  {
-    path: '/role',
-    meta: { title: '角色管理', icon: <SafetyOutlined />, group: '组织与人员', permissions: [PERMISSIONS.ROLE_VIEW] },
-    children: [
-      {
-        path: '',
-        meta: { title: '角色列表' },
-        component: lazy(() => import('@/pages/role/list')),
-      },
-      {
-        path: 'create',
-        meta: { title: '新建角色', hideInMenu: true },
-        component: lazy(() => import('@/pages/role/create')),
-      },
-    ],
-  },
+  }
 ]

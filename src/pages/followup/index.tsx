@@ -73,6 +73,7 @@ export default function FollowupList() {
 
   const applyFilters = () => {
     setApplied({ typeFilter, keyword })
+    setPage(1)
   }
 
   const onReset = () => {
@@ -234,6 +235,7 @@ export default function FollowupList() {
                 setPage(nextPage)
                 setPageSize(nextPageSize)
               },
+              showSizeChanger: true,
               showTotal: (total) => `共 ${total} 条`,
             }}
           />

@@ -5,13 +5,13 @@
  * 说明：顶部统计卡无对应接口，已移除
  */
 import { useCallback, useEffect, useState } from 'react'
-import { Button, Card, Input, Select, Table } from 'antd'
+import { Button, Card, Input, Select, Space, Table } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import { staffApi } from '@/api'
 import type { PositionItem, StaffItem } from '@/api/modules/staff'
-import './index.less'
+import '../index.less'
 
 const STAFF_TYPE_MAP: Record<number, string> = {
   1: '本端协同人员',
@@ -91,29 +91,37 @@ export default function StaffList() {
       title: '人员',
       key: 'name',
       render: (_: unknown, row: StaffItem) => (
-        <div>
-          <div className="staff-row__name">{row.name || '-'}</div>
-          <div className="staff-row__sub">{row.phone || '-'}</div>
+        <div className='table-cell'>
+          <strong>{row.name || '-'}</strong>
+          <span>{row.phone || '-'}</span>
         </div>
       ),
     },
     {
       title: '人员类型',
       key: 'staff_type',
-      render: (_: unknown, row: StaffItem) => STAFF_TYPE_MAP[row.staff_type] ?? '-',
+      render: (_: unknown, row: StaffItem) => (
+        <div className='table-cell'>
+          <strong>{STAFF_TYPE_MAP[row.staff_type] ?? '-'}</strong>
+          <span>{row.referral_code}</span>
+        </div>
+      )
     },
     {
       title: '岗位',
       key: 'position',
       render: (_: unknown, row: StaffItem) =>
-        row.institutions?.[0]?.position_name || row.title || '-',
+        <div className='table-cell'>
+          <strong>{row.position_name || '-'}</strong>
+          {row.title && row.title !== row.position_name && <span>{row.title || '-'}</span>}
+        </div>
     },
     {
       title: '资质与授权',
       key: 'credential',
       render: (_: unknown, row: StaffItem) =>
         row.upcoming_credential_expire ? (
-          <span className="staff-tag staff-tag--orange">资质即将到期</span>
+          <span className="status-tag status-tag--orange">资质即将到期</span>
         ) : (
           <span className="staff-text--muted">-</span>
         ),
@@ -122,7 +130,7 @@ export default function StaffList() {
       title: '人员状态',
       key: 'status',
       render: (_: unknown, row: StaffItem) => (
-        <span className={`staff-tag staff-tag--${row.status === 1 ? 'green' : 'red'}`}>
+        <span className={`status-tag status-tag--${row.status === 1 ? 'green' : 'red'}`}>
           {STAFF_STATUS_MAP[row.status] ?? '-'}
         </span>
       ),
@@ -145,14 +153,14 @@ export default function StaffList() {
         title="人员管理"
         description="机构管理员维护当前机构普通用户、专业服务人员及账号状态"
         extra={
-          <>
+          <Space>
             <Button onClick={() => navigate('/staff/credentials')}>执业资质</Button>
             <Button onClick={() => navigate('/staff/audit')}>资质审核</Button>
             <Button onClick={() => navigate('/staff/qualification')}>派单资格总览</Button>
             <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/staff/create')}>
               新增人员
             </Button>
-          </>
+          </Space>
         }
       >
         {/* 筛选 */}
@@ -192,14 +200,15 @@ export default function StaffList() {
             }))}
             allowClear
           />
-          <Button type="primary" onClick={applyFilters}>查询</Button>
           <Button onClick={resetFilters}>重置</Button>
+          <Button type="primary" onClick={applyFilters}>查询</Button>
         </Card>
 
         {/* 人员表格 */}
         <Card variant="borderless" className="list-card table-fill">
           <Table<StaffItem>
             rowKey="id"
+            size="small"
             columns={columns}
             dataSource={list}
             loading={loading}
@@ -211,14 +220,10 @@ export default function StaffList() {
                 setPage(nextPage)
                 setPageSize(nextPageSize)
               },
+              showSizeChanger: true,
               showTotal: (total) => `共 ${total} 条`,
             }}
           />
-          <div className="staff-list__footer">
-            <span className="staff-text--danger">
-              本页仅维护当前机构；平台管理员可切换机构代建。
-            </span>
-          </div>
         </Card>
       </PageContainer>
     </div>

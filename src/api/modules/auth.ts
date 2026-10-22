@@ -5,47 +5,36 @@ import { http } from '@/utils/request'
  * 网关前缀：/api/v1/staff
  */
 
-/** 登录账号在各机构下的成员信息（login 出参 staff.institutions 元素，结构同 StaffItem） */
-export interface StaffInstitution {
-  id: number
-  institution_id: number
-  institution_name?: string
-  /** 1-本端协同人员 2-小程序服务人员 */
-  staff_type?: number
-  name?: string
-  phone?: string
-  title?: string
-  position_code?: string
-  position_name?: string
-  position?: {
-    id: number
-    position_name: string
-    position_code: string
-  }
-  /** 0-停用 1-启用 */
-  status?: number
-}
-
 /** 登录账号信息（login / profile 出参 staff 对象） */
 export interface StaffProfile {
   id: number
-  institution_id: number
-  institution_name?: string
-  /** 1-本端协同人员 2-小程序服务人员 */
-  staff_type: number
   name: string
   phone: string
-  avatar_url?: string
+  institution_id: number
+  /** 1-本端协同人员 2-小程序服务人员 */
+  staff_type: number
   title?: string
+  // 切换机构时返回
   position?: {
     id: number
-    position_name: string
-    position_code: string
+    code: string
   }
+  // 登录接口返回
+  position_code?: string
+  position_name?: string
   /** 权限码列表，驱动侧边栏与页面权限 */
   permissions?: string[]
   /** 可访问机构列表（选择机构页数据源） */
-  institutions?: StaffInstitution[]
+  institutions: StaffInstitution[]
+}
+
+export interface StaffInstitution {
+  brief: string;
+  institution_id: number;
+  institution_name: string;
+  last_login_at: number;
+  position_code: string;
+  position_name: string;
 }
 
 /** 登录出参 */
@@ -90,7 +79,10 @@ export function refreshToken() {
  * 返回绑定到目标机构的新 JWT 及该机构岗位
  */
 export function switchInstitution(data: { institution_id: number }) {
-  return http.post<LoginResult>('/v1/staff/auth/switch-institution', data)
+  return http.post<{
+    token: string
+    expires_in: number
+  } & StaffProfile>('/v1/staff/auth/switch-institution', data)
 }
 
 /** 登出（登录态，服务端注销 token） */

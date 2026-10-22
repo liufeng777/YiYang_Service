@@ -70,7 +70,7 @@ export default function AppRouter() {
     <Routes>
       <Route path="/" element={<Navigate to="/workbench" replace />} />
       <Route path="/login" element={<Login />} />
-      {/* 登录成功后选择机构：需登录但不含侧边栏布局 */}
+      {/* 顶栏「切换机构」入口：需登录但不含侧边栏布局 */}
       <Route
         path="/select-org"
         element={

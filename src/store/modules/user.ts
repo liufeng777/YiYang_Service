@@ -4,22 +4,14 @@ import { authApi } from '@/api'
 import type { StaffInstitution } from '@/api/modules/auth'
 
 /**
- * 岗位编码（对齐登录接口 staff.position.position_code）
+ * 岗位编码（与后端 position_code 完全一致）
  * 工作台模板按岗位码选择；侧边栏按 permissions 权限码过滤
  */
 export const POSITIONS = {
-  /** 健康管理师 */
-  HEALTH_MANAGER: 'HEALTH_MANAGER',
-  /** 护理院养老顾问 */
-  CARE_CONSULTANT: 'CARE_CONSULTANT',
-  /** 机构管理员 */
-  ORG_ADMIN: 'ORG_ADMIN',
-  /** 健康驿站运营专员 */
-  STATION_OPERATOR: 'STATION_OPERATOR',
-  /** 平台管理员 */
-  PLATFORM_ADMIN: 'PLATFORM_ADMIN',
-  /** 审核医生 */
-  REVIEW_DOCTOR: 'REVIEW_DOCTOR',
+  ADMIN: 'Admin', // 医护管理员
+  DOCTOR: 'Doctor', // 执业医师
+  HEALTH_MANAGER: 'HealthMgr', // 健管师
+  CARE_GIVER: 'Caregiver', // 照护人员
 } as const
 
 export type PositionCode = (typeof POSITIONS)[keyof typeof POSITIONS]
@@ -68,7 +60,7 @@ interface UserState {
   setUserInfo: (userInfo: UserInfo) => void
   setCurrentOrg: (org: OrgInfo | null) => void
   /**
-   * 登录（当前为 mock 实现，接入真实后端后替换为调用登录接口）
+   * 登录（已对接真实接口）
    * - 密码登录：传 phone + password（POST /api/v1/staff/auth/login）
    * - 验证码登录：传 phone + code（POST /api/v1/staff/auth/sms-login）
    */
@@ -83,81 +75,68 @@ export function maskPhone(phone: string): string {
 
 /** 各岗位的权限码集合（后端未下发 permissions 时的兜底，对齐 src/utils/permissions.ts staffPermissions） */
 const POSITION_PERMISSIONS: Record<PositionCode, string[]> = {
-  // 健康管理师：客户与健康管理全域 + 工单查看 + 咨询
-  HEALTH_MANAGER: [
+  // 医护管理员：本机构全量权限（后端 all:manage 语义）
+  [POSITIONS.ADMIN]: ['all:manage'],
+  // 执业医师：健康预警处置 + 订单审核 + 评估确认
+  [POSITIONS.DOCTOR]: [
+    'dashboard:view',
+    'member:view', 'assessment:view', 'assessment:edit',
+    'warning:view', 'warning:edit',
+    'order:view', 'order:edit',
+    'followup:view', 'consultation:view',
+  ],
+  // 健管师：健康管理全域 + 工单查看 + 咨询
+  [POSITIONS.HEALTH_MANAGER]: [
     'dashboard:view',
     'lead:view', 'lead:edit',
     'member:view', 'member:edit',
     'assessment:view', 'assessment:edit',
-    'goal:view', 'goal:edit',
-    'plan:view', 'plan:edit',
     'followup:view', 'followup:edit',
     'warning:view', 'warning:edit',
     'work_order:view', 'consultation:view',
   ],
-  // 护理院养老顾问：线索跟进转化 + 预约到访 + 咨询 + 活动 + 工单查看
-  CARE_CONSULTANT: [
+  // 照护人员：工单执行 + 排班查看 + 档案查看
+  [POSITIONS.CARE_GIVER]: [
     'dashboard:view',
-    'lead:view', 'lead:edit', 'lead:manage',
-    'member:view',
-    'appointment:view', 'appointment:edit',
-    'consultation:view', 'consultation:edit',
-    'activity:view', 'work_order:view',
-  ],
-  // 机构管理员：本机构全量权限（后端 all:manage 语义）
-  ORG_ADMIN: ['all:manage'],
-  // 健康驿站运营专员：活动 + 线索 + 预约 + 工单查看
-  STATION_OPERATOR: [
-    'dashboard:view',
-    'activity:view',
-    'lead:view', 'lead:edit',
-    'appointment:view', 'appointment:edit',
-    'consultation:view', 'work_order:view',
-  ],
-  // 平台管理员：跨机构视角（机构/角色/人员概况/订单）
-  PLATFORM_ADMIN: [
-    'dashboard:view',
-    'org:view', 'role:view', 'staff:view',
-    'work_order:view', 'order:view',
-  ],
-  // 审核医生：健康预警 + 订单审核 + 目标与方案终审
-  REVIEW_DOCTOR: [
-    'dashboard:view',
-    'member:view', 'assessment:view', 'assessment:edit',
-    'goal:view', 'goal:edit', 'goal:manage',
-    'plan:view', 'plan:edit', 'plan:manage',
-    'warning:view', 'warning:edit',
-    'order:view', 'order:edit', 'followup:view',
+    'work_order:view', 'schedule:view',
+    'member:view', 'consultation:view',
   ],
 }
 
 /** 各岗位显示名（后端未返回岗位名时回退使用） */
 const POSITION_NAMES: Record<PositionCode, string> = {
-  HEALTH_MANAGER: '健康管理师',
-  CARE_CONSULTANT: '养老顾问',
-  ORG_ADMIN: '机构管理员',
-  STATION_OPERATOR: '运营专员',
-  PLATFORM_ADMIN: '平台管理员',
-  REVIEW_DOCTOR: '审核医生',
+  [POSITIONS.ADMIN]: '医护管理员',
+  [POSITIONS.DOCTOR]: '执业医师',
+  [POSITIONS.HEALTH_MANAGER]: '健管师',
+  [POSITIONS.CARE_GIVER]: '照护人员',
 }
 
 /**
- * 后端 position_code（如 Admin / Doctor / HealthMgr / Caregiver / NURSE_HEAD）
- * → 前端岗位编码映射；未识别时回退健康管理师（权限最少的工作台模板之一由权限码兜底）
+ * 解析后端 position_code 为前端岗位编码（登录与切换机构共用）
+ * 后端岗位码与 POSITIONS 值一致（Admin / Doctor / HealthMgr / Caregiver），
+ * 未识别时回退健管师（权限由后端 permissions 兜底）
  */
-const BACKEND_POSITION_MAP: Record<string, PositionCode> = {
-  Admin: POSITIONS.ORG_ADMIN,
-  Doctor: POSITIONS.REVIEW_DOCTOR,
-  HealthMgr: POSITIONS.HEALTH_MANAGER,
-  Nurse: POSITIONS.HEALTH_MANAGER,
-  Caregiver: POSITIONS.HEALTH_MANAGER,
+export function resolvePositionCode(code?: string): PositionCode {
+  if (code && (Object.values(POSITIONS) as string[]).includes(code)) return code as PositionCode
+  return POSITIONS.HEALTH_MANAGER
 }
 
-/** 解析后端岗位编码为前端岗位编码（登录与切换机构共用） */
-export function resolvePositionCode(code?: string): PositionCode {
-  if (!code) return POSITIONS.HEALTH_MANAGER
-  if ((Object.values(POSITIONS) as string[]).includes(code)) return code as PositionCode
-  return BACKEND_POSITION_MAP[code] ?? POSITIONS.HEALTH_MANAGER
+/**
+ * 登录返回的机构成员信息 → 机构卡片视图模型（选择机构页与登录默认机构共用）
+ * 数据源为 staff.institutions 各项：institution_name / brief / last_login_at / position_name
+ */
+export function staffInstitutionToOrg(item: StaffInstitution, fallbackRole = ''): OrgInfo {
+  return {
+    id: item.institution_id,
+    name: item.institution_name || `机构 #${item.institution_id}`,
+    type: '',
+    roleTag: item.position_name || fallbackRole,
+    scope: '',
+    scopeDetail: item.brief || '',
+    lastVisit: item.last_login_at
+      ? new Date(item.last_login_at * 1000).toLocaleString('zh-CN', { hour12: false })
+      : '',
+  }
 }
 
 export const useUserStore = create<UserState>()(
@@ -174,25 +153,37 @@ export const useUserStore = create<UserState>()(
        * 登录（已对接真实接口）
        * - 密码登录：POST /api/v1/staff/auth/login
        * - 验证码登录：POST /api/v1/staff/auth/sms-login
-       * 登录出参 staff.permissions 驱动侧边栏；后端未下发权限码时按岗位码回退预置权限集
+       * 登录出参 staff.permissions 即当前机构（staff.institution_id，最近登录机构）的权限，
+       * 驱动侧边栏；后端未下发权限码时按岗位码回退预置权限集。
+       * 登录后无需选择机构，默认进入 staff.institution_id 对应的机构（currentOrg 在此设置）。
        */
       login: async (params) => {
         const res = params.password
           ? await authApi.login({ phone: params.phone, password: params.password })
           : await authApi.smsLogin({ phone: params.phone, code: params.code ?? '' })
         const staff = res.staff
-        const positionCode = resolvePositionCode(staff?.position?.position_code)
+        // 登录返回平铺 position_code；切换机构返回嵌套 position { id, code }
+        const positionCode = resolvePositionCode(staff?.position_code ?? staff?.position?.code)
+        const institutions = staff?.institutions ?? []
+        // 默认机构：staff.institution_id 为最近登录机构；institutions 中找不到时取第一项兜底
+        const current =
+          institutions.find((item) => item.institution_id === staff?.institution_id) ??
+          institutions[0]
+        const currentOrg = current
+          ? staffInstitutionToOrg(current, POSITION_NAMES[positionCode])
+          : null
         set({
           token: res.token,
-          currentOrg: null,
-          institutions: staff?.institutions ?? [],
+          currentOrg,
+          institutions,
           userInfo: {
             id: staff?.id ?? 0,
             phone: staff?.phone || params.phone,
             nickname: staff?.name || `用户${params.phone.slice(-4)}`,
             positionCode,
-            positionName: staff?.position?.position_name || POSITION_NAMES[positionCode],
-            institutionName: staff?.institution_name,
+            positionName:
+              staff?.position_name || current?.position_name || POSITION_NAMES[positionCode],
+            institutionName: current?.institution_name,
             permissions:
               staff?.permissions && staff.permissions.length > 0
                 ? staff.permissions
@@ -208,11 +199,11 @@ export const useUserStore = create<UserState>()(
     }),
     {
       name: 'yiyang_user',
-      // v2：userInfo 结构由 roles 切换为 positionCode + permissions，
-      // 旧版本缓存直接清空（强制重新登录），避免旧结构引发渲染异常
-      version: 2,
+      // v3：岗位码切换为后端 position_code（Admin / Doctor / HealthMgr / Caregiver），
+      // 旧版本缓存直接清空（强制重新登录），避免旧岗位码导致工作台模板匹配失败
+      version: 3,
       migrate: (persisted, version) => {
-        if (version < 2) {
+        if (version < 3) {
           return { token: '', userInfo: null, institutions: [], currentOrg: null } as never
         }
         return persisted as never

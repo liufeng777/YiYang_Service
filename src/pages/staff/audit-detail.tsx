@@ -54,14 +54,14 @@ export default function StaffAuditDetail() {
             </div>
           </div>
           <div className="staff-profile__side">
-            <span className="staff-tag staff-tag--orange">{d.status}</span>
+            <span className="status-tag status-tag--orange">{d.status}</span>
             <div className="staff-profile__cell">
               <div className="staff-profile__cell-label">提交时间</div>
               <div className="staff-profile__cell-value">{d.submittedAt}</div>
             </div>
             <div className="staff-profile__cell">
               <div className="staff-profile__cell-label">当前派单资格</div>
-              <span className="staff-tag staff-tag--red">{d.dispatch}</span>
+              <span className="status-tag status-tag--red">{d.dispatch}</span>
             </div>
           </div>
         </div>
@@ -92,7 +92,7 @@ export default function StaffAuditDetail() {
           <div className="staff-card">
             <div className="staff-card__header">
               <div className="staff-card__title">执业资质</div>
-              <span className="staff-tag staff-tag--orange">{d.credential.status}</span>
+              <span className="status-tag status-tag--orange">{d.credential.status}</span>
             </div>
             <div className="staff-cred-head">
               <div>
@@ -118,7 +118,7 @@ export default function StaffAuditDetail() {
           <div className="staff-card">
             <div className="staff-card__header">
               <div className="staff-card__title">服务授权</div>
-              <span className="staff-tag staff-tag--orange">{d.auth.pendingNote}</span>
+              <span className="status-tag status-tag--orange">{d.auth.pendingNote}</span>
             </div>
             <div className="staff-card__sub">{d.auth.source}</div>
             <div className="staff-auth-checks">
@@ -145,7 +145,7 @@ export default function StaffAuditDetail() {
                 {RESULT_OPTIONS.map((o) => (
                   <span
                     key={o.value}
-                    className={`staff-tag staff-tag--${o.tone} staff-audit-result${
+                    className={`status-tag status-tag--${o.tone} staff-audit-result${
                       result === o.value ? ' staff-audit-result--active' : ''
                     }`}
                     onClick={() => setResult(o.value)}

@@ -39,7 +39,7 @@ src/
 
 - **单一数据源**：[src/router/routes.tsx](src/router/routes.tsx) 同时驱动「侧边栏菜单」「路由表」，菜单结构以设计稿（医养服务工作台）为准。
 - 导航项 `path` 为绝对路径；每个导航项为单页，`children` 中 `''` 默认页承载组件。
-- 侧边栏分组标题通过 `meta.group` 配置（如「客户与健康管理」），相同 group 的相邻导航归入一组，数组顺序即菜单顺序。
+- 侧边栏分组标题通过 `meta.group` 配置（如「健康管理」），相同 group 的相邻导航归入一组，数组顺序即菜单顺序。
 - 新增导航 → 在 `routes` 数组追加并配置 `meta.group` / `meta.roles`。
 - 不在菜单展示的页面（如详情页）设置 `meta.hideInMenu = true`。
 - 侧边栏按登录用户权限码过滤：`meta.permissions` 配置允许访问的权限码（常量见 `routes.tsx` 中 `PERMISSIONS`，对齐《协同工作台-API设计》权限码模型），不配置表示所有登录用户可见；菜单（`menu.tsx`）与路由守卫（`guard.tsx` RoleGuard，无权访问渲染 403）共用该配置。工作台模板按用户岗位码（`userInfo.positionCode`，常量见 `user store` 中 `POSITIONS`）选择，配置见 `src/pages/workbench/configs.ts`。

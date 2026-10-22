@@ -10,11 +10,8 @@ import type { PageParams, PageResult } from '@/types/api'
 export interface StaffItem {
   id: number
   institution_id: number
-  institutions: {
-    institution_id: number;
-    position_code: string;
-    position_name: string;
-  }[]
+  position_code?: string;
+  position_name?: string;
   /** 1-本端协同人员 2-小程序服务人员 */
   staff_type: number
   name: string

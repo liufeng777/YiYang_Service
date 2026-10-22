@@ -127,15 +127,9 @@ export default function MemberList() {
         </Button>
       }
     >
-      {/* 页签位（一期仅健康会员列表） */}
-      <div className="mb-tabs">
-        <span className="mb-tabs__item mb-tabs__item--active">健康会员列表</span>
-      </div>
-
       {/* 筛选区 */}
       <div className="mb-card mb-filters">
         <div className="mb-filters__field">
-          <span className="mb-filters__label">健康会员信息</span>
           <Input
             placeholder="姓名 / 手机号"
             value={keyword}
@@ -148,10 +142,10 @@ export default function MemberList() {
           />
         </div>
         <div className="mb-filters__field">
-          <span className="mb-filters__label">实名状态</span>
           <Select
-            defaultValue="passed"
+            placeholder="实名状态"
             options={[{ value: 'passed', label: '系统校验通过' }]}
+            allowClear
           />
         </div>
         <div className="mb-filters__actions">
@@ -191,6 +185,7 @@ export default function MemberList() {
               setPage(nextPage)
               setPageSize(nextPageSize)
             },
+            showSizeChanger: true,
             showTotal: (t) => `共 ${t} 条`,
           }}
         />

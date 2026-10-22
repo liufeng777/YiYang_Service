@@ -4,7 +4,7 @@
  * TODO: 以上接口 API v0.1 未定义，当前为 mock（见 ./mock.ts）
  */
 import { useMemo, useState } from 'react'
-import { Button, Input, Table } from 'antd'
+import { Button, Input, Select, Table } from 'antd'
 import {
   ArrowLeftOutlined,
   DownloadOutlined,
@@ -311,8 +311,8 @@ export function RecordsTab() {
 
       <div className="hr-card">
         <div className="filter-row">
-          <span className="hr-records__filter">记录类型：全部</span>
-          <span className="hr-records__filter">时间：最近一年</span>
+          <Select placeholder="记录类型：全部" allowClear />
+          <Select placeholder="时间：最近一年" allowClear />
           <Input
             placeholder="关键词：事件名称 / 记录人"
             value={keyword}
@@ -741,6 +741,7 @@ export function ExamTab() {
               setPage(nextPage)
               setPageSize(nextPageSize)
             },
+            showSizeChanger: true,
             showTotal: (total) => `共 ${total} 条`,
           }}
         />

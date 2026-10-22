@@ -65,7 +65,7 @@ export default function StaffAuthorize() {
               <div className="staff-profile__name">{a.staff.name}</div>
               <div className="staff-profile__meta">{a.staff.roleOrg}</div>
             </div>
-            <span className="staff-tag staff-tag--orange">{a.staff.tag}</span>
+            <span className="status-tag status-tag--orange">{a.staff.tag}</span>
           </div>
           <div className="staff-profile__side">
             <div className="staff-profile__cell">
@@ -124,7 +124,7 @@ export default function StaffAuthorize() {
                       )}
                       <span className="staff-service-item__name">{it.name}</span>
                       {it.roleMismatch && (
-                        <span className="staff-tag staff-tag--orange">角色不匹配</span>
+                        <span className="status-tag status-tag--orange">角色不匹配</span>
                       )}
                     </div>
                     <div className="staff-service-item__meta">{it.meta}</div>

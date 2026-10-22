@@ -1,40 +1,21 @@
 /**
- * 选择机构页（设计稿：登录成功后选择本次进入的机构）
- * 数据源：登录接口返回的 staff.institutions（结构同 StaffItem，见 @/api/modules/auth），
- * 并按每项 institution_id 逐个调用 getInstitutionDetail 补全机构卡片信息（名称/类型/地址等）
+ * 选择机构页（顶栏「切换机构」入口）
+ * 数据源：登录接口返回的 staff.institutions（institution_name / brief / last_login_at / position_name），
+ * 直接渲染机构卡片，无需调用机构详情接口
  */
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Button, Checkbox, Empty, Input, Switch, Tag, App } from 'antd'
 import { PlusOutlined, SearchOutlined, RightOutlined, CheckOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
-import { useUserStore, maskPhone, resolvePositionCode, type OrgInfo } from '@/store/modules/user'
-import { authApi, institutionApi } from '@/api'
-import type { StaffInstitution } from '@/api/modules/auth'
-import type { InstitutionDetail } from '@/api/modules/institution'
+import {
+  useUserStore,
+  maskPhone,
+  resolvePositionCode,
+  staffInstitutionToOrg,
+  type OrgInfo,
+} from '@/store/modules/user'
+import { authApi } from '@/api'
 import './index.less'
-
-/** 登录返回的机构成员信息 → 机构卡片视图模型（detail 为机构详情接口补全信息） */
-function toOrgInfo(
-  item: StaffInstitution,
-  fallbackRole: string,
-  detail?: InstitutionDetail,
-): OrgInfo {
-  const id = item.institution_id ?? item.id
-  return {
-    id,
-    name:
-      detail?.institution_name ||
-      detail?.name ||
-      item.institution_name ||
-      item.name ||
-      `机构 #${id}`,
-    type: detail?.type || detail?.institution_type || '',
-    roleTag: item.position_name || item.position?.position_name || item.title || fallbackRole,
-    scope: detail?.scope || '',
-    scopeDetail: detail?.scope_detail || detail?.address || '',
-    lastVisit: '',
-  }
-}
 
 export default function SelectOrg() {
   const navigate = useNavigate()
@@ -45,37 +26,11 @@ export default function SelectOrg() {
   const setCurrentOrg = useUserStore((state) => state.setCurrentOrg)
   const setToken = useUserStore((state) => state.setToken)
   const setUserInfo = useUserStore((state) => state.setUserInfo)
-
-  /** 机构详情缓存：key 为 institution_id，逐个拉取后合并进卡片 */
-  const [details, setDetails] = useState<Record<string, InstitutionDetail>>({})
-
-  useEffect(() => {
-    if (institutions.length === 0) return
-    let cancelled = false
-    institutions.forEach((item) => {
-      const id = item.institution_id ?? item.id
-      if (id == null) return
-      institutionApi
-        .getInstitutionDetail(id)
-        .then((detail) => {
-          if (cancelled) return
-          setDetails((prev) => ({ ...prev, [String(id)]: detail }))
-        })
-        .catch(() => {
-          // 单个机构详情失败不阻塞页面，卡片回退为登录接口返回的基础信息
-        })
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [institutions])
+  const currentOrg = useUserStore((state) => state.currentOrg)
 
   const orgs = useMemo(
-    () =>
-      institutions.map((item) =>
-        toOrgInfo(item, userInfo?.positionName ?? '', details[String(item.institution_id ?? item.id)]),
-      ),
-    [institutions, userInfo?.positionName, details],
+    () => institutions.map((item) => staffInstitutionToOrg(item, userInfo?.positionName ?? '')),
+    [institutions, userInfo?.positionName],
   )
 
   const [keyword, setKeyword] = useState('')
@@ -88,7 +43,8 @@ export default function SelectOrg() {
     () => orgs.filter((org) => !keyword || org.name.includes(keyword)),
     [orgs, keyword],
   )
-  const selectedOrg = orgs.find((org) => org.id === (selectedId ?? orgs[0]?.id))
+  // 默认选中当前机构（顶栏「切换机构」进入时）
+  const selectedOrg = orgs.find((org) => org.id === (selectedId ?? currentOrg?.id ?? orgs[0]?.id))
 
   const onEnter = async () => {
     if (!selectedOrg) {
@@ -103,16 +59,18 @@ export default function SelectOrg() {
       const res = await authApi.switchInstitution({ institution_id: Number(selectedOrg.id) })
       setToken(res.token)
       if (userInfo) {
-        const positionCode = resolvePositionCode(res.staff?.position?.position_code)
+        // 切换机构返回嵌套 position { id, code }，兼容平铺 position_code
+        const positionCode = resolvePositionCode(
+          res.position?.code ?? res.position_code,
+        )
         setUserInfo({
           ...userInfo,
-          id: res.staff?.id ?? userInfo.id,
           positionCode,
-          positionName: res.staff?.position?.position_name || selectedOrg.roleTag,
-          institutionName: res.staff?.institution_name || selectedOrg.name,
+          positionName: res.position_name || selectedOrg.roleTag,
+          institutionName: selectedOrg.name,
           permissions:
-            res.staff?.permissions && res.staff.permissions.length > 0
-              ? res.staff.permissions
+            res.permissions && res.permissions.length > 0
+              ? res.permissions
               : userInfo.permissions,
         })
       }

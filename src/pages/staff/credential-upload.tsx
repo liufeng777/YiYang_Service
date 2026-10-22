@@ -48,7 +48,7 @@ export default function CredentialUpload() {
               <div className="staff-profile__name">{u.staff.name}</div>
               <div className="staff-profile__meta">{u.staff.roleOrg}</div>
             </div>
-            <span className="staff-tag staff-tag--blue">{u.staff.tag}</span>
+            <span className="status-tag status-tag--blue">{u.staff.tag}</span>
           </div>
           <div className="staff-profile__side">
             <span className="staff-text--muted">{u.headNote}</span>
@@ -108,7 +108,7 @@ export default function CredentialUpload() {
           <div className="staff-card">
             <div className="staff-card__header">
               <div className="staff-card__title">2. 核对识别结果</div>
-              <span className="staff-tag staff-tag--green">系统已识别</span>
+              <span className="status-tag status-tag--green">系统已识别</span>
             </div>
             <div className="staff-card__sub">识别内容可修改；无法识别的字段再人工填写。</div>
             <div className="staff-form__grid staff-form__grid--2">

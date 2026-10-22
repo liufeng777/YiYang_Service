@@ -50,7 +50,7 @@ export function filterRoutesByPermissions(
 /**
  * 构建侧边栏菜单项
  * - 按 userPermissions 过滤，仅渲染当前权限可见的导航
- * - 按 meta.group 渲染分组标题（设计稿：客户与健康管理 / 服务履约 / 活动与客户运营 / 组织与人员）
+ * - 按 meta.group 渲染分组标题（设计稿：健康管理 / 服务履约 / 活动与客户运营 / 组织与人员）
  * - 无 group 的导航（如工作台）直接渲染为普通菜单项
  */
 export function buildMenuItems(userPermissions: string[]): MenuItems {

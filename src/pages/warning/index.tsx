@@ -169,6 +169,7 @@ export default function WarningList() {
                 setPage(nextPage)
                 setPageSize(nextPageSize)
               },
+              showSizeChanger: true,
               showTotal: (total) => `共 ${total} 条`,
             }}
           />

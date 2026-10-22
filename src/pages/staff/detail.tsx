@@ -59,7 +59,7 @@ export default function StaffDetail() {
   }, [fetchDetail])
 
   const isPro = detail?.staff_type === 2
-  const positionName = detail?.institutions?.[0]?.position_name
+  const positionName = detail?.position_name
 
   const baseFields = detail
     ? [
@@ -99,9 +99,9 @@ export default function StaffDetail() {
                   <div className="staff-profile__name">
                     {detail.name || '-'}
                     {positionName && (
-                      <span className="staff-tag staff-tag--blue">{positionName}</span>
+                      <span className="status-tag status-tag--blue">{positionName}</span>
                     )}
-                    <span className="staff-tag staff-tag--green">
+                    <span className="status-tag status-tag--green">
                       {STAFF_TYPE_MAP[detail.staff_type] ?? '-'}
                     </span>
                   </div>
@@ -113,14 +113,14 @@ export default function StaffDetail() {
               <div className="staff-profile__side">
                 <div className="staff-profile__cell">
                   <div className="staff-profile__cell-label">人员状态</div>
-                  <span className={`staff-tag staff-tag--${detail.status === 1 ? 'green' : 'red'}`}>
+                  <span className={`status-tag status-tag--${detail.status === 1 ? 'green' : 'red'}`}>
                     {detail.status === 1 ? '启用' : '停用'}
                   </span>
                 </div>
                 <div className="staff-profile__cell">
                   <div className="staff-profile__cell-label">资质到期预警</div>
                   <span
-                    className={`staff-tag staff-tag--${detail.upcoming_credential_expire ? 'orange' : 'green'}`}
+                    className={`status-tag status-tag--${detail.upcoming_credential_expire ? 'orange' : 'green'}`}
                   >
                     {detail.upcoming_credential_expire ? '即将到期' : '正常'}
                   </span>
