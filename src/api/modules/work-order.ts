@@ -17,14 +17,12 @@ import type { PageParams, PageResult } from '@/types/api'
 /** 工单状态（work_orders.wo_status，对齐共通 §6.2，仅邻近状态正向流转） */
 export const WO_STATUS_MAP: Record<number, string> = {
   1: '待派单',
-  2: '已派单',
-  3: '待联系确认',
-  4: '待服务',
-  5: '服务中',
-  6: '待回执',
-  7: '已完成',
-  8: '改期待重派',
-  9: '履约异常',
+  2: '待接单(已派单)',
+  3: '待服务',
+  4: '服务中',
+  5: '已完成',
+  8: '已取消',
+  9: '服务终止'
 }
 
 /** 服务前联系结果（联系状态，与工单状态分开管理） */
@@ -39,33 +37,29 @@ export const WO_CONTACT_STATUS_MAP: Record<number, string> = {
 
 /** 工单（GET /work-orders 出参，对齐 §9.2） */
 export interface WorkOrderItem {
-  id: number
-  /** 工单号（服务端生成，如 WO2608120036） */
-  wo_no: string
-  order_id: number
-  /** 关联订单号（如 OD2608121028） */
-  order_no: string
-  member_id: number
-  member_name: string
-  member_phone: string
-  contact_name?: string
-  contact_phone?: string
-  service_address: string
-  /** 预约开始/结束时间（Unix 秒） */
-  expected_start_at: number
-  expected_stop_at: number
-  /** 工单状态（WO_STATUS_MAP） */
-  wo_status: number
-  /** 联系状态（WO_CONTACT_STATUS_MAP） */
-  contact_status?: number
-  schedule_id?: number | null
-  assigned_at?: number | null
-  /** 期望医护（下单时所填，派单决策参考） */
-  expect_staff?: number | null
-  expect_staff_name?: string
-  remark?: string
-  service_name: string
-  category?: number
+  assigned_at: number;
+  assigned_staff_id: number;
+  assigned_staff_name: string;
+  category: number;
+  contact_name: string;
+  contact_phone: string;
+  expect_staff: number;
+  expect_staff_name: string;
+  expected_start_at: number;
+  id: number;
+  work_order_no: string;
+  member_id: number;
+  member_name: string;
+  member_phone: string; 
+  order_id: number;
+  order_no: string; 
+  remark: string; 
+  schedule_id: number;
+  service_address: string;
+  service_id: number;
+  duration: number; // 服务时长，分钟
+  service_name: string;
+  wo_status: number;
 }
 
 /** 工单列表查询参数（§9.2） */

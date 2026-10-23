@@ -5,44 +5,24 @@
  */
 import { useCallback, useEffect, useState } from 'react'
 import { Button, Card, DatePicker, Input, Select, Table } from 'antd'
-import { SearchOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
-import dayjs from 'dayjs'
 import PageContainer from '@/components/PageContainer'
 import { workOrderApi } from '@/api'
-import {
-  WO_CONTACT_STATUS_MAP,
-  WO_STATUS_MAP,
-  type WorkOrderItem,
-} from '@/api/modules/work-order'
+import DispatchBoard from './DispatchBoard'
+import { WO_STATUS_MAP, type WorkOrderItem } from '@/api/modules/work-order';
+import { formatDateTime } from '@/utils'
 import './index.less'
 
-/** 工单状态标签配色（wo-tag--*） */
+/** 工单状态标签配色（wo-tag--*，对齐最新 WO_STATUS_MAP） */
 const STATUS_TONE: Record<number, string> = {
-  1: 'orange',
-  2: 'blue',
-  3: 'blue',
-  4: 'green',
-  5: 'green',
-  6: 'orange',
-  7: 'green',
-  8: 'purple',
-  9: 'red',
+  1: 'orange', // 待派单
+  2: 'blue', // 待接单(已派单)
+  3: 'blue', // 待服务
+  4: 'green', // 服务中
+  5: 'green', // 已完成
+  8: 'gray', // 已取消
+  9: 'red', // 服务终止
 }
-
-const CONTACT_TONE: Record<number, string> = {
-  1: 'blue',
-  2: 'orange',
-  3: 'green',
-  4: 'orange',
-  5: 'purple',
-  6: 'red',
-}
-
-const STATUS_TABS = [
-  { key: 0, label: '全部' },
-  ...Object.entries(WO_STATUS_MAP).map(([value, label]) => ({ key: Number(value), label })),
-]
 
 interface Filters {
   keyword: string
@@ -52,14 +32,32 @@ interface Filters {
 
 export default function WorkOrderList() {
   const navigate = useNavigate()
-  const [activeTab, setActiveTab] = useState<number>(0)
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
   const [applied, setApplied] = useState<Filters>({ keyword: '' })
   const [list, setList] = useState<WorkOrderItem[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(20)
+  const [pageSize, setPageSize] = useState(10)
+
+  /* 批量派单排单板 */
+  const [batchOpen, setBatchOpen] = useState(false)
+  const [batchLoading, setBatchLoading] = useState(false)
+  const [pendingOrders, setPendingOrders] = useState<WorkOrderItem[]>([])
+
+  /** 打开批量派单：拉取待派单队列；为空 / 异常时传空数组，排单板自动进入 mock 演示 */
+  const onOpenBatch = async () => {
+    setBatchLoading(true)
+    try {
+      const res = await workOrderApi.getPendingDispatch({ page: 1, page_size: 50 })
+      setPendingOrders(res.list)
+    } catch {
+      setPendingOrders([])
+    } finally {
+      setBatchLoading(false)
+      setBatchOpen(true)
+    }
+  }
 
   const fetchList = useCallback(async () => {
     setLoading(true)
@@ -67,7 +65,7 @@ export default function WorkOrderList() {
       const res = await workOrderApi.getWorkOrders({
         page,
         page_size: pageSize,
-        wo_status: activeTab || undefined,
+        wo_status: applied.status,
         keyword: applied.keyword || undefined,
         service_date: applied.date,
       })
@@ -78,7 +76,7 @@ export default function WorkOrderList() {
     } finally {
       setLoading(false)
     }
-  }, [page, pageSize, activeTab, applied])
+  }, [page, pageSize, applied])
 
   useEffect(() => {
     fetchList()
@@ -86,14 +84,12 @@ export default function WorkOrderList() {
 
   const applyFilters = () => {
     setApplied(filters)
-    setActiveTab(filters.status ?? 0)
     setPage(1)
   }
 
   const onReset = () => {
     setFilters({ keyword: '' })
     setApplied({ keyword: '' })
-    setActiveTab(0)
     setPage(1)
   }
 
@@ -109,36 +105,10 @@ export default function WorkOrderList() {
             去派单
           </Button>
         )
-      case 5:
-        return (
-          <Button size="small" onClick={() => navigate(`/work-order/${row.id}`)}>
-            查看进度
-          </Button>
-        )
-      case 8:
-        return (
-          <Button
-            type="primary"
-            size="small"
-            onClick={() => navigate(`/work-order/${row.id}?reschedule=1`)}
-          >
-            处理改期
-          </Button>
-        )
-      case 6:
-        return (
-          <Button
-            type="primary"
-            size="small"
-            onClick={() => navigate(`/work-order/${row.id}?tab=receipt`)}
-          >
-            确认回执
-          </Button>
-        )
       default:
         return (
           <Button size="small" onClick={() => navigate(`/work-order/${row.id}`)}>
-            查看
+            查看详情
           </Button>
         )
     }
@@ -149,9 +119,9 @@ export default function WorkOrderList() {
       title: '工单 / 订单',
       key: 'wo',
       render: (_: unknown, row: WorkOrderItem) => (
-        <div>
-          <div className="wo-row__name">{row.wo_no}</div>
-          <div className="wo-row__sub">订单 {row.order_no || '-'}</div>
+        <div className='table-cell'>
+          <strong>{row.work_order_no}</strong>
+          <span>订单 {row.order_no || '-'}</span>
         </div>
       ),
     },
@@ -159,50 +129,59 @@ export default function WorkOrderList() {
       title: '服务对象',
       key: 'member',
       render: (_: unknown, row: WorkOrderItem) => (
-        <div>
-          <div>{row.member_name || '-'}</div>
-          <div className="wo-row__sub">{row.member_phone || row.contact_phone || '-'}</div>
+        <div className='table-cell'>
+          <strong>{row.member_name || '-'}</strong>
+          <span>{row.member_phone || row.contact_phone || '-'}</span>
         </div>
       ),
     },
-    { title: '服务项目', dataIndex: 'service_name', key: 'service_name' },
     {
-      title: '预约时间',
+      title: '联系人',
+      key: 'contact_name',
+      render: (_: unknown, row: WorkOrderItem) => (
+        <div className='table-cell'>
+          <strong>{row.contact_name || '-'}</strong>
+          <span>{row.member_phone || row.contact_phone || '-'}</span>
+        </div>
+      ),
+    },
+    { 
+      title: '服务项目/时长(分钟)',
+      dataIndex: 'service_name',
+      key: 'service_name',
+      render: (_: unknown, row: WorkOrderItem) => (
+        <div className='table-cell'>
+          <strong>{row.service_name || '-'}</strong>
+          <span>{row.duration}</span>
+        </div>
+      ),
+    },
+    {
+      title: '服务人员/时间',
       key: 'appointment',
-      render: (_: unknown, row: WorkOrderItem) =>
-        row.expected_start_at
-          ? `${dayjs(row.expected_start_at * 1000).format('MM-DD HH:mm')} ~ ${dayjs(
-              (row.expected_stop_at || row.expected_start_at) * 1000,
-            ).format('HH:mm')}`
-          : '-',
-    },
-    {
-      title: '服务人员',
-      key: 'staff',
-      render: (_: unknown, row: WorkOrderItem) =>
-        row.expect_staff_name ? (
-          <span>{row.expect_staff_name}</span>
-        ) : (
-          <span className="wo-row__sub">—</span>
-        ),
-    },
-    {
-      title: '联系状态',
-      key: 'contactStatus',
-      render: (_: unknown, row: WorkOrderItem) =>
-        row.contact_status ? (
-          <span className={`wo-tag wo-tag--${CONTACT_TONE[row.contact_status] ?? 'blue'}`}>
-            {WO_CONTACT_STATUS_MAP[row.contact_status] ?? '-'}
-          </span>
-        ) : (
-          <span className="wo-row__sub">—</span>
-        ),
+      render: (_: unknown, row: WorkOrderItem) => <div className='table-cell'>
+        {row.wo_status === 1 ? (
+          <>
+            <strong>{row.expect_staff_name || '-'}</strong>
+            <span>
+              {row.expected_start_at ? formatDateTime(row.expected_start_at * 1000) : '-'}
+            </span>
+          </>
+        ) :(
+          <>
+            <strong>{row.assigned_staff_name || '-'}</strong>
+            <span>
+              {row.assigned_at ? formatDateTime(row.assigned_at * 1000) : '-'}
+            </span>
+          </>
+        )}
+        </div>
     },
     {
       title: '工单状态',
       key: 'status',
       render: (_: unknown, row: WorkOrderItem) => (
-        <span className={`wo-tag wo-tag--${STATUS_TONE[row.wo_status] ?? 'blue'}`}>
+        <span className={`status-tag status-tag--${STATUS_TONE[row.wo_status] ?? 'blue'}`}>
           {WO_STATUS_MAP[row.wo_status] ?? '-'}
         </span>
       ),
@@ -220,14 +199,19 @@ export default function WorkOrderList() {
       <PageContainer
         title="服务工单"
         description="处理运营平台分配至当前机构的订单，完成派单、联系、改期与履约管理"
+        extra={
+          <Button color="primary" variant="outlined" loading={batchLoading} onClick={onOpenBatch}>
+            批量派单
+          </Button>
+        }
       >
         {/* 规则提示 */}
-        <div className="wo-banner">
+        {/* <div className="wo-banner">
           预约日期与时段来自 C 端订单（至少提前一天）；机构无需再次与用户确认预约后才派单。
-        </div>
+        </div> */}
 
         {/* 状态 Tabs */}
-        <div className="wo-tabs">
+        {/* <div className="wo-tabs">
           {STATUS_TABS.map((t) => (
             <span
               key={t.key}
@@ -241,12 +225,11 @@ export default function WorkOrderList() {
               {t.label}
             </span>
           ))}
-        </div>
+        </div> */}
 
         {/* 筛选 */}
         <Card variant="borderless" className="filter-bar">
           <Input
-            prefix={<SearchOutlined />}
             placeholder="工单号 / 订单号 / 姓名 / 手机号"
             value={filters.keyword}
             onChange={(e) => setFilters((f) => ({ ...f, keyword: e.target.value.trim() }))}
@@ -293,6 +276,19 @@ export default function WorkOrderList() {
           />
         </Card>
       </PageContainer>
+
+      {/* 批量派单排单板（队列为空时自动进入 mock 演示，覆盖各种冲突情况） */}
+      {batchOpen && (
+        <DispatchBoard
+          open={batchOpen}
+          orders={pendingOrders}
+          onClose={() => setBatchOpen(false)}
+          onDone={() => {
+            setBatchOpen(false)
+            fetchList()
+          }}
+        />
+      )}
     </div>
   )
 }

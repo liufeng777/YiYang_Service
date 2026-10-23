@@ -1,0 +1,370 @@
+/* ===== 排单板抽屉（批量派单：默认期望方案 + 课程表式拖拽调整） ===== */
+.wo-dispatch-modal {
+  .ant-drawer-content {
+    background: @color-bg-page;
+  }
+
+  /* 无标题抽屉：隐藏默认头部，高度全部留给内容区 */
+  .ant-drawer-header {
+    display: none;
+  }
+
+  .ant-drawer-body {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: @spacing-sm;
+    padding: @spacing-md @spacing-lg;
+    overflow: hidden;
+    background: rgb(240, 240, 240);
+    .ant-spin-container {
+      height: 100%;
+      .wo-board {
+        height: 100%;
+      }
+    }
+  }
+
+  .wo-modal__head {
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+
+  .wo-modal__footer {
+    margin-top: 0;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  /* 状态横幅（底部左下角，紧凑态） */
+  .wo-board__banner {
+    display: inline-flex;
+    align-items: center;
+    gap: @spacing-2xs;
+    padding: 3px @spacing-sm;
+    border-radius: @radius-sm;
+    font-size: @font-size-auxiliary;
+    line-height: @line-height-auxiliary;
+    white-space: nowrap;
+
+    &--ok {
+      background: @color-risk-low-bg;
+      color: @color-risk-low;
+    }
+
+    &--conflict {
+      background: @color-risk-high-bg;
+      color: @color-risk-high;
+    }
+  }
+
+  /* ===== 待分配池（时间条上方的独立卡片，跨天共享，与表格视觉分离） ===== */
+  .wo-pool {
+    display: flex;
+    align-items: stretch;
+    flex-shrink: 0;
+    background: @color-bg-card;
+    border: 1px dashed @color-risk-mid;
+    border-radius: @radius-sm;
+    padding: @spacing-sm @spacing-lg;
+    box-shadow: @shadow-card;
+    user-select: none;
+
+    /* 与表格人员列同宽（148px），保证轨道时间刻度对齐 */
+    &__label {
+      flex: 0 0 148px;
+      padding: 0 @spacing-sm 0 0;
+      border-right: 1px dashed @color-risk-mid;
+    }
+
+    &__name {
+      display: flex;
+      align-items: center;
+      gap: @spacing-2xs;
+      font-size: @font-size-body;
+      font-weight: @font-weight-body-medium;
+      line-height: @line-height-body;
+      color: @color-text-primary;
+    }
+
+    &__count {
+      padding: 0 @spacing-xs;
+      border-radius: @radius-full;
+      background: @color-risk-mid-bg;
+      color: @color-risk-mid;
+      font-size: @font-size-auxiliary;
+      line-height: @line-height-auxiliary;
+    }
+
+    &__sub {
+      margin-top: @spacing-2xs;
+      .text-auxiliary();
+    }
+
+    &__track {
+      position: relative;
+      flex: 1;
+      cursor: pointer;
+      border-radius: @radius-xs;
+      background-color: @color-bg-active;
+      background-image: repeating-linear-gradient(
+        to right,
+        @color-border 0,
+        @color-border 1px,
+        transparent 1px,
+        transparent calc(100% / 24)
+      );
+    }
+
+    &__hint {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      .text-auxiliary();
+    }
+  }
+
+  /* ===== 排单板表格 ===== */
+  .wo-board {
+    .card-surface();
+    padding: @spacing-md @spacing-lg;
+    user-select: none;
+  }
+
+  .wo-board__head {
+    display: flex;
+    align-items: stretch;
+    border-bottom: 1px solid @color-border;
+  }
+
+  .wo-board__row {
+    display: flex;
+    align-items: stretch;
+    border-bottom: 1px solid @color-border;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &--active {
+      background: @color-primary-light;
+    }
+  }
+
+  .wo-board__staff {
+    flex: 0 0 148px;
+    padding: @spacing-sm @spacing-sm @spacing-sm 0;
+    border-right: 1px solid @color-border;
+
+    &--head {
+      .text-auxiliary();
+      padding: @spacing-xs @spacing-sm @spacing-xs 0;
+    }
+  }
+
+  .wo-board__staff-name {
+    display: flex;
+    align-items: center;
+    gap: @spacing-2xs;
+    font-size: @font-size-body;
+    font-weight: @font-weight-body-medium;
+    line-height: @line-height-body;
+    color: @color-text-primary;
+  }
+
+  .wo-board__staff-sub {
+    display: flex;
+    align-items: center;
+    gap: @spacing-2xs;
+    margin-top: @spacing-2xs;
+    .text-auxiliary();
+  }
+
+  .wo-board__track {
+    position: relative;
+    flex: 1;
+    height: 56px;
+    cursor: pointer;
+    background-image: repeating-linear-gradient(
+      to right,
+      @color-border 0,
+      @color-border 1px,
+      transparent 1px,
+      transparent calc(100% / 24)
+    );
+
+    &--head {
+      height: 28px;
+      cursor: default;
+      background-image: none;
+    }
+  }
+
+  .wo-board__hour {
+    position: absolute;
+    top: 4px;
+    transform: translateX(-50%);
+    .text-auxiliary();
+  }
+
+  .wo-board__busy {
+    position: absolute;
+    top: 6px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    white-space: nowrap;
+    border-radius: @radius-xs;
+    background: @color-bg-active;
+    border: 1px solid @color-border;
+    color: @color-text-secondary;
+    font-size: @font-size-auxiliary;
+    cursor: not-allowed;
+  }
+
+  /* 工单方案块（人员行与待分配池共用） */
+  .wo-board__plan {
+    position: absolute;
+    top: 6px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: @spacing-2xs;
+    border-radius: @radius-xs;
+    background: @color-primary;
+    color: @color-bg-card;
+    font-size: @font-size-auxiliary;
+    font-weight: @font-weight-label;
+    cursor: grab;
+    box-shadow: @shadow-card;
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    &--adjusted {
+      background: @color-primary;
+    }
+
+    &--conflict {
+      background: @color-danger;
+    }
+
+    &--selected {
+      outline: 2px solid @color-primary-dark;
+      outline-offset: 1px;
+    }
+
+    /* 池内工单块：暖色虚线卡片外观，与人员行实色块、浅绿虚线期望框区分 */
+    &--pool {
+      background: @color-risk-mid-bg;
+      color: @color-risk-mid;
+      border: 1px dashed @color-risk-mid;
+      box-shadow: none;
+    }
+  }
+
+  /* 客户期望位置（浅绿虚线幽灵块，竖向堆叠，位置 / 高度由组件内联计算） */
+  .wo-board__expect {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    white-space: nowrap;
+    border: 1px dashed @color-wb-trend-bar;
+    border-radius: @radius-xs;
+    color: @color-sider-icon;
+    font-size: @font-size-auxiliary;
+    line-height: 1;
+    cursor: default;
+  }
+
+  /* 工单条（点选后点击轨道空档放置） */
+  .wo-board__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: @spacing-xs;
+    flex-shrink: 0;
+  }
+
+  .wo-board__chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px @spacing-sm;
+    border-radius: @radius-full;
+    font-size: @font-size-auxiliary;
+    line-height: @line-height-auxiliary;
+    font-weight: @font-weight-label;
+    cursor: pointer;
+    border: 1px solid transparent;
+
+    &--ok {
+      background: @color-primary-light;
+      color: @color-primary;
+    }
+
+    &--adjusted {
+      background: @color-primary-light;
+      color: @color-primary;
+    }
+
+    &--conflict {
+      background: @color-risk-high-bg;
+      color: @color-risk-high;
+    }
+
+    &--selected {
+      border-color: currentColor;
+    }
+  }
+
+  .wo-board__plan-icon {
+    flex: 0 0 auto;
+  }
+
+  .wo-board__plan-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+    line-height: 1.3;
+  }
+
+  .wo-board__plan-no,
+  .wo-board__plan-name {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .wo-board__plan-no {
+    opacity: 0.85;
+  }
+
+  .wo-board__plan-summary {
+    margin-right: auto;
+    font-size: @font-size-body;
+    line-height: @line-height-body;
+    color: @color-text-primary;
+    font-weight: @font-weight-body-medium;
+  }
+}
+
+/* 期望幽灵块溢出折叠的「+N」标识（悬停展示全部） */
+.wo-dispatch-modal .wo-board__expect-more {
+  position: absolute;
+  right: 2px;
+  padding: 0 @spacing-2xs;
+  border-radius: @radius-full;
+  background: @color-primary-light;
+  color: @color-sider-icon;
+  font-size: @font-size-auxiliary;
+  line-height: 16px;
+  cursor: default;
+}

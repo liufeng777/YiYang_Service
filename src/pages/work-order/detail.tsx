@@ -7,18 +7,14 @@
  * 说明：改期 / 联系结果回写 / 回执接口 API v0.1 未定义，相关操作为演示交互
  */
 import { useCallback, useEffect, useState } from 'react'
-import { Button, DatePicker, Input, Modal, Radio, Spin, TimePicker, App } from 'antd'
+import { Button, DatePicker, Input, Modal, Spin, TimePicker, App } from 'antd'
 import { CheckOutlined } from '@ant-design/icons'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import dayjs, { type Dayjs } from 'dayjs'
 import PageContainer from '@/components/PageContainer'
-import { staffApi, workOrderApi } from '@/api'
-import type { StaffItem } from '@/api/modules/staff'
-import {
-  WO_CONTACT_STATUS_MAP,
-  WO_STATUS_MAP,
-  type WorkOrderItem,
-} from '@/api/modules/work-order'
+import { workOrderApi } from '@/api'
+import { WO_STATUS_MAP, type WorkOrderItem } from '@/api/modules/work-order'
+import DispatchBoard from './DispatchBoard'
 import './index.less'
 
 const DETAIL_TABS = [
@@ -33,17 +29,15 @@ const DETAIL_TABS = [
 
 const STEP_TITLES = ['派单', '联系确认', '服务执行', '服务回执', '完成']
 
-/** 工单状态 → 当前所处步骤下标 */
+/** 工单状态 → 当前所处步骤下标（对齐最新 WO_STATUS_MAP） */
 const STATUS_STAGE: Record<number, number> = {
-  1: 0,
-  8: 0,
-  2: 1,
-  3: 1,
-  4: 2,
-  5: 2,
-  9: 2,
-  6: 3,
-  7: 4,
+  1: 0, // 待派单
+  8: 0, // 已取消
+  2: 1, // 待接单(已派单)
+  3: 1, // 待服务
+  4: 2, // 服务中
+  9: 2, // 服务终止
+  5: 4, // 已完成
 }
 
 const fmt = (ts?: number | null, pattern = 'YYYY-MM-DD HH:mm') =>
@@ -106,11 +100,6 @@ export default function WorkOrderDetail() {
           {detail && (
             <div className="wo-detail__status">
               <span className="wo-tag wo-tag--blue">{WO_STATUS_MAP[detail.wo_status] ?? '-'}</span>
-              {detail.contact_status != null && (
-                <span className="wo-tag wo-tag--orange">
-                  联系：{WO_CONTACT_STATUS_MAP[detail.contact_status] ?? '-'}
-                </span>
-              )}
               <span className="wo-detail__status-note">
                 服务人员助手端将于服务前一天收到联系任务并解锁联系方式
               </span>
@@ -204,9 +193,9 @@ export default function WorkOrderDetail() {
       </PageContainer>
 
       {detail && id && (
-        <DispatchModal
+        <DispatchBoard
           open={dispatchOpen}
-          wo={detail}
+          orders={[detail]}
           onClose={() => setDispatchOpen(false)}
           onDone={() => {
             setDispatchOpen(false)
@@ -237,7 +226,7 @@ function BookingTab({ d, onOpenReschedule }: { d: WorkOrderItem; onOpenReschedul
           <div className="wo-kv">
             <span className="wo-kv__label">预约时段</span>
             <span className="wo-kv__value">
-              {fmt(d.expected_start_at, 'HH:mm')} — {fmt(d.expected_stop_at, 'HH:mm')}
+              {fmt(d.expected_start_at, 'HH:mm')} — {fmt(d.expected_start_at + (d.duration || 0) * 60, 'HH:mm')}
             </span>
           </div>
           <div className="wo-kv">
@@ -291,12 +280,6 @@ function BookingTab({ d, onOpenReschedule }: { d: WorkOrderItem; onOpenReschedul
               {d.contact_name || d.member_name || '-'} {d.contact_phone || d.member_phone || ''}
             </span>
           </div>
-          <div className="wo-kv">
-            <span className="wo-kv__label">当前结果</span>
-            <span className="wo-kv__value wo-text--strong">
-              {d.contact_status != null ? (WO_CONTACT_STATUS_MAP[d.contact_status] ?? '-') : '-'}
-            </span>
-          </div>
         </div>
         <div className="wo-note wo-note--block">
           联系结果回写接口待后端补充；履约异常在「履约异常」Tab 单独记录。
@@ -337,7 +320,7 @@ function BasicTab({ d }: { d: WorkOrderItem }) {
         </div>
         <div className="wo-kv">
           <span className="wo-kv__label">工单编号</span>
-          <span className="wo-kv__value">{d.wo_no || '-'}</span>
+          <span className="wo-kv__value">{d.work_order_no || '-'}</span>
         </div>
         <div className="wo-kv">
           <span className="wo-kv__label">关联订单</span>
@@ -350,7 +333,7 @@ function BasicTab({ d }: { d: WorkOrderItem }) {
         <div className="wo-kv">
           <span className="wo-kv__label">预约时间</span>
           <span className="wo-kv__value">
-            {fmt(d.expected_start_at)} ~ {fmt(d.expected_stop_at, 'HH:mm')}
+            {fmt(d.expected_start_at)} ~ {fmt(d.expected_start_at + (d.duration || 0) * 60, 'HH:mm')}
           </span>
         </div>
         {d.remark && (
@@ -386,136 +369,6 @@ function DispatchTab({ d, onOpenDispatch }: { d: WorkOrderItem; onOpenDispatch: 
   )
 }
 
-/* ===== 派单弹窗（对接 staffs 列表 + dispatch 接口） ===== */
-function DispatchModal({
-  open,
-  wo,
-  onClose,
-  onDone,
-}: {
-  open: boolean
-  wo: WorkOrderItem
-  onClose: () => void
-  onDone: () => void
-}) {
-  const { message } = App.useApp()
-  const [staffList, setStaffList] = useState<StaffItem[]>([])
-  const [staffLoading, setStaffLoading] = useState(false)
-  const [selectedId, setSelectedId] = useState<number | null>(null)
-  const [submitting, setSubmitting] = useState(false)
-
-  useEffect(() => {
-    if (!open) return
-    setStaffLoading(true)
-    staffApi
-      .getStaffList({ page: 1, page_size: 50, status: 1 })
-      .then((res) => setStaffList(res.list))
-      .catch(() => {
-        // 错误提示由拦截器统一处理
-      })
-      .finally(() => setStaffLoading(false))
-  }, [open])
-
-  const selected = staffList.find((s) => s.id === selectedId)
-
-  const onConfirm = async () => {
-    if (!selected) return
-    setSubmitting(true)
-    try {
-      await workOrderApi.dispatchWorkOrder(wo.id, {
-        assigned_staff_id: selected.id,
-        service_date: dayjs((wo.expected_start_at || Date.now() / 1000) * 1000).format('YYYY-MM-DD'),
-        planned_start_at: wo.expected_start_at,
-        planned_stop_at: wo.expected_stop_at,
-      })
-      message.success(`已派单给 ${selected.name}，服务人员助手端同步收到任务`)
-      onDone()
-    } catch {
-      // 错误提示由拦截器统一处理
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  return (
-    <Modal
-      open={open}
-      onCancel={onClose}
-      footer={null}
-      width={860}
-      title={null}
-      closable={false}
-      className="wo-dispatch-modal"
-    >
-      <div className="wo-modal__head">
-        <div>
-          <div className="wo-modal__title">派单服务人员</div>
-          <div className="wo-modal__sub">
-            {wo.wo_no} · {wo.service_name} · {fmt(wo.expected_start_at, 'MM-DD HH:mm')}
-          </div>
-        </div>
-        <Button onClick={onClose}>关闭</Button>
-      </div>
-
-      <div className="wo-dispatch__rule">
-        <div className="wo-dispatch__rule-title">强制条件：证照有效 + 已获得当前服务项目授权</div>
-        <div>预约时段可用仅用于排序和冲突提醒，不会自动禁止选择；资质校验接口待后端补充。</div>
-      </div>
-
-      <Spin spinning={staffLoading}>
-        <div className="wo-dispatch__table-head">
-          <span>服务人员</span>
-          <span>岗位</span>
-          <span>手机号</span>
-          <span>选择</span>
-        </div>
-        {staffList.map((s) => (
-          <div
-            key={s.id}
-            className={`wo-staff ${s.id === selectedId ? 'wo-staff--active' : ''}`}
-            onClick={() => setSelectedId(s.id)}
-          >
-            <div className="wo-staff__main">
-              <span className="wo-assignee__avatar" />
-              <div>
-                <div className="wo-assignee__name">{s.name}</div>
-                <div className="wo-assignee__title">{s.title || '-'}</div>
-              </div>
-            </div>
-            <div className="wo-staff__tags">
-              <span className="wo-tag wo-tag--green">
-                {s.position_name || '-'}
-              </span>
-            </div>
-            <div className="wo-staff__slot">
-              <div>{s.phone || '-'}</div>
-            </div>
-            <div className="wo-staff__action">
-              {s.upcoming_credential_expire ? (
-                <span className="wo-tag wo-tag--orange">资质临期</span>
-              ) : (
-                <span className="wo-tag wo-tag--blue">可选择</span>
-              )}
-              <Radio checked={s.id === selectedId} />
-            </div>
-          </div>
-        ))}
-        {!staffLoading && staffList.length === 0 && (
-          <div className="wo-empty">暂无可派单人员</div>
-        )}
-      </Spin>
-
-      <div className="wo-modal__note">管理员可在存在时段提醒时继续派单，系统保留确认人和操作时间。</div>
-      <div className="wo-modal__footer">
-        <Button onClick={onClose}>取消</Button>
-        <Button type="primary" disabled={!selected} loading={submitting} onClick={onConfirm}>
-          确认派单
-        </Button>
-      </div>
-    </Modal>
-  )
-}
-
 /* ===== 修改预约弹窗（改期接口待后端补充，当前为演示交互） ===== */
 function RescheduleModal({
   open,
@@ -534,7 +387,10 @@ function RescheduleModal({
   useEffect(() => {
     if (open && wo?.expected_start_at) {
       setDate(dayjs(wo.expected_start_at * 1000))
-      setRange([dayjs(wo.expected_start_at * 1000), dayjs((wo.expected_stop_at || 0) * 1000)])
+      setRange([
+        dayjs(wo.expected_start_at * 1000),
+        dayjs((wo.expected_start_at + (wo.duration || 0) * 60) * 1000),
+      ])
       setReason('')
     }
   }, [open, wo])
@@ -560,7 +416,7 @@ function RescheduleModal({
         <div>
           <div className="wo-modal__title">修改预约日期和时间</div>
           <div className="wo-modal__sub">
-            原预约：{wo ? `${fmt(wo.expected_start_at)} ~ ${fmt(wo.expected_stop_at, 'HH:mm')}` : '-'}
+            原预约：{wo ? `${fmt(wo.expected_start_at)} ~ ${fmt(wo.expected_start_at + (wo.duration || 0) * 60, 'HH:mm')}` : '-'}
           </div>
         </div>
         <Button onClick={onClose}>关闭</Button>
