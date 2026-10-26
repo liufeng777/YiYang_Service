@@ -5,7 +5,7 @@
  */
 import { useEffect, useState } from 'react'
 import { Button, Input, App } from 'antd'
-import { CheckCircleFilled, LeftOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, CheckCircleFilled, LeftOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import { memberApi } from '@/api'
@@ -42,7 +42,7 @@ export default function MemberDetail() {
       extra={
         <>
           <span className="mb-tag mb-tag--verify">系统实名校验：已通过</span>
-          <Button icon={<LeftOutlined />} onClick={() => navigate('/member')}>
+          <Button icon={<ArrowLeftOutlined />} color="primary" variant="outlined" onClick={() => navigate('/member')}>
             返回列表
           </Button>
         </>

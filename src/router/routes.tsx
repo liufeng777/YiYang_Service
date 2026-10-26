@@ -487,35 +487,35 @@ export const routes: RouteConfig[] = [
       },
     ],
   },
-  {
-    path: '/team',
-    meta: { title: '团队管理', icon: <TeamOutlined />, group: '组织与人员', permissions: [PERMISSIONS.TEAM_VIEW] },
-    children: [
-      {
-        path: '',
-        meta: { title: '团队列表' },
-        component: lazy(() => import('@/pages/team/list')),
-      },
-      {
-        path: 'create',
-        meta: { title: '新建团队', hideInMenu: true },
-        component: lazy(() => import('@/pages/team/create')),
-      },
-      {
-        path: 'unassigned',
-        meta: { title: '待分配患者', hideInMenu: true },
-        component: lazy(() => import('@/pages/team/unassigned')),
-      },
-      {
-        path: 'assign',
-        meta: { title: '批量分配管理团队', hideInMenu: true },
-        component: lazy(() => import('@/pages/team/assign')),
-      },
-      {
-        path: ':id',
-        meta: { title: '团队详情', hideInMenu: true },
-        component: lazy(() => import('@/pages/team/detail')),
-      },
-    ],
-  }
+  // {
+  //   path: '/team',
+  //   meta: { title: '团队管理', icon: <TeamOutlined />, group: '组织与人员', permissions: [PERMISSIONS.TEAM_VIEW] },
+  //   children: [
+  //     {
+  //       path: '',
+  //       meta: { title: '团队列表' },
+  //       component: lazy(() => import('@/pages/team/list')),
+  //     },
+  //     {
+  //       path: 'create',
+  //       meta: { title: '新建团队', hideInMenu: true },
+  //       component: lazy(() => import('@/pages/team/create')),
+  //     },
+  //     {
+  //       path: 'unassigned',
+  //       meta: { title: '待分配患者', hideInMenu: true },
+  //       component: lazy(() => import('@/pages/team/unassigned')),
+  //     },
+  //     {
+  //       path: 'assign',
+  //       meta: { title: '批量分配管理团队', hideInMenu: true },
+  //       component: lazy(() => import('@/pages/team/assign')),
+  //     },
+  //     {
+  //       path: ':id',
+  //       meta: { title: '团队详情', hideInMenu: true },
+  //       component: lazy(() => import('@/pages/team/detail')),
+  //     },
+  //   ],
+  // }
 ]

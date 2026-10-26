@@ -693,7 +693,7 @@
                       "BearerAuth": []
                   }
               ],
-              "description": "多机构人员可在在职机构间切换，返回绑定到目标机构的新 JWT 及该机构岗位。",
+              "description": "多机构人员可在在职机构间切换，返回绑定到目标机构的新 JWT、该机构岗位及更新后的权限点。",
               "consumes": [
                   "application/json"
               ],
@@ -1221,6 +1221,368 @@
               }
           }
       },
+      "/api/v1/staff/health-accesses": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康服务"
+              ],
+              "summary": "健康服务接入列表",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "页码(默认1)",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数(默认10)",
+                      "name": "page_size",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "状态:1待处理/2管理拒绝/3待健管师/4健管师拒绝/5已接入",
+                      "name": "status",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "来源:1-线下登记",
+                      "name": "source_type",
+                      "in": "query"
+                  },
+                  {
+                      "type": "string",
+                      "description": "关键字(会员名/手机号/编号)",
+                      "name": "key",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "最近N天(按创建时间,\u003e0生效)",
+                      "name": "days",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康服务"
+              ],
+              "summary": "新增健康服务接入(线下登记)",
+              "parameters": [
+                  {
+                      "description": "新增接入参数",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffAccessCreate"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/health-accesses/{id}": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康服务"
+              ],
+              "summary": "健康服务接入详情",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "接入记录ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/health-accesses/{id}/assign": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康服务"
+              ],
+              "summary": "分配健管师(医护管理员)",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "接入记录ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "分配参数(staff_id=目标健管师)",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffAccessAssign"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/health-accesses/{id}/confirm": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康服务"
+              ],
+              "summary": "健管师确认接入",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "接入记录ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "确认参数(relation 可选)",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffAccessConfirm"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/health-accesses/{id}/followup": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康服务"
+              ],
+              "summary": "跟进健康接入",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "接入记录ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "跟进参数(content)",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffAccessFollowup"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/health-accesses/{id}/reject": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康服务"
+              ],
+              "summary": "拒绝健康接入",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "接入记录ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "拒绝参数",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffAccessReject"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/health-accesses/{id}/transfer": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康服务"
+              ],
+              "summary": "转派回退待分配",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "接入记录ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "转派参数",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffAccessTransfer"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
       "/api/v1/staff/leads": {
           "get": {
               "security": [
@@ -1701,146 +2063,6 @@
                       "description": "操作原因/备注，选填",
                       "name": "remark",
                       "in": "query"
-                  }
-              ],
-              "responses": {
-                  "200": {
-                      "description": "OK",
-                      "schema": {
-                          "$ref": "#/definitions/pkg.Response"
-                      }
-                  }
-              }
-          }
-      },
-      "/api/v1/staff/member-staff-relations": {
-          "get": {
-              "security": [
-                  {
-                      "BearerAuth": []
-                  }
-              ],
-              "description": "查看当前机构会员与医护人员（健管师）的绑定关系。可按当前员工(staff_id)、岗位、会员、是否生效过滤。",
-              "consumes": [
-                  "application/json"
-              ],
-              "produces": [
-                  "application/json"
-              ],
-              "tags": [
-                  "staff-健管师绑定"
-              ],
-              "summary": "机构会员健管师绑定列表",
-              "parameters": [
-                  {
-                      "type": "integer",
-                      "description": "会员ID，选填",
-                      "name": "member_id",
-                      "in": "query"
-                  },
-                  {
-                      "type": "integer",
-                      "description": "当前员工ID（某健管师），选填",
-                      "name": "staff_id",
-                      "in": "query"
-                  },
-                  {
-                      "type": "string",
-                      "description": "医护岗位编码，选填（健管师岗位等）",
-                      "name": "staff_position_code",
-                      "in": "query"
-                  },
-                  {
-                      "type": "integer",
-                      "description": "仅看生效(1)/全部(0)，默认1",
-                      "name": "active_only",
-                      "in": "query"
-                  },
-                  {
-                      "type": "integer",
-                      "description": "页码",
-                      "name": "page",
-                      "in": "query"
-                  },
-                  {
-                      "type": "integer",
-                      "description": "每页条数",
-                      "name": "page_size",
-                      "in": "query"
-                  }
-              ],
-              "responses": {
-                  "200": {
-                      "description": "OK",
-                      "schema": {
-                          "$ref": "#/definitions/pkg.Response"
-                      }
-                  }
-              }
-          },
-          "post": {
-              "security": [
-                  {
-                      "BearerAuth": []
-                  }
-              ],
-              "description": "本机构医护人员（健管师）绑定会员。绑定来源固定为医护人员指定(2)。",
-              "consumes": [
-                  "application/json"
-              ],
-              "produces": [
-                  "application/json"
-              ],
-              "tags": [
-                  "staff-健管师绑定"
-              ],
-              "summary": "绑定会员健管师",
-              "parameters": [
-                  {
-                      "description": "绑定参数",
-                      "name": "body",
-                      "in": "body",
-                      "required": true,
-                      "schema": {
-                          "$ref": "#/definitions/staff.StaffBindMemberStaffReq"
-                      }
-                  }
-              ],
-              "responses": {
-                  "200": {
-                      "description": "OK",
-                      "schema": {
-                          "$ref": "#/definitions/pkg.Response"
-                      }
-                  }
-              }
-          }
-      },
-      "/api/v1/staff/member-staff-relations/{id}/unbind": {
-          "post": {
-              "security": [
-                  {
-                      "BearerAuth": []
-                  }
-              ],
-              "description": "解绑当前机构医护人员与会员的绑定关系（软删除）。",
-              "consumes": [
-                  "application/json"
-              ],
-              "produces": [
-                  "application/json"
-              ],
-              "tags": [
-                  "staff-健管师绑定"
-              ],
-              "summary": "解绑会员健管师",
-              "parameters": [
-                  {
-                      "type": "integer",
-                      "description": "绑定记录ID",
-                      "name": "id",
-                      "in": "path",
-                      "required": true
                   }
               ],
               "responses": {
@@ -3480,6 +3702,148 @@
               }
           }
       },
+      "/api/v1/staff/upload": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "上传图片/视频/音频/文档到 OSS，返回可访问 URL，来源目录位于 uploads/staff 下（与 admin/sminiapp 隔离）。支持类型同 admin 端。",
+              "consumes": [
+                  "multipart/form-data"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "文件上传"
+              ],
+              "summary": "上传文件到 OSS",
+              "parameters": [
+                  {
+                      "type": "file",
+                      "description": "待上传文件",
+                      "name": "file",
+                      "in": "formData",
+                      "required": true
+                  },
+                  {
+                      "type": "string",
+                      "description": "可选业务子目录，如 avatar、report；留空用默认目录 uploads/staff",
+                      "name": "dir",
+                      "in": "formData"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "成功，data: service.UploadResult",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  },
+                  "400": {
+                      "description": "参数错误或文件校验失败",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  },
+                  "500": {
+                      "description": "OSS 未配置或上传失败",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/upload/batch": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "multipart/form-data"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "文件上传"
+              ],
+              "summary": "批量上传文件到 OSS",
+              "parameters": [
+                  {
+                      "type": "file",
+                      "description": "多个文件（multipart 字段名 files）",
+                      "name": "files",
+                      "in": "formData",
+                      "required": true
+                  },
+                  {
+                      "type": "string",
+                      "description": "可选业务子目录",
+                      "name": "dir",
+                      "in": "formData"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "成功，data: {list:[service.UploadResult],count:n}",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  },
+                  "500": {
+                      "description": "OSS 未配置或上传失败",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/upload/{key}": {
+          "delete": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "文件上传"
+              ],
+              "summary": "删除已上传文件",
+              "parameters": [
+                  {
+                      "type": "string",
+                      "description": "文件 key（形如 uploads/staff/images/202408/xxx.jpg）",
+                      "name": "key",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "删除成功",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  },
+                  "500": {
+                      "description": "OSS 未配置或删除失败",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
       "/api/v1/staff/warnings": {
           "get": {
               "security": [
@@ -3711,6 +4075,12 @@
                       "in": "query"
                   },
                   {
+                      "type": "string",
+                      "description": "工单编码",
+                      "name": "work_order_no",
+                      "in": "query"
+                  },
+                  {
                       "type": "integer",
                       "description": "页码",
                       "name": "page",
@@ -3721,6 +4091,45 @@
                       "description": "每页条数",
                       "name": "page_size",
                       "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/work-orders/batch-dispatch": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "按工单编码批量派单；已存在排单的工单自动转为改派（更新服务人员）",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-工单"
+              ],
+              "summary": "批量派单/改派（按工单编码）",
+              "parameters": [
+                  {
+                      "description": "批量派单信息",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
                   }
               ],
               "responses": {
@@ -3811,6 +4220,51 @@
               }
           }
       },
+      "/api/v1/staff/work-orders/{id}/cancel": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "医护管理员取消工单，仅待接单(2)/待服务(3)/服务中(4)可取消；已完成/已取消/中止为终态不可二次变更。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-工单"
+              ],
+              "summary": "取消工单",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "工单ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "取消信息",
+                      "name": "body",
+                      "in": "body",
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
       "/api/v1/staff/work-orders/{id}/dispatch": {
           "post": {
               "security": [
@@ -3855,51 +4309,6 @@
                   }
               }
           }
-      },
-      "/api/v1/staff/work-orders/{id}/reminder": {
-          "post": {
-              "security": [
-                  {
-                      "BearerAuth": []
-                  }
-              ],
-              "consumes": [
-                  "application/json"
-              ],
-              "produces": [
-                  "application/json"
-              ],
-              "tags": [
-                  "staff-工单"
-              ],
-              "summary": "催单",
-              "parameters": [
-                  {
-                      "type": "integer",
-                      "description": "工单ID",
-                      "name": "id",
-                      "in": "path",
-                      "required": true
-                  },
-                  {
-                      "description": "催办信息",
-                      "name": "body",
-                      "in": "body",
-                      "required": true,
-                      "schema": {
-                          "type": "object"
-                      }
-                  }
-              ],
-              "responses": {
-                  "200": {
-                      "description": "OK",
-                      "schema": {
-                          "$ref": "#/definitions/pkg.Response"
-                      }
-                  }
-              }
-          }
       }
   },
   "definitions": {
@@ -3926,6 +4335,104 @@
               },
               "meta": {
                   "$ref": "#/definitions/pkg.Meta"
+              }
+          }
+      },
+      "staff.ReqStaffAccessAssign": {
+          "type": "object",
+          "required": [
+              "staff_id"
+          ],
+          "properties": {
+              "staff_id": {
+                  "description": "目标健管师ID",
+                  "type": "integer"
+              }
+          }
+      },
+      "staff.ReqStaffAccessConfirm": {
+          "type": "object",
+          "properties": {
+              "relation": {
+                  "description": "关系(默认1)",
+                  "type": "integer"
+              }
+          }
+      },
+      "staff.ReqStaffAccessCreate": {
+          "type": "object",
+          "required": [
+              "member_id"
+          ],
+          "properties": {
+              "demand_desc": {
+                  "description": "需求描述",
+                  "type": "string"
+              },
+              "demand_tags": {
+                  "description": "需求标签(JSON数组)",
+                  "type": "string"
+              },
+              "health_intent": {
+                  "description": "健康管理意向",
+                  "type": "string"
+              },
+              "institution_id": {
+                  "description": "机构ID(默认当前机构)",
+                  "type": "integer"
+              },
+              "member_id": {
+                  "description": "会员ID，必填",
+                  "type": "integer"
+              },
+              "relation": {
+                  "description": "关系(默认1)",
+                  "type": "integer"
+              },
+              "remark": {
+                  "description": "备注",
+                  "type": "string"
+              },
+              "source_type": {
+                  "description": "来源:1线下登记",
+                  "type": "integer"
+              }
+          }
+      },
+      "staff.ReqStaffAccessFollowup": {
+          "type": "object",
+          "required": [
+              "content"
+          ],
+          "properties": {
+              "content": {
+                  "description": "跟进内容",
+                  "type": "string"
+              }
+          }
+      },
+      "staff.ReqStaffAccessReject": {
+          "type": "object",
+          "properties": {
+              "reason": {
+                  "description": "拒绝原因",
+                  "type": "string"
+              }
+          }
+      },
+      "staff.ReqStaffAccessTransfer": {
+          "type": "object",
+          "required": [
+              "institution_id"
+          ],
+          "properties": {
+              "institution_id": {
+                  "description": "目标机构ID（必填）",
+                  "type": "integer"
+              },
+              "reason": {
+                  "description": "转派原因",
+                  "type": "string"
               }
           }
       },
@@ -4054,31 +4561,6 @@
               },
               "reason": {
                   "description": "转派原因（留痕），选填",
-                  "type": "string"
-              }
-          }
-      },
-      "staff.StaffBindMemberStaffReq": {
-          "type": "object",
-          "required": [
-              "member_id",
-              "staff_id"
-          ],
-          "properties": {
-              "comment": {
-                  "description": "绑定备注，选填",
-                  "type": "string"
-              },
-              "member_id": {
-                  "description": "会员ID，必填",
-                  "type": "integer"
-              },
-              "staff_id": {
-                  "description": "医护人员(健管师)ID，必填",
-                  "type": "integer"
-              },
-              "staff_position_code": {
-                  "description": "医护岗位编码，选填",
                   "type": "string"
               }
           }

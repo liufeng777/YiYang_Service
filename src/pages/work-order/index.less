@@ -27,7 +27,7 @@
     align-items: center;
     justify-content: space-between;
     gap: @spacing-sm;
-    margin-bottom: @spacing-md;
+    margin-bottom: @spacing-xs;
   }
 
   &__title {
@@ -322,7 +322,7 @@
 
   &__line {
     position: absolute;
-    left: 36px;
+    left: 100px;
     right: @spacing-md;
     top: 14px;
     height: 2px;
@@ -796,4 +796,115 @@
     gap: @spacing-sm;
     margin-top: @spacing-lg;
   }
+}
+
+/* ===== 工单详情（设计稿：含改派与异常主示例.png） ===== */
+
+/* 区块标题（绿色） */
+.wo-card__title--green {
+  color: @color-primary;
+}
+
+/* 卡片内小节标题（如 派单安排） */
+.wo-card__section {
+  margin: @spacing-md 0 @spacing-sm;
+  font-size: @font-size-body;
+  line-height: @line-height-body;
+  font-weight: @font-weight-body-medium;
+  color: @color-primary;
+}
+
+/* 双列 kv 栅格 */
+.wo-grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: @spacing-2xl;
+}
+
+/* 步骤条时间 */
+.wo-steps__time {
+  .text-auxiliary();
+  margin-top: @spacing-2xs;
+}
+
+/* 改派记录（警示黄块） */
+.wo-reassign {
+  margin-top: @spacing-md;
+  background: @color-wb-banner-bg;
+  border-radius: @radius-sm;
+  padding: @spacing-sm @spacing-md;
+
+  &__title {
+    font-size: @font-size-body;
+    line-height: @line-height-body;
+    font-weight: @font-weight-body-medium;
+    color: @color-text-primary;
+  }
+
+  &__row {
+    margin-top: @spacing-2xs;
+    font-size: @font-size-body;
+    line-height: @line-height-body;
+    color: @color-text-secondary;
+  }
+}
+
+/* 服务详情 - 照片与凭证 */
+.wo-photos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: @spacing-md;
+  margin-top: @spacing-md;
+}
+
+.wo-photo {
+  border: 1px solid @color-border;
+  border-radius: @radius-sm;
+  padding: @spacing-sm;
+  text-align: center;
+
+  &__img,
+  &__placeholder {
+    width: 100%;
+    height: 140px;
+    border-radius: @radius-xs;
+    object-fit: cover;
+  }
+
+  &__placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: @spacing-2xs;
+    background: @color-bg-active;
+    color: @color-text-secondary;
+    font-size: @font-size-auxiliary;
+  }
+
+  &__title {
+    margin-top: @spacing-xs;
+    font-size: @font-size-body;
+    line-height: @line-height-body;
+    font-weight: @font-weight-body-medium;
+    color: @color-primary;
+  }
+
+  &__time {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+  }
+}
+
+/* 异常记录行 */
+.wo-warn-row {
+  font-size: @font-size-body;
+  line-height: @line-height-body;
+  color: @color-text-primary;
+  padding: @spacing-2xs 0;
+}
+
+/* 卡片底部操作区（左对齐变体） */
+.wo-card__footer--left {
+  justify-content: flex-start;
 }

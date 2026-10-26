@@ -40,6 +40,13 @@ export interface OrderDetail extends OrderItem {
   address?: string
   assignee?: number
   assignee_name?: string
+  /** 审核信息（审核人 / 状态 / 时间，后端返回即展示，缺省降级为 -） */
+  audit_staff_name?: string
+  /** 1-已通过 2-已驳回（推断，以后端实际返回为准） */
+  audit_status?: number
+  audit_at?: number
+  confirmed_by_name?: string
+  confirmed_at?: number
   [key: string]: unknown
 }
 

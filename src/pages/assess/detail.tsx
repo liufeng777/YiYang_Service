@@ -45,7 +45,7 @@ export default function AssessDetail() {
           <Button icon={<ReloadOutlined />} onClick={() => navigate('/assessment/create')}>
             重新评测
           </Button>
-          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/assessment')}>返回测评列表</Button>
+          <Button icon={<ArrowLeftOutlined />} color="primary" variant="outlined" onClick={() => navigate('/assessment')}>返回测评列表</Button>
         </Space>
       }
     >

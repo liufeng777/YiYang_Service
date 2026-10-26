@@ -8,7 +8,7 @@ import {
   CheckOutlined,
   DownloadOutlined,
   FileExcelOutlined,
-  LeftOutlined,
+  ArrowLeftOutlined,
   PlusOutlined,
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
@@ -81,7 +81,7 @@ export default function HealthRecordImport() {
           title="批量导入健康档案"
           description="导入已完成，可查看创建、关联和失败明细"
           extra={
-            <Button icon={<LeftOutlined />} onClick={() => navigate('/health-record')}>
+            <Button icon={<ArrowLeftOutlined />} color="primary" variant="outlined" onClick={() => navigate('/health-record')}>
               返回档案列表
             </Button>
           }
@@ -109,7 +109,7 @@ export default function HealthRecordImport() {
         title="批量导入健康档案"
         description="下载标准模板并上传 Excel，系统自动校验会员、实名状态、重复档案和必填字段"
         extra={
-          <Button icon={<LeftOutlined />} onClick={() => navigate('/health-record')}>
+          <Button icon={<ArrowLeftOutlined />} color="primary" variant="outlined" onClick={() => navigate('/health-record')}>
             返回档案列表
           </Button>
         }

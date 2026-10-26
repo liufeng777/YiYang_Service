@@ -17,7 +17,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent } from 'react'
 import { Button, DatePicker, Drawer, Spin, Tooltip, App } from 'antd'
-import { CheckCircleFilled, WarningFilled } from '@ant-design/icons'
+import { CheckCircleFilled, WarningFilled, CloseOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { staffApi, workOrderApi } from '@/api'
 import type { WorkOrderItem } from '@/api/modules/work-order'
@@ -372,14 +372,17 @@ export default function DispatchBoard({
       className="wo-dispatch-modal"
     >
       <div className="wo-modal__head">
-        <div>
+        <div style={{flex: 1}}>
           <div className="wo-modal__title">
-            {chipOrders.length > 1 ? `排单板 · 批量派单（${chipOrders.length} 单）` : '排单板 · 派单'}
-            <DatePicker
-              value={dayjs(dateStr)}
-              onChange={(d) => d && setDateStr(d.format('YYYY-MM-DD'))}
-              allowClear={false}
-            />
+            <div>
+              {chipOrders.length > 1 ? `排单板 · 批量派单（${chipOrders.length} 单）` : '排单板 · 派单'}
+              <DatePicker
+                value={dayjs(dateStr)}
+                onChange={(d) => d && setDateStr(d.format('YYYY-MM-DD'))}
+                allowClear={false}
+              />
+            </div>
+            <Button type="text" icon={<CloseOutlined />} onClick={onClose} />
           </div>
           <div className="wo-modal__sub">
             绿色 = 无冲突可派，红色 = 冲突，浅绿虚线框 = 客户期望位置；「待分配」栏拖入人员行完成分配

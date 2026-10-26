@@ -6,7 +6,7 @@
  */
 import { useState } from 'react'
 import { Button, Checkbox, Input, Select, message } from 'antd'
-import { CheckCircleFilled, PlusOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, CheckCircleFilled, PlusOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import { mockCredentialUpload as u } from './mock'
@@ -38,7 +38,7 @@ export default function CredentialUpload() {
       <PageContainer
         title="上传执业资质"
         description={`为${u.staff.name}（护士）上传证照照片，系统识别后提交人工审核`}
-        extra={<Button onClick={() => navigate(`/staff/${id ?? u.staff.id}`)}>返回执业资质</Button>}
+        extra={<Button icon={<ArrowLeftOutlined />} color="primary" variant="outlined" onClick={() => navigate(`/staff/${id ?? u.staff.id}`)}>返回执业资质</Button>}
       >
         {/* 人员头卡 */}
         <div className="staff-card staff-profile">

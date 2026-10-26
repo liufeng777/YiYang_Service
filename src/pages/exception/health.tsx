@@ -5,6 +5,7 @@
  */
 import { useState } from 'react'
 import { Button, Input, Select, message } from 'antd'
+import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import { mockHealthException } from './mock'
@@ -36,7 +37,7 @@ export default function ExceptionHealth() {
         extra={
           <span className="ex-detail__extra">
             <span className="ex-tag ex-tag--red">待受理</span>
-            <Button onClick={() => navigate('/exception')}>返回列表</Button>
+            <Button icon={<ArrowLeftOutlined />} color="primary" variant="outlined" onClick={() => navigate('/exception')}>返回列表</Button>
           </span>
         }
       >

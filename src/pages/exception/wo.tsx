@@ -5,7 +5,7 @@
  */
 import { useState } from 'react'
 import { Button, Checkbox, Input, Select, Upload, message } from 'antd'
-import { PlusOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, PlusOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import { mockWoException } from './mock'
@@ -52,7 +52,7 @@ export default function ExceptionWo() {
         extra={
           <span className="ex-detail__extra">
             <span className="ex-tag ex-tag--blue">处理中</span>
-            <Button onClick={() => navigate('/exception')}>返回列表</Button>
+            <Button icon={<ArrowLeftOutlined />} color="primary" variant="outlined" onClick={() => navigate('/exception')}>返回列表</Button>
           </span>
         }
       >

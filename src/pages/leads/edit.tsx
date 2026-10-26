@@ -82,7 +82,7 @@ export default function LeadEdit() {
             {sourceType && (
               <Tag className="lead-edit__source-tag">来源：{LEAD_SOURCE_MAP[sourceType]}</Tag>
             )}
-            <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/leads')}>返回线索列表</Button>
+            <Button icon={<ArrowLeftOutlined />} color="primary" variant="outlined" onClick={() => navigate('/leads')}>返回线索列表</Button>
           </>
         }
       >

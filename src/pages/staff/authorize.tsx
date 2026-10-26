@@ -5,7 +5,7 @@
  */
 import { useMemo, useState } from 'react'
 import { Button, Input, message } from 'antd'
-import { CheckSquareFilled } from '@ant-design/icons'
+import { ArrowLeftOutlined, CheckSquareFilled } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import { mockAuthorize as a } from './mock'
@@ -55,7 +55,7 @@ export default function StaffAuthorize() {
       <PageContainer
         title="配置服务授权"
         description={`选择${a.staff.name}可以承接的服务项目，保存后提交审核`}
-        extra={<Button onClick={() => navigate(`/staff/${id}`)}>返回服务授权</Button>}
+        extra={<Button icon={<ArrowLeftOutlined />} color="primary" variant="outlined" onClick={() => navigate(`/staff/${id}`)}>返回服务授权</Button>}
       >
         {/* 人员头卡 */}
         <div className="staff-card staff-profile">

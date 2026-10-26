@@ -3,7 +3,7 @@
  * 实名认证完成后系统自动创建最小健康档案
  */
 import { Button } from 'antd'
-import { CheckOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, CheckOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import { mockConvertResult } from './mock'
 import './index.less'
@@ -46,7 +46,7 @@ export default function LeadConvertSuccess() {
         </div>
 
         <div className="lead-success__actions">
-          <Button onClick={() => navigate('/leads')}>返回线索列表</Button>
+          <Button icon={<ArrowLeftOutlined />} color="primary" variant="outlined" onClick={() => navigate('/leads')}>返回线索列表</Button>
           <Button type="primary" onClick={() => navigate('/health-record')}>
             查看健康档案
           </Button>

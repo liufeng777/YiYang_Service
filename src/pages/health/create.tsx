@@ -7,7 +7,7 @@
  */
 import { useState } from 'react'
 import { Button, Checkbox, DatePicker, Input, Select, App } from 'antd'
-import { CheckCircleFilled, CheckOutlined, LeftOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons'
+import { CheckCircleFilled, CheckOutlined, ArrowLeftOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import dayjs, { type Dayjs } from 'dayjs'
 import PageContainer from '@/components/PageContainer'
@@ -151,7 +151,7 @@ export default function HealthRecordCreate() {
           title="新建健康档案"
           description="档案已建立，可继续完善健康评估与管理方案"
           extra={
-            <Button icon={<LeftOutlined />} onClick={() => navigate('/health-record')}>
+            <Button icon={<ArrowLeftOutlined />} color="primary" variant="outlined" onClick={() => navigate('/health-record')}>
               返回档案列表
             </Button>
           }
@@ -168,7 +168,7 @@ export default function HealthRecordCreate() {
         title="新建健康档案"
         description="关联实名会员并在一个页面完成基础建档，后续再进入档案持续完善"
         extra={
-          <Button icon={<LeftOutlined />} onClick={() => navigate('/health-record')}>
+          <Button icon={<ArrowLeftOutlined />} color="primary" variant="outlined" onClick={() => navigate('/health-record')}>
             返回档案列表
           </Button>
         }

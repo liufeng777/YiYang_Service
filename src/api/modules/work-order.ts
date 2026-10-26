@@ -60,6 +60,50 @@ export interface WorkOrderItem {
   duration: number; // 服务时长，分钟
   service_name: string;
   wo_status: number;
+  stages: {
+    name: string // created_at、assigned_at、accepted_at、started_at、completed_at
+    time: number
+  }[]
+}
+
+/** 照片 / 凭证（服务执行留痕，排单详情附件） */
+export interface WorkOrderPhoto {
+  /** 类型标题，如 到场签到 / 服务过程 / 完成回执 */
+  title?: string
+  type?: string
+  url?: string
+  key?: string
+  uploaded_at?: number
+}
+
+/** 改派记录（service_schedules 改派留痕） */
+export interface ReassignLog {
+  time?: number
+  from_staff_name?: string
+  to_staff_name?: string
+  reason?: string
+}
+
+/**
+ * 工单详情（GET /work-orders/{id} 出参）：列表字段 + 详情扩展
+ * swagger 出参为通用 pkg.Response，扩展字段以后端实际返回为准，缺省降级展示为 -
+ */
+export interface WorkOrderDetail extends WorkOrderItem {
+  institution_name?: string
+  created_at?: number
+  /** 订单审核（医生审核结果） */
+  audit_staff_name?: string
+  audit_status?: number
+  audit_at?: number
+  /** 派单安排 */
+  assigned_by_name?: string
+  confirmed_at?: number
+  /** 服务执行留痕 */
+  checkin_at?: number
+  start_at?: number
+  finish_at?: number
+  photos?: WorkOrderPhoto[]
+  reassign_logs?: ReassignLog[]
 }
 
 /** 工单列表查询参数（§9.2） */
@@ -78,7 +122,7 @@ export function getWorkOrders(params: WorkOrderListParams) {
 
 /** 工单详情（权限 wo:view，含排单与服务留痕） */
 export function getWorkOrderDetail(id: number | string) {
-  return http.get<WorkOrderItem>(`/v1/staff/work-orders/${id}`)
+  return http.get<WorkOrderDetail>(`/v1/staff/work-orders/${id}`)
 }
 
 /** 待排单队列（权限 wo:dispatch，wo_status=1-待派单） */

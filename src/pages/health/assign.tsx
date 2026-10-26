@@ -5,7 +5,7 @@
  */
 import { useState } from 'react'
 import { Button, Select } from 'antd'
-import { CheckOutlined, LeftOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, CheckOutlined, LeftOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import { mockAssign, mockCreateSuccess } from './mock'
@@ -53,7 +53,7 @@ function AssignSuccess({ id }: { id: string }) {
 
         <div className="hr-success__note">已进入责任健康管理师待完善任务。</div>
         <div className="hr-success__actions">
-          <Button onClick={() => navigate('/health-record')}>返回档案列表</Button>
+          <Button icon={<ArrowLeftOutlined />} color="primary" variant="outlined" onClick={() => navigate('/health-record')}>返回档案列表</Button>
           <Button type="primary" onClick={() => navigate(`/health-record/${id}`)}>
             完善健康档案
           </Button>
@@ -81,7 +81,7 @@ export default function HealthAssign() {
           title="分配管理团队"
           description="管理团队与责任人已生效，可继续完善健康档案"
           extra={
-            <Button icon={<LeftOutlined />} onClick={() => navigate('/health-record')}>
+            <Button icon={<ArrowLeftOutlined />} color="primary" variant="outlined" onClick={() => navigate('/health-record')}>
               返回档案列表
             </Button>
           }

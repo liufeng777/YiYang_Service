@@ -78,7 +78,7 @@ export default function AssessEntry() {
           : `张桂芳 · 67岁｜《专业健康力评测表 V1.0》｜${p.source}`
       }
       extra={
-        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(`/assessment/${id}`)}>返回测评详情</Button>
+        <Button icon={<ArrowLeftOutlined />} color="primary" variant="outlined" onClick={() => navigate(`/assessment/${id}`)}>返回测评详情</Button>
       }
     >
       <div className="as-entry">
@@ -183,7 +183,7 @@ export default function AssessEntry() {
             <div className="as-entry__side-actions">
               {readonly ? (
                 <>
-                  <Button block onClick={() => navigate('/assessment')}>
+                  <Button icon={<ArrowLeftOutlined />} color="primary" variant="outlined" block onClick={() => navigate('/assessment')}>
                     返回列表
                   </Button>
                   <Button type="primary" block onClick={() => navigate(`/assessment/${id ?? 'A20260819001'}/analysis`)}>

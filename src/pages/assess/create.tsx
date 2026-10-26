@@ -56,7 +56,7 @@ export default function AssessCreate() {
       title="新建健康力测评"
       description="选择评测对象与模板，录入完成后由 AI 辅助分析、专业人员确认"
       extra={
-        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/assessment')}>返回测评列表</Button>
+        <Button icon={<ArrowLeftOutlined />} color="primary" variant="outlined" onClick={() => navigate('/assessment')}>返回测评列表</Button>
         
       }
     >

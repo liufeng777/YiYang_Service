@@ -5,7 +5,7 @@
  */
 import { useState } from 'react'
 import { Button, Input, message } from 'antd'
-import { CheckCircleFilled } from '@ant-design/icons'
+import { ArrowLeftOutlined, CheckCircleFilled } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import { mockAuditDetail as d } from './mock'
@@ -42,7 +42,7 @@ export default function StaffAuditDetail() {
       <PageContainer
         title="专业人员统一审核"
         description="一次核对执业资质和服务授权，提交统一审核结论"
-        extra={<Button onClick={() => navigate('/staff/audit')}>返回审核队列</Button>}
+        extra={<Button icon={<ArrowLeftOutlined />} color="primary" variant="outlined" onClick={() => navigate('/staff/audit')}>返回审核队列</Button>}
       >
         {/* 人员头卡 */}
         <div className="staff-card staff-profile">

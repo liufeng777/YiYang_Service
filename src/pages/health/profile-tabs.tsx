@@ -364,7 +364,7 @@ function ExamReportView({ onBack, onManualEntry }: { onBack: () => void; onManua
           <div className="hr-disease__title">检查检验报告详情</div>
           <div className="hr-disease__desc">来源：{r.source}</div>
         </div>
-        <Button icon={<ArrowLeftOutlined />} onClick={onBack}>
+        <Button icon={<ArrowLeftOutlined />} color="primary" variant="outlined" onClick={onBack}>
           返回列表
         </Button>
       </div>
