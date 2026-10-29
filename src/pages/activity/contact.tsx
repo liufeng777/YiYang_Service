@@ -1,161 +1,154 @@
-/**
- * 健康活动 - 联系确认（设计稿：联系确认.png）
- * 确认实际参与人并记录活动需求；保存后系统自动校验身份
- * TODO: 联系确认保存接口 API v0.1 未定义，待后端补充
- */
-import { useState } from 'react'
-import { Button, Input, message } from 'antd'
+/** 健康活动：展示真实报名联系信息，仅保留接口支持的签到与取消操作。 */
+import { useCallback, useEffect, useState } from 'react'
+import { App, Button, Empty, Popconfirm, Spin, Tag } from 'antd'
+import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
-import { mockContactConfirm } from './mock'
+import { activityApi } from '@/api'
+import type { ActivityItem, RegistrationItem } from '@/api/modules/activity'
 import './index.less'
 
+const STATUS_COLOR: Record<number, string> = { 1: 'blue', 2: 'green', 3: 'default' }
+
 export default function ActivityContact() {
-  const { id } = useParams()
+  const { id = '', rid = '' } = useParams<{ id: string; rid: string }>()
   const navigate = useNavigate()
-  const c = mockContactConfirm
-  const [participantType, setParticipantType] = useState(c.defaultType)
-  const [name, setName] = useState(c.defaultName)
-  const [phone, setPhone] = useState(c.defaultPhone)
-  const [result, setResult] = useState(c.defaultResult)
-  const [needs, setNeeds] = useState<string[]>(c.defaultNeeds)
-  const [record, setRecord] = useState(c.defaultRecord)
-  const [nextContact, setNextContact] = useState(c.defaultNextContact)
+  const { message } = App.useApp()
+  const [activity, setActivity] = useState<ActivityItem | null>(null)
+  const [registration, setRegistration] = useState<RegistrationItem | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [acting, setActing] = useState(false)
 
-  const toggleNeed = (n: string) =>
-    setNeeds((list) => (list.includes(n) ? list.filter((x) => x !== n) : [...list, n]))
+  const registrationsPath = `/health-activity/${id}/registrations`
 
-  const onSave = () => {
-    if (!name.trim() || !phone.trim()) {
-      message.warning('请填写参与人姓名与手机号')
-      return
+  const fetchDetail = useCallback(async () => {
+    if (!id || !rid) return
+    setLoading(true)
+    try {
+      const [activityDetail, registrationPage] = await Promise.all([
+        activityApi.getActivityDetail(id),
+        activityApi.getActivityRegistrations(id, { page: 1, page_size: 100 }),
+      ])
+      setActivity(activityDetail)
+      setRegistration(registrationPage.list?.find((item) => String(item.id) === rid) ?? null)
+    } catch {
+      // 错误提示由拦截器统一处理
+    } finally {
+      setLoading(false)
     }
-    // TODO: 联系确认保存接口待后端补充；保存后系统自动校验身份并判断是否建线索
-    message.success('已保存并完成身份校验：实名信息已关联，线索由系统自动判断')
-    navigate(`/health-activity/${id ?? 'AC01'}/registrations`)
+  }, [id, rid])
+
+  useEffect(() => {
+    fetchDetail()
+  }, [fetchDetail])
+
+  const onCheckin = async () => {
+    setActing(true)
+    try {
+      await activityApi.checkinRegistration(id, rid)
+      message.success('签到成功')
+      navigate(registrationsPath)
+    } catch {
+      // 错误提示由拦截器统一处理
+    } finally {
+      setActing(false)
+    }
   }
+
+  const onCancel = async () => {
+    setActing(true)
+    try {
+      await activityApi.cancelRegistration(id, rid)
+      message.success('已取消报名')
+      navigate(registrationsPath)
+    } catch {
+      // 错误提示由拦截器统一处理
+    } finally {
+      setActing(false)
+    }
+  }
+
+  const status = registration?.status
 
   return (
     <div className="ac-page">
       <PageContainer
-        title="联系确认"
-        description="确认实际参与人并记录活动需求；保存后系统自动校验身份"
+        title="报名联系信息"
+        description="查看活动报名人与联系信息；签到和取消操作将直接更新报名记录"
+        extra={<Button icon={<ArrowLeftOutlined />} onClick={() => navigate(registrationsPath)}>返回报名名单</Button>}
       >
-        <div className="ac-contact">
-          {/* 左：表单 */}
-          <div className="ac-card">
-            <div className="ac-field__label">报名账号</div>
-            <div className="ac-contact__account">
-              {c.applicant}　{c.phone}　{c.accountType}
-            </div>
-
-            <div className="ac-field">
-              <div className="ac-field__label">
-                实际参与人 <span className="ac-required">*</span>
-              </div>
-              <div className="ac-pills">
-                {c.participantTypes.map((t) => (
-                  <span
-                    key={t}
-                    className={t === participantType ? 'ac-pill ac-pill--active' : 'ac-pill'}
-                    onClick={() => setParticipantType(t)}
-                  >
-                    {t}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="ac-contact__grid">
-              <div className="ac-field">
-                <div className="ac-field__label">
-                  参与人姓名 <span className="ac-required">*</span>
+        <Spin spinning={loading}>
+          {registration ? (
+            <div className="ac-contact">
+              <div className="ac-card">
+                <div className="ac-card__header">
+                  <span className="ac-card__title">报名信息</span>
+                  <Tag color={STATUS_COLOR[status ?? 0] ?? 'default'}>
+                    {status != null ? activityApi.REG_STATUS_MAP[status] : undefined}
+                  </Tag>
                 </div>
-                <Input value={name} onChange={(e) => setName(e.target.value)} />
-              </div>
-              <div className="ac-field">
-                <div className="ac-field__label">
-                  参与人手机号 <span className="ac-required">*</span>
+                <div className="ac-contact__grid">
+                  <div className="ac-field">
+                    <div className="ac-field__label">报名人 / 会员</div>
+                    <div>{registration.member_name || registration.contact_name}</div>
+                  </div>
+                  <div className="ac-field">
+                    <div className="ac-field__label">联系人</div>
+                    <div>{registration.contact_name}</div>
+                  </div>
+                  <div className="ac-field">
+                    <div className="ac-field__label">联系电话</div>
+                    <div>{registration.contact_phone}</div>
+                  </div>
+                  <div className="ac-field">
+                    <div className="ac-field__label">参与人数</div>
+                    <div>{registration.participant_count}</div>
+                  </div>
+                  <div className="ac-field">
+                    <div className="ac-field__label">报名时间</div>
+                    <div>{registration.created_at}</div>
+                  </div>
+                  <div className="ac-field">
+                    <div className="ac-field__label">报名编号</div>
+                    <div>{registration.id}</div>
+                  </div>
                 </div>
-                <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
-              </div>
-            </div>
-
-            <div className="ac-field">
-              <div className="ac-field__label">
-                联系结果 <span className="ac-required">*</span>
-              </div>
-              <div className="ac-pills">
-                {c.results.map((r) => (
-                  <span
-                    key={r}
-                    className={r === result ? 'ac-pill ac-pill--active' : 'ac-pill'}
-                    onClick={() => setResult(r)}
-                  >
-                    {r}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="ac-field">
-              <div className="ac-field__label">用户关注或服务需求</div>
-              <div className="ac-pills">
-                {c.needs.map((n) => (
-                  <span
-                    key={n}
-                    className={needs.includes(n) ? 'ac-pill ac-pill--active' : 'ac-pill'}
-                    onClick={() => toggleNeed(n)}
-                  >
-                    {n}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="ac-field">
-              <div className="ac-field__label">联系记录</div>
-              <Input.TextArea rows={3} value={record} onChange={(e) => setRecord(e.target.value)} />
-            </div>
-
-            <div className="ac-field">
-              <div className="ac-field__label">下次联系时间（需要继续跟进时）</div>
-              <Input
-                className="ac-contact__next"
-                value={nextContact}
-                onChange={(e) => setNextContact(e.target.value)}
-              />
-            </div>
-
-            <div className="ac-contact__submit">
-              <Button type="primary" onClick={onSave}>
-                保存并校验身份
-              </Button>
-            </div>
-          </div>
-
-          {/* 右：保存后的系统处理 */}
-          <div className="ac-card ac-contact__rail">
-            <div className="ac-card__header">
-              <span className="ac-card__title">保存后的系统处理</span>
-            </div>
-            {c.systemSteps.map((s, i) => (
-              <div key={s.title} className="ac-step">
-                <span className="ac-step__no">{i + 1}</span>
-                <div>
-                  <div className="ac-step__title">{s.title}</div>
-                  <div className="ac-step__desc">{s.desc}</div>
+                <div className="ac-field">
+                  <div className="ac-field__label">报名备注</div>
+                  <div>{registration.remark, '无备注'}</div>
                 </div>
               </div>
-            ))}
-            <div className="ac-note-blue">
-              <div className="ac-note-blue__title">防重复规则</div>
-              {c.antiDuplicate.split('\n\n').map((p) => (
-                <p key={p.slice(0, 8)}>{p}</p>
-              ))}
+
+              <div className="ac-card ac-contact__rail">
+                <div className="ac-card__header"><span className="ac-card__title">活动与可用操作</span></div>
+                <div className="ac-field">
+                  <div className="ac-field__label">活动名称</div>
+                  <div>{activity?.title || activity?.activity_name}</div>
+                </div>
+                <div className="ac-field">
+                  <div className="ac-field__label">活动地点</div>
+                  <div>{activity?.location || activity?.address}</div>
+                </div>
+                <div className="ac-note-blue">
+                  <div className="ac-note-blue__title">操作说明</div>
+                  <p>当前接口不支持保存联系结果或身份校验。签到与取消报名会调用真实接口，请确认后操作。</p>
+                </div>
+                <div className="ac-contact__submit">
+                  {status === 1 && (
+                    <Button type="primary" loading={acting} onClick={onCheckin}>确认签到</Button>
+                  )}
+                  {status !== 3 && (
+                    <Popconfirm title="确认取消该报名？" onConfirm={onCancel}>
+                      <Button danger loading={acting}>取消报名</Button>
+                    </Popconfirm>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          ) : !loading ? (
+            <div className="ac-card"><Empty description="未找到对应报名记录" /></div>
+          ) : null}
+        </Spin>
       </PageContainer>
     </div>
   )

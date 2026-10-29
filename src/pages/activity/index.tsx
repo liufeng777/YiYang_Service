@@ -20,12 +20,6 @@ const ACTIVITY_STATUS: Record<number, { label: string; color: string }> = {
   4: { label: '已下架', color: 'default' },
 }
 
-/** 活动时间兼容秒级时间戳与字符串 */
-function formatDate(v?: number | string) {
-  if (v == null || v === '') return '-'
-  return typeof v === 'number' ? formatDateTime(v * 1000) : v
-}
-
 export default function ActivityList() {
   const navigate = useNavigate()
   const [list, setList] = useState<ActivityItem[]>([])

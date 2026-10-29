@@ -80,7 +80,7 @@ export default function ConsultationList() {
       title: '咨询人',
       key: 'member_name',
       dataIndex: 'member_name',
-      render: (v) => v || '-'
+      render: (v: string) => v || '-'
     },
     {
       title: '联系人',

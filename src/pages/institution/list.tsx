@@ -59,7 +59,7 @@ export default function InstitutionInfo() {
       dataIndex: 'is_home_service',
       key: 'is_home_service',
       width: 120,
-      render: (v) => <Tag>{v === 1 ? '上门' : '到店'}</Tag>
+      render: (v: number) => <Tag>{v === 1 ? '上门' : '到店'}</Tag>
     }
   ]
 

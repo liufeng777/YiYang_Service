@@ -5,7 +5,7 @@
  */
 import { useEffect, useState } from 'react'
 import { Button, Input, App } from 'antd'
-import { ArrowLeftOutlined, CheckCircleFilled, LeftOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, CheckCircleFilled } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import { memberApi } from '@/api'

@@ -118,9 +118,9 @@ export default function WorkOrderDetail() {
 
   /* 订单审核展示：审核人 · 状态 · 时间（接口未返回时降级 -） */
   const auditText = useMemo(() => {
-    const name = detail?.audit_staff_name || order?.audit_staff_name || order?.confirmed_by_name
-    const status = detail?.audit_status ?? order?.audit_status
-    const at = detail?.audit_at ?? order?.audit_at ?? order?.confirmed_at
+    const name = detail?.audit_staff_name
+    const status = detail?.audit_status
+    const at = detail?.audit_at
     if (!name && status == null) return '-'
     const parts = [
       name,
@@ -220,7 +220,7 @@ export default function WorkOrderDetail() {
                   <div className="wo-kv">
                     <span className="wo-kv__label">创建时间</span>
                     <span className="wo-kv__value">
-                      {fmt(detail.created_at ?? order?.created_at)}
+                      {fmt(detail.created_at)}
                     </span>
                   </div>
                 </div>

@@ -26,7 +26,6 @@ import {
   AlertOutlined,
   AuditOutlined,
   ToolOutlined,
-  WarningOutlined,
   CarryOutOutlined,
   MessageOutlined,
   HomeOutlined,

@@ -5,7 +5,7 @@
  */
 import { useState } from 'react'
 import { Button, Select } from 'antd'
-import { ArrowLeftOutlined, CheckOutlined, LeftOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, CheckOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import { mockAssign, mockCreateSuccess } from './mock'

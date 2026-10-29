@@ -229,10 +229,10 @@ export default function AdmissionList() {
       dataIndex: 'contact_phone',
       key: 'contact_phone',
       width: 120,
-      render: (v, r) => (
+      render: (v: string, r: any) => (
         <div className='table-cell'>
           <strong>{r.contact_name}</strong>
-          <span>{r.contact_phone}</span>
+          <span>{v}</span>
         </div>
       )
     },

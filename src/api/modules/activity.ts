@@ -23,8 +23,8 @@ export interface ActivityItem {
   cover_url?: string
   /** 活动状态（枚举未定义，原样展示） */
   status?: number
-  start_date?: number | string
-  end_date?: number | string
+  start_date: number
+  end_date: number
   location?: string
   address?: string
   quota?: number
