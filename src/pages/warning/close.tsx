@@ -1,108 +1,109 @@
-/**
- * 预警管理 - 关闭健康预警（设计稿：关闭与回写.png）
- * 核对处置结果、随访完成情况与档案回写后关闭本次预警
- * TODO: 关闭前检查清单与关闭接口 API v0.1 未定义，待后端补充
- */
-import { useState } from 'react'
-import { Button, Input, Radio, message } from 'antd'
-import { CheckOutlined } from '@ant-design/icons'
-import { useNavigate } from 'react-router-dom'
+/** 预警完成处置：使用真实详情与处置接口，不再使用本地关闭 mock。 */
+import { useCallback, useEffect, useState } from 'react'
+import { App, Button, Input, Radio, Spin } from 'antd'
+import { ArrowLeftOutlined } from '@ant-design/icons'
+import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
-import { mockWarningClose } from './mock'
+import { warningApi } from '@/api'
+import { WARNING_STATUS_MAP, type WarningItem } from '@/api/modules/warning'
 import './index.less'
 
 export default function WarningClose() {
   const navigate = useNavigate()
-  const c = mockWarningClose
-  const [conclusion, setConclusion] = useState(c.defaultConclusion)
-  const [reason, setReason] = useState(c.reasons[0])
+  const { id } = useParams<{ id: string }>()
+  const { message } = App.useApp()
+  const [detail, setDetail] = useState<WarningItem | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [conclusion, setConclusion] = useState('')
+  const [stopService, setStopService] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
-  const onClose = () => {
+  const fetchDetail = useCallback(async () => {
+    if (!id) return
+    setLoading(true)
+    try {
+      setDetail(await warningApi.getWarningDetail(id))
+    } catch {
+      // 错误提示由拦截器统一处理
+    } finally {
+      setLoading(false)
+    }
+  }, [id])
+
+  useEffect(() => {
+    fetchDetail()
+  }, [fetchDetail])
+
+  const onSubmit = async () => {
+    if (!id) return
     if (!conclusion.trim()) {
-      message.warning('请填写关闭结论')
+      message.warning('请填写处置结论')
       return
     }
-    // TODO: 预警关闭接口待后端补充
-    message.success('预警已关闭，处置结论已回写健康档案')
-    navigate('/warning')
+    setSubmitting(true)
+    try {
+      await warningApi.handleWarning(id, {
+        warning_status: stopService ? 5 : 4,
+        handled_reason: conclusion.trim(),
+      })
+      message.success('预警处置结果已提交')
+      navigate('/warning')
+    } catch {
+      // 错误提示由拦截器统一处理
+    } finally {
+      setSubmitting(false)
+    }
   }
+
+  const isPending = detail?.warning_status === 0 || detail?.warning_status === 1
 
   return (
     <div className="wn-page">
       <PageContainer
-        title="关闭健康预警"
-        description="核对处置结果、随访完成情况与档案回写后关闭本次预警"
-        extra={<span className="wn-tag wn-tag--green">待关闭</span>}
+        title="完成预警处置"
+        description="核对预警信息后，提交最终处置结论与服务安排"
+        extra={<Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/warning')}>返回预警列表</Button>}
       >
-        <div className="wn-close">
-          {/* 左：处置结果 */}
-          <div className="wn-card">
-            <div className="wn-card__header">
-              <span className="wn-card__title">处置结果</span>
+        <Spin spinning={loading}>
+          <div className="wn-close">
+            <div className="wn-card">
+              <div className="wn-card__header"><span className="wn-card__title">预警信息</span></div>
+              <div className="wn-field"><div className="wn-field__label">预警内容</div><div>{detail?.title}</div></div>
+              <div className="wn-field"><div className="wn-field__label">服务对象</div><div>{detail?.member_name}</div></div>
+              {/* <div className="wn-field"><div className="wn-field__label">指标快照</div><div>{detail?.metric_values}</div></div> */}
+              <div className="wn-field"><div className="wn-field__label">当前状态</div><div>{detail ? WARNING_STATUS_MAP[detail.warning_status] : undefined}</div></div>
+              <div className="wn-field"><div className="wn-field__label">已有处置意见</div><div>{detail?.handled_reason}</div></div>
             </div>
-            <div className="wn-timeline">
-              {c.timeline.map((t) => (
-                <div key={t.time} className="wn-timeline__item">
-                  <span className="wn-timeline__time">{t.time}</span>
-                  <span className="wn-timeline__text">{t.text}</span>
+
+            <div className="wn-card">
+              <div className="wn-card__header"><span className="wn-card__title">处置结论</span></div>
+              {isPending ? (
+                <>
+                  <div className="wn-field">
+                    <div className="wn-field__label">结论说明 <span className="wn-required">*</span></div>
+                    <Input.TextArea rows={4} value={conclusion} onChange={(event) => setConclusion(event.target.value)} placeholder="请填写最终判断和处理结论" maxLength={1000} showCount />
+                  </div>
+                  <div className="wn-field wn-field--last">
+                    <div className="wn-field__label">后续服务安排</div>
+                    <Radio.Group value={stopService} onChange={(event) => setStopService(event.target.value as boolean)}>
+                      <Radio.Button value={false}>继续服务</Radio.Button>
+                      <Radio.Button value>中止服务</Radio.Button>
+                    </Radio.Group>
+                  </div>
+                  <div className="wn-close__actions">
+                    <Button type="primary" onClick={onSubmit} loading={submitting}>提交处置结果</Button>
+                  </div>
+                </>
+              ) : (
+                <div className="wn-note-box">
+                  <div className="wn-note-box__title">该预警已完成处理</div>
+                  <div className="wn-note-box__line">处理状态：{detail ? WARNING_STATUS_MAP[detail.warning_status] : undefined}</div>
+                  <div className="wn-note-box__line">处置意见：{detail?.handled_reason}</div>
                 </div>
-              ))}
-            </div>
-
-            <div className="wn-field">
-              <div className="wn-field__label">
-                关闭结论 <span className="wn-required">*</span>
-              </div>
-              <Input.TextArea
-                rows={3}
-                value={conclusion}
-                onChange={(e) => setConclusion(e.target.value)}
-              />
-            </div>
-
-            <div className="wn-field wn-field--last">
-              <div className="wn-field__label">
-                关闭原因 <span className="wn-required">*</span>
-              </div>
-              <Radio.Group value={reason} onChange={(e) => setReason(e.target.value)}>
-                {c.reasons.map((r) => (
-                  <Radio key={r} value={r}>
-                    {r}
-                  </Radio>
-                ))}
-              </Radio.Group>
+              )}
             </div>
           </div>
-
-          {/* 右：关闭前检查 */}
-          <div className="wn-card">
-            <div className="wn-card__header">
-              <span className="wn-card__title">关闭前检查</span>
-            </div>
-            {c.checks.map((item) => (
-              <div key={item} className="wn-close__check">
-                <CheckOutlined className="wn-close__check-icon" />
-                {item}
-              </div>
-            ))}
-            <div className="wn-note-box">
-              <div className="wn-note-box__title">关闭后系统动作</div>
-              {c.afterActions.map((s) => (
-                <div key={s} className="wn-note-box__line">
-                  {s}
-                </div>
-              ))}
-            </div>
-            <div className="wn-close__actions">
-              <Button onClick={() => message.success('已暂存')}>暂存</Button>
-              <Button type="primary" onClick={onClose}>
-                确认关闭预警
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <div className="wn-close__footer">{c.footer}</div>
+        </Spin>
       </PageContainer>
     </div>
   )

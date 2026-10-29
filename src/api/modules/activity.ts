@@ -1,40 +1,92 @@
 import { http } from '@/utils/request'
 import type { PageParams, PageResult } from '@/types/api'
 
+/**
+ * 健康活动（协同工作台端，对齐 swagger「staff-健康活动」模块）
+ * 网关前缀：/api/v1/staff
+ * 说明：swagger 出参均为通用 pkg.Response（data: {}），未定义字段 schema，
+ * 以下出参字段按业务命名预定义并做可选兼容，如后端实际字段名有出入仅需调整此处。
+ */
+
+/** 报名状态：1-待参加 2-已签到 3-已取消 */
+export const REG_STATUS_MAP: Record<number, string> = {
+  1: '待参加',
+  2: '已签到',
+  3: '已取消',
+}
+
+/** 健康活动列表项 */
 export interface ActivityItem {
   id: number
-  title: string
-  coverUrl: string
-  status: number // 0 未开始 1 进行中 2 已结束 3 已下架
-  startTime: string
-  endTime: string
+  title?: string
+  activity_name?: string
+  cover_url?: string
+  /** 活动状态（枚举未定义，原样展示） */
+  status?: number
+  start_date?: number | string
+  end_date?: number | string
+  location?: string
+  address?: string
+  quota?: number
+  registered_count?: number
+  [key: string]: unknown
 }
 
-/** 活动分页列表 */
-export function getActivityList(params: PageParams) {
-  return http.get<PageResult<ActivityItem>>('/activity/list', { ...params })
+/** 活动报名记录 */
+export interface RegistrationItem {
+  id: number
+  member_id?: number
+  member_name?: string
+  contact_name?: string
+  contact_phone?: string
+  participant_count?: number
+  /** 见 REG_STATUS_MAP */
+  status?: number
+  remark?: string
+  created_at?: number
+  [key: string]: unknown
 }
 
-/** 活动详情 */
-export function getActivityDetail(id: number) {
-  return http.get<ActivityItem>(`/activity/${id}`)
+/** 代报名入参（staff.ReqStaffActivityRegister） */
+export interface ActivityRegisterReq {
+  contact_name?: string
+  contact_phone?: string
+  member_id?: number
+  participant_count?: number
+  remark?: string
 }
 
-/** 创建 / 更新活动 */
-export function saveActivity(data: Partial<ActivityItem>) {
-  return data.id
-    ? http.put<null>('/activity/update', data)
-    : http.post<null>('/activity/create', data)
+/** 健康活动分页列表（GET /activities） */
+export function getActivities(params: PageParams) {
+  return http.get<PageResult<ActivityItem>>('/v1/staff/activities', { ...params })
 }
 
-/** 活动上下架 */
-export function toggleActivity(id: number, enabled: boolean) {
-  return http.post<null>(`/activity/${id}/toggle`, { enabled })
+/** 健康活动详情（GET /activities/{id}） */
+export function getActivityDetail(id: number | string) {
+  return http.get<ActivityItem>(`/v1/staff/activities/${id}`)
 }
 
-/**
- * TODO: 协同工作台端健康活动接口（本机构承接活动列表 / 报名名单 / 联系确认 / 现场签到与临时到场补登记）
- * API v0.1（《协同工作台-API设计》）未定义，待后端补充；
- * 当前 src/pages/activity 页面以本地 mock 演示完整交互。
- * 注意：本模块上述运营后台域接口与本端健康活动页面无对应关系，页面未调用。
- */
+/** 活动报名记录分页列表（GET /activities/{id}/registrations） */
+export function getActivityRegistrations(
+  id: number | string,
+  params: PageParams & { status?: number; keyword?: string },
+) {
+  return http.get<PageResult<RegistrationItem>>(`/v1/staff/activities/${id}/registrations`, {
+    ...params,
+  })
+}
+
+/** 活动代报名（POST /activities/{id}/registrations） */
+export function registerActivity(id: number | string, data: ActivityRegisterReq) {
+  return http.post<null>(`/v1/staff/activities/${id}/registrations`, data)
+}
+
+/** 取消活动报名（POST /activities/{id}/registrations/{rid}/cancel） */
+export function cancelRegistration(id: number | string, rid: number | string) {
+  return http.post<null>(`/v1/staff/activities/${id}/registrations/${rid}/cancel`)
+}
+
+/** 活动报名签到（POST /activities/{id}/registrations/{rid}/checkin） */
+export function checkinRegistration(id: number | string, rid: number | string) {
+  return http.post<null>(`/v1/staff/activities/${id}/registrations/${rid}/checkin`)
+}

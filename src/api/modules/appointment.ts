@@ -14,6 +14,15 @@ export const APPOINTMENT_TYPE_MAP: Record<number, string> = {
   4: '服务',
 }
 
+/** 预约状态：1-待办 2-已确认 3-已到达 4-已完成 9-已取消 */
+export const APPOINTMENT_STATUS_MAP: Record<number, string> = {
+  1: '待办',
+  2: '已确认',
+  3: '已到达',
+  4: '已完成',
+  9: '已取消',
+}
+
 /** 预约列表项 */
 export interface AppointmentItem {
   id: number

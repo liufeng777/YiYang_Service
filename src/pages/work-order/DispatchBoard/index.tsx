@@ -11,32 +11,29 @@
  *   拖拽按抓取点偏移落位，块落在视觉上看到的位置
  * - 状态提示（无冲突 / N 单冲突）位于底部左下角；
  *   「确认派单（N）」批量提交所有无冲突且已分配的工单；其余留板继续调整
- * 数据来源：候选人员与待派单队列为真实接口；人员每日已有安排为本地确定性 mock；
- * 待派单队列为空时自动生成覆盖四种情况的演示工单（见 ./mock-dispatch.ts buildMockOrders）
+ * 数据来源：候选人员、待派单队列、人员排班及派单提交均使用真实接口。
  */
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent } from 'react'
 import { Button, DatePicker, Drawer, Spin, Tooltip, App } from 'antd'
 import { CheckCircleFilled, WarningFilled, CloseOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
-import { staffApi, workOrderApi } from '@/api'
+import { scheduleApi, staffApi, workOrderApi } from '@/api'
 import type { WorkOrderItem } from '@/api/modules/work-order'
 import {
   BOARD_END,
   BOARD_START,
   SLOT_STEP,
-  buildMockOrders,
   findConflicts,
   fmtMin,
-  getStaffSchedule,
-  mockCandidates,
   overlaps,
+  timeToMinutes,
   type BusyBlock,
-  type MockCandidate,
-} from './mock-dispatch'
+  type DispatchCandidate,
+} from './board-utils'
 import './index.less'
 
-type Candidate = MockCandidate
+type Candidate = DispatchCandidate
 
 /** staffId = 0 表示在待分配池中 */
 const POOL_STAFF_ID = 0
@@ -64,7 +61,7 @@ export default function DispatchBoard({
   onDone,
 }: {
   open: boolean
-  /** 待派工单；传空数组则进入 mock 演示模式（自动构造覆盖各种情况的工单） */
+  /** 真实待派工单 */
   orders: WorkOrderItem[]
   onClose: () => void
   /** 板上工单全部派完时回调（父级关闭并刷新列表） */
@@ -77,7 +74,7 @@ export default function DispatchBoard({
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [doneIds, setDoneIds] = useState<number[]>([])
-  const [mockOrders, setMockOrders] = useState<WorkOrderItem[]>([])
+  const [schedules, setSchedules] = useState<Map<number, BusyBlock[]>>(new Map())
   const [dateStr, setDateStr] = useState(() =>
     orders.length > 0
       ? dayjs(orders[0].expected_start_at * 1000).format('YYYY-MM-DD')
@@ -86,8 +83,7 @@ export default function DispatchBoard({
   /** 拖拽抓取点偏移（分钟）：落点 = 指针位置 - 偏移，块落在视觉位置 */
   const dragRef = useRef<{ id: number; offset: number } | null>(null)
 
-  const mockMode = !!orders.length
-  const allOrders = mockMode ? mockOrders : orders
+  const allOrders = orders
 
   /* 服务时长（分钟）→ 块长，吸附 30 分钟粒度，最小 1 格 */
   const durationOf = (o: WorkOrderItem) =>
@@ -124,36 +120,54 @@ export default function DispatchBoard({
     [dayOrders, poolOrders],
   )
 
-  /* 打开时加载候选人员（接口为空 / 异常时用 mock 兜底演示） */
+  /* 打开时加载真实候选人员，无数据或请求失败均不生成演示人员。 */
   useEffect(() => {
     if (!open) return
     setLoading(true)
     staffApi
-      .getStaffList({ page: 1, page_size: 50, status: 1 })
+      .getStaffList({ page: 1, page_size: 100, status: 1 })
       .then((res) => {
-        const list: Candidate[] = res.list.map((s) => ({
-          id: s.id,
-          name: s.name,
-          position_name: s.position_name || '-',
-          title: s.title || '',
-          phone: s.phone || '',
-          upcoming_credential_expire: s.upcoming_credential_expire,
-        }))
-        setCandidates(list.length > 0 ? list : mockCandidates)
+        setCandidates(res.list.map((staff) => ({
+          id: staff.id,
+          name: staff.name,
+          position_name: staff.position_name || '-',
+          title: staff.title || '',
+          phone: staff.phone || '',
+          upcoming_credential_expire: staff.upcoming_credential_expire,
+        })))
       })
       .catch(() => {
         // 错误提示由拦截器统一处理
-        setCandidates(mockCandidates)
+        setCandidates([])
       })
       .finally(() => setLoading(false))
   }, [open])
 
-  /* mock 演示模式：候选人就绪且队列为空时，构造覆盖四种情况的演示工单 */
+  /* 按当前日期读取真实人员排班，用于时段冲突提示。 */
   useEffect(() => {
-    if (open && mockMode && candidates.length > 0 && mockOrders.length === 0) {
-      setMockOrders(buildMockOrders(candidates, dateStr))
-    }
-  }, [open, mockMode, candidates, mockOrders.length, dateStr])
+    if (!open) return
+    setLoading(true)
+    scheduleApi
+      .getSchedules({ page: 1, page_size: 200, view: 'day', date: dateStr })
+      .then((res) => {
+        const next = new Map<number, BusyBlock[]>()
+        res.list.forEach((item) => {
+          if (!item.staff_id || item.status === 9) return
+          const startMin = timeToMinutes(item.start_time)
+          const endMin = timeToMinutes(item.end_time)
+          if (startMin == null || endMin == null || endMin <= startMin) return
+          const blocks = next.get(item.staff_id) ?? []
+          blocks.push({ startMin, endMin, title: item.remark || '已排安排' })
+          next.set(item.staff_id, blocks)
+        })
+        setSchedules(next)
+      })
+      .catch(() => {
+        // 请求失败时不使用模拟排班，避免产生虚假冲突。
+        setSchedules(new Map())
+      })
+      .finally(() => setLoading(false))
+  }, [open, dateStr])
 
   /* 初始化默认方案：期望人员 + 期望时段；
      无期望人员 / 期望时间的工单进入待分配池（位置取期望时间，无则 08:00 起） */
@@ -180,13 +194,6 @@ export default function DispatchBoard({
     )
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, candidates, allOrders])
-
-  /* 各候选人当日已有安排（确定性 mock） */
-  const schedules = useMemo(() => {
-    const map = new Map<number, BusyBlock[]>()
-    candidates.forEach((c) => map.set(c.id, getStaffSchedule(c.id, dateStr)))
-    return map
-  }, [candidates, dateStr])
 
   /** 某工单方案的冲突：人员已有安排 + 同人员其他工单方案（池内工单不参与） */
   const conflictOf = (o: WorkOrderItem) => {
@@ -256,14 +263,12 @@ export default function DispatchBoard({
       const p = plans[o.id]
       const startAt = dayjs(dateStr).startOf('day').add(p.startMin, 'minute').unix()
       try {
-        if (!mockMode) {
-          await workOrderApi.dispatchWorkOrder(o.id, {
-            assigned_staff_id: p.staffId,
-            service_date: dateStr,
-            planned_start_at: startAt,
-            planned_stop_at: startAt + durationOf(o) * 60,
-          })
-        }
+        await workOrderApi.dispatchWorkOrder(o.id, {
+          assigned_staff_id: p.staffId,
+          service_date: dateStr,
+          planned_start_at: startAt,
+          planned_stop_at: startAt + durationOf(o) * 60,
+        })
         dispatched.push(o.id)
       } catch {
         // 单笔失败不中断批量，错误提示由拦截器统一处理
@@ -281,7 +286,7 @@ export default function DispatchBoard({
         (o) => !doneIds.includes(o.id) && !dispatched.includes(o.id),
       ).length
       message.success(
-        `已派单 ${dispatched.length} 单${mockMode ? '（演示）' : '，助手端同步收到任务'}${remain > 0 ? `，剩余 ${remain} 单待调整` : ''}`,
+        `已派单 ${dispatched.length} 单，助手端同步收到任务${remain > 0 ? `，剩余 ${remain} 单待调整` : ''}`,
       )
       if (remain === 0) onDone()
     }
@@ -606,7 +611,7 @@ export default function DispatchBoard({
             )
           })}
           {!loading && chipOrders.length === 0 && (
-            <div className="wo-empty">该日期暂无待派工单{mockMode ? '' : '，可切换日期查看'}</div>
+            <div className="wo-empty">该日期暂无待派工单，可切换日期查看</div>
           )}
         </div>
       </Spin>

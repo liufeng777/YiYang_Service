@@ -10,6 +10,7 @@ import type { PageParams, PageResult } from '@/types/api'
 export interface ConsultationItem {
   id: number
   member_id?: number | null
+  member_name: string
   /** 咨询类型（AI / 人工 / 电话等，待后端字典确认） */
   consultation_type: number
   /** 咨询问题 */

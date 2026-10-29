@@ -9,11 +9,14 @@ import type { PageParams, PageResult } from '@/types/api'
 
 /** 订单状态 */
 export const ORDER_STATUS_MAP: Record<number, string> = {
-  1: '待审核',
-  2: '待确定',
-  3: '已确认',
+  1: '待支付',
+  2: '待确认',
+  3: '生效中',
   4: '已完成',
-  9: '已取消',
+  5: '已取消',
+  6: '已退款',
+  7: '退款中',
+  8: '退款待审批'
 }
 
 /** 订单列表项 */
@@ -24,8 +27,10 @@ export interface OrderItem {
   member_name?: string
   service_id?: number
   service_name?: string
+  service_count?: number
   institution_id?: number
   amount?: number
+  paid_at?: number
   /** 见 ORDER_STATUS_MAP */
   order_status?: number
   status?: number
@@ -34,20 +39,46 @@ export interface OrderItem {
 }
 
 /** 订单详情 */
-export interface OrderDetail extends OrderItem {
+
+export interface OrderDetail {
+  address_detail: string
+  address_region: string
+  amount: string
+  consumables: string[]
+  // 联系人
   contact_name?: string
   contact_phone?: string
-  address?: string
-  assignee?: number
-  assignee_name?: string
-  /** 审核信息（审核人 / 状态 / 时间，后端返回即展示，缺省降级为 -） */
-  audit_staff_name?: string
-  /** 1-已通过 2-已驳回（推断，以后端实际返回为准） */
-  audit_status?: number
-  audit_at?: number
-  confirmed_by_name?: string
-  confirmed_at?: number
-  [key: string]: unknown
+  id: string;
+  institution_name: string;
+  member_age?: number
+  member_chronic_disease: string[] // 如 ["高血脂症", "2型糖尿病", "高血压"]
+  member_gender?: number
+  member_health_record: {
+    data_source: number
+    is_abnormal: number
+    metric_id: number
+    metric_name: string
+    metric_value: string
+    record_time: number
+    unit: string
+  }[]
+  // 如 [{
+  //   data_source: 2,
+  //   is_abnormal: 1,
+  //   metric_id: 3,
+  //   metric_name: "空腹血糖",
+  //   metric_value: "6.40",
+  //   record_time: 1788350400,
+  //   unit: "mmol/L"
+  // }]
+  member_id: number
+  member_name: string
+  order_no: string
+  order_status: number
+  remark: string
+  service_id: number
+  service_name: string
+  services: string[]
 }
 
 /** 待确定订单列表（GET /orders/pending-confirm，order_status=2） */

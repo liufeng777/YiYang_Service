@@ -45,7 +45,7 @@ export default function WorkOrderList() {
   const [batchLoading, setBatchLoading] = useState(false)
   const [pendingOrders, setPendingOrders] = useState<WorkOrderItem[]>([])
 
-  /** 打开批量派单：拉取待派单队列；为空 / 异常时传空数组，排单板自动进入 mock 演示 */
+  /** 打开批量派单：拉取真实待派单队列 */
   const onOpenBatch = async () => {
     setBatchLoading(true)
     try {
@@ -277,7 +277,7 @@ export default function WorkOrderList() {
         </Card>
       </PageContainer>
 
-      {/* 批量派单排单板（队列为空时自动进入 mock 演示，覆盖各种冲突情况） */}
+      {/* 批量派单排单板：仅展示接口返回的真实待派工单 */}
       {batchOpen && (
         <DispatchBoard
           open={batchOpen}

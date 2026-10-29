@@ -6,12 +6,12 @@
  */
 import { useCallback, useEffect, useState } from 'react'
 import { Button, Card, Input, Modal, Select, Table, App } from 'antd'
-import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
-import { useNavigate } from 'react-router-dom'
-import dayjs from 'dayjs'
+import { PlusOutlined } from '@ant-design/icons'
 import PageContainer from '@/components/PageContainer'
 import { consultApi } from '@/api'
 import type { ConsultationItem } from '@/api/modules/consult'
+import { formatDateTime } from '@/utils'
+import ConsultationRegister from './register'
 import './index.less'
 
 const STATUS_MAP: Record<number, string> = { 1: '待回复', 2: '已回复' }
@@ -19,8 +19,8 @@ const STATUS_MAP: Record<number, string> = { 1: '待回复', 2: '已回复' }
 const TYPE_MAP: Record<number, string> = { 1: 'AI 健康管家', 2: '人工客服', 3: '电话咨询' }
 
 export default function ConsultationList() {
-  const navigate = useNavigate()
   const { message } = App.useApp()
+  const [registerOpen, setRegisterOpen] = useState(false)
   const [status, setStatus] = useState<number>()
   const [appliedStatus, setAppliedStatus] = useState<number>()
   const [list, setList] = useState<ConsultationItem[]>([])
@@ -77,19 +77,19 @@ export default function ConsultationList() {
 
   const columns = [
     {
-      title: '咨询时间',
-      dataIndex: 'created_at',
-      key: 'created_at',
-      width: 150,
-      render: (v: number) => (v ? dayjs(v * 1000).format('YYYY-MM-DD HH:mm') : '-'),
+      title: '咨询人',
+      key: 'member_name',
+      dataIndex: 'member_name',
+      render: (v) => v || '-'
     },
     {
-      title: '咨询人',
+      title: '联系人',
       key: 'contact',
       render: (_: unknown, row: ConsultationItem) => (
-        <span className="cs-row__name">
-          {row.contact_name || '-'} <span className="cs-row__sub">{row.contact_phone || ''}</span>
-        </span>
+        <div className='table-cell'>
+          <strong>{row.contact_name || '-'}</strong>
+          <span>{row.contact_phone || ''}</span>
+        </div>
       ),
     },
     {
@@ -97,9 +97,16 @@ export default function ConsultationList() {
       dataIndex: 'consultation_type',
       key: 'consultation_type',
       width: 120,
-      render: (v: number) => TYPE_MAP[v] ?? `类型 ${v}`,
+      render: (v: number) => TYPE_MAP[v] ?? `-`,
     },
     { title: '咨询内容', dataIndex: 'question', key: 'question', ellipsis: true },
+    {
+      title: '咨询时间',
+      dataIndex: 'created_at',
+      key: 'created_at',
+      width: 150,
+      render: (v: number) => (v ? formatDateTime(v * 1000) : '-'),
+    },
     {
       title: '回复内容',
       key: 'answer',
@@ -117,11 +124,20 @@ export default function ConsultationList() {
     {
       title: '状态',
       key: 'status',
-      width: 90,
+      width: 100,
       render: (_: unknown, row: ConsultationItem) => (
-        <span className={row.status === 1 ? 'cs-text--warn' : undefined}>
+        <span className={row.status === 1 ? 'status-tag status-tag--orange' : 'status-tag status-tag--green'}>
           {STATUS_MAP[row.status] ?? '-'}
         </span>
+      ),
+    },
+    {
+      title: '满意度',
+      width: 100,
+      key: 'satisfaction_score',
+      dataIndex: 'satisfaction_score',
+      render: (v: number, row: ConsultationItem) => (
+        row.status === 1 ? '-' : `${v}分`
       ),
     },
     {
@@ -131,7 +147,6 @@ export default function ConsultationList() {
       render: (_: unknown, row: ConsultationItem) =>
         row.status === 1 ? (
           <Button
-            type="link"
             size="small"
             onClick={() => {
               setReplyTarget(row)
@@ -141,8 +156,8 @@ export default function ConsultationList() {
             回复
           </Button>
         ) : (
-          <Button type="link" size="small" disabled>
-            已回复
+          <Button size="small" disabled>
+            回复
           </Button>
         ),
     },
@@ -157,24 +172,23 @@ export default function ConsultationList() {
           <Button
             type="primary"
             icon={<PlusOutlined />}
-            onClick={() => navigate('/consultation/register')}
+            onClick={() => setRegisterOpen(true)}
           >
             登记电话咨询
           </Button>
         }
       >
         {/* 电话来源提示 */}
-        <div className="cs-banner">
+        {/* <div className="cs-banner">
           <div className="cs-banner__title">电话来源</div>
           <div>
             护理院/驿站介绍页展示机构电话；AI健康管家无法回答时展示对应机构电话。用户拨打后，由接听机构登记咨询。
           </div>
-        </div>
+        </div> */}
 
         {/* 筛选 */}
         <Card variant="borderless" className="filter-bar">
           <Input
-            prefix={<SearchOutlined />}
             placeholder="姓名 / 手机号 / 咨询内容"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value.trim())}
@@ -191,16 +205,6 @@ export default function ConsultationList() {
             allowClear
           />
           <Button
-            type="primary"
-            onClick={() => {
-              setAppliedStatus(status)
-              setAppliedKeyword(keyword)
-              setPage(1)
-            }}
-          >
-            查询
-          </Button>
-          <Button
             onClick={() => {
               setStatus(undefined)
               setAppliedStatus(undefined)
@@ -210,6 +214,16 @@ export default function ConsultationList() {
             }}
           >
             重置
+          </Button>
+          <Button
+            type="primary"
+            onClick={() => {
+              setAppliedStatus(status)
+              setAppliedKeyword(keyword)
+              setPage(1)
+            }}
+          >
+            查询
           </Button>
         </Card>
 
@@ -255,6 +269,15 @@ export default function ConsultationList() {
           onChange={(e) => setAnswer(e.target.value)}
         />
       </Modal>
+
+      <ConsultationRegister
+        open={registerOpen}
+        onClose={() => setRegisterOpen(false)}
+        onSuccess={() => {
+          setRegisterOpen(false)
+          fetchList()
+        }}
+      />
     </div>
   )
 }

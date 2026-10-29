@@ -1,101 +1,116 @@
 /**
  * 入住协同 - 意向列表（设计稿：16.入住协同 / 意向列表.png）
  * 登记会员入住意向并持续跟进，线下接待结果在此留痕
- * 说明：swagger.json 无入住意向相关端点（列表/新增/跟进均无），
- * 当前以本地 mock 演示完整交互，页面顶部展示「暂未对接接口」提示
+ * 已对接预约（appointments）接口：入住意向 = 预约类型「参观」(appointment_type=3)，
+ * 列表/新增走预约接口，跟进操作走状态回写、到院确认与取消接口；
+ * 逐条跟进记录暂无独立接口，跟进内容写入预约备注
  */
-import { useMemo, useState } from 'react'
-import { Button, Card, DatePicker, Drawer, Input, Select, Table, Tag, App } from 'antd'
+import { useCallback, useEffect, useState } from 'react'
+import { Button, Card, DatePicker, Drawer, Input, Popconfirm, Select, Table, Tag, App } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
-import dayjs, { type Dayjs } from 'dayjs'
+import type { Dayjs } from 'dayjs'
 import PageContainer from '@/components/PageContainer'
-import {
-  FOLLOW_RESULT_OPTIONS,
-  FOLLOW_STATUS_MAP,
-  FOLLOW_TYPE_OPTIONS,
-  INSTITUTION_OPTIONS,
-  INTENT_SOURCE_OPTIONS,
-  MOVE_IN_OPTIONS,
-  RECEPTION_MAP,
-  mockIntents,
-  mockStats,
-  type AdmissionIntent,
-} from './mock'
+import { appointmentApi } from '@/api'
+import type { AppointmentItem } from '@/api/modules/appointment'
+
+const {
+  APPOINTMENT_STATUS_MAP,
+  APPOINTMENT_TYPE_MAP,
+  cancelAppointment,
+  createAppointment,
+  getAppointmentDetail,
+  getAppointments,
+  updateAppointmentStatus,
+  visitAppointment,
+} = appointmentApi
+import { formatDateTime } from '@/utils'
+import { useUserStore } from '@/store'
 import './index.less'
 
-/** 跟进状态标签配色 */
-const FOLLOW_TAG_COLOR: Record<string, string> = {
-  pending: 'orange',
-  invited: 'blue',
-  done: 'green',
-  paused: 'default',
-}
-
-/** 接待结果标签配色 */
-const RECEPTION_TAG_COLOR: Record<string, string> = {
-  none: 'default',
-  waiting: 'blue',
-  arrived: 'green',
+/** 预约状态标签配色 */
+const STATUS_TAG_COLOR: Record<number, string> = {
+  1: 'orange',
+  2: 'blue',
+  3: 'green',
+  4: 'green',
+  9: 'default',
 }
 
 interface Filters {
   keyword: string
-  institution?: string
-  followStatus?: string
-  date?: Dayjs | null
+  status?: number
 }
 
 export default function AdmissionList() {
   const { message } = App.useApp()
-  const [list, setList] = useState<AdmissionIntent[]>(mockIntents)
-  const [filters, setFilters] = useState<Filters>({ keyword: '' })
-  const [applied, setApplied] = useState<Filters>({ keyword: '' })
+  const currentOrg = useUserStore((s) => s.currentOrg)
+
+  const [list, setList] = useState<AppointmentItem[]>([])
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
+  const [filters, setFilters] = useState<Filters>({ keyword: '' })
+  const [applied, setApplied] = useState<Filters>({ keyword: '' })
 
   /* 新增意向抽屉 */
   const [createOpen, setCreateOpen] = useState(false)
+  const [creating, setCreating] = useState(false)
   const [form, setForm] = useState({
-    memberName: '',
     contactName: '',
-    targetName: '',
     contactPhone: '',
-    source: undefined as string | undefined,
-    institution: undefined as string | undefined,
     expectedVisit: null as Dayjs | null,
-    moveIn: undefined as string | undefined,
+    timeSlot: '',
     demand: '',
-  })
-
-  /* 跟进记录抽屉 */
-  const [followTarget, setFollowTarget] = useState<AdmissionIntent | null>(null)
-  const [followForm, setFollowForm] = useState({
-    type: undefined as string | undefined,
-    result: undefined as string | undefined,
-    nextTime: null as Dayjs | null,
-    reception: undefined as string | undefined,
     remark: '',
   })
 
-  const filtered = useMemo(
-    () =>
-      list.filter(
-        (item) =>
-          (!applied.keyword ||
-            item.memberName.includes(applied.keyword) ||
-            item.targetName.includes(applied.keyword) ||
-            item.contactPhone.includes(applied.keyword)) &&
-          (!applied.institution || item.institution === applied.institution) &&
-          (!applied.followStatus || item.followStatus === applied.followStatus) &&
-          (!applied.date || item.createdAt.startsWith(applied.date.format('MM-DD'))),
-      ),
-    [list, applied],
-  )
+  /* 跟进抽屉 */
+  const [followId, setFollowId] = useState<number | null>(null)
+  const [followDetail, setFollowDetail] = useState<AppointmentItem | null>(null)
+  const [followLoading, setFollowLoading] = useState(false)
+  const [nextStatus, setNextStatus] = useState<number | undefined>(undefined)
+  const [followRemark, setFollowRemark] = useState('')
+  const [acting, setActing] = useState(false)
 
-  const paged = useMemo(
-    () => filtered.slice((page - 1) * pageSize, page * pageSize),
-    [filtered, page, pageSize],
-  )
+  const load = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await getAppointments({
+        page,
+        page_size: pageSize,
+        appoint_type: 3, // 入住意向 = 参观预约
+        keyword: applied.keyword || undefined,
+        status: applied.status,
+      })
+      setList(res.list ?? [])
+      setTotal(res.total ?? 0)
+    } catch {
+      /* 拦截器已提示 */
+    } finally {
+      setLoading(false)
+    }
+  }, [page, pageSize, applied])
+
+  useEffect(() => {
+    load()
+  }, [load])
+
+  /** 打开跟进抽屉时加载预约详情 */
+  useEffect(() => {
+    if (followId == null) {
+      setFollowDetail(null)
+      return
+    }
+    setFollowLoading(true)
+    getAppointmentDetail(followId)
+      .then((res) => {
+        setFollowDetail(res)
+        setNextStatus(res?.status)
+      })
+      .catch(() => undefined)
+      .finally(() => setFollowLoading(false))
+  }, [followId])
 
   const onSearch = () => {
     setApplied(filters)
@@ -107,120 +122,174 @@ export default function AdmissionList() {
     setPage(1)
   }
 
-  /** 保存登记（本地 mock） */
-  const onCreate = () => {
-    if (!form.memberName.trim() || !form.contactPhone.trim()) {
-      message.warning('请填写注册会员与联系电话')
+  /** 保存登记（创建参观预约） */
+  const onCreate = async () => {
+    if (!form.contactName.trim() || !form.contactPhone.trim()) {
+      message.warning('请填写联系人与联系电话')
       return
     }
-    if (!form.institution) {
-      message.warning('请选择意向机构')
+    if (!form.expectedVisit) {
+      message.warning('请选择期望到访日期')
       return
     }
-    const item: AdmissionIntent = {
-      id: Date.now(),
-      memberName: form.memberName.trim(),
-      contactName: form.contactName.trim() || form.memberName.trim(),
-      targetName: form.targetName.trim() || form.memberName.trim(),
-      contactPhone: form.contactPhone.trim(),
-      institution: form.institution,
-      source: form.source ?? '健康咨询转运营',
-      lastFollow: `${dayjs().format('MM-DD')} 登记意向`,
-      followStatus: 'pending',
-      reception: 'none',
-      createdAt: dayjs().format('MM-DD HH:mm'),
-      followRecords: form.demand.trim()
-        ? [{ time: dayjs().format('MM-DD HH:mm'), title: '登记意向', content: form.demand.trim() }]
-        : [],
+    setCreating(true)
+    try {
+      await createAppointment({
+        appointment_type: 3,
+        appointment_date: form.expectedVisit.format('YYYY-MM-DD'),
+        time_slot: form.timeSlot.trim() || undefined,
+        contact_name: form.contactName.trim(),
+        contact_phone: form.contactPhone.trim(),
+        institution_id: +(currentOrg?.id || 0),
+        service_interest: form.demand.trim() || undefined,
+        remark: form.remark.trim() || undefined,
+        status: 1,
+      })
+      message.success('入住意向已登记')
+      setCreateOpen(false)
+      setForm({
+        contactName: '',
+        contactPhone: '',
+        expectedVisit: null,
+        timeSlot: '',
+        demand: '',
+        remark: '',
+      })
+      setPage(1)
+      load()
+    } catch {
+      /* 拦截器已提示 */
+    } finally {
+      setCreating(false)
     }
-    setList((prev) => [item, ...prev])
-    setCreateOpen(false)
-    setForm({
-      memberName: '',
-      contactName: '',
-      targetName: '',
-      contactPhone: '',
-      source: undefined,
-      institution: undefined,
-      expectedVisit: null,
-      moveIn: undefined,
-      demand: '',
-    })
-    message.success('入住意向已登记（本地演示，接口待对接）')
   }
 
-  /** 保存跟进（本地 mock） */
-  const onFollow = () => {
-    if (!followTarget) return
-    if (!followForm.type || !followForm.result) {
-      message.warning('请选择跟进方式与跟进结果')
+  /** 状态回写（跟进结果） */
+  const onSaveStatus = async () => {
+    if (followId == null || nextStatus == null) {
+      message.warning('请选择预约状态')
       return
     }
-    const record = {
-      time: dayjs().format('MM-DD HH:mm'),
-      title: `${followForm.type}跟进`,
-      content: followForm.remark.trim() || `跟进结果：${followForm.result}`,
+    setActing(true)
+    try {
+      await updateAppointmentStatus(followId, { status: nextStatus })
+      message.success('预约状态已更新')
+      load()
+    } catch {
+      /* 拦截器已提示 */
+    } finally {
+      setActing(false)
     }
-    setList((prev) =>
-      prev.map((item) =>
-        item.id === followTarget.id
-          ? {
-              ...item,
-              followRecords: [record, ...item.followRecords],
-              lastFollow: `${dayjs().format('MM-DD')} ${followForm.type}跟进`,
-              followStatus:
-                followForm.result === '已邀约到访'
-                  ? 'invited'
-                  : followForm.result === '暂缓'
-                    ? 'paused'
-                    : item.followStatus,
-              reception: (followForm.reception as AdmissionIntent['reception']) ?? item.reception,
-            }
-          : item,
-      ),
-    )
-    setFollowTarget((prev) =>
-      prev ? { ...prev, followRecords: [record, ...prev.followRecords] } : prev,
-    )
-    setFollowForm({ type: undefined, result: undefined, nextTime: null, reception: undefined, remark: '' })
-    message.success('跟进记录已保存（本地演示，接口待对接）')
+  }
+
+  /** 到院确认 */
+  const onVisit = async () => {
+    if (followId == null) return
+    setActing(true)
+    try {
+      await visitAppointment(followId, followRemark.trim() ? { remark: followRemark.trim() } : undefined)
+      message.success('已确认到院')
+      setFollowDetail((prev) => (prev ? { ...prev, status: 3 } : prev))
+      setNextStatus(3)
+      load()
+    } catch {
+      /* 拦截器已提示 */
+    } finally {
+      setActing(false)
+    }
+  }
+
+  /** 取消预约 */
+  const onCancel = async () => {
+    if (followId == null) return
+    setActing(true)
+    try {
+      await cancelAppointment(followId, followRemark.trim() ? { reason: followRemark.trim() } : undefined)
+      message.success('预约已取消')
+      setFollowDetail((prev) => (prev ? { ...prev, status: 9 } : prev))
+      setNextStatus(9)
+      load()
+    } catch {
+      /* 拦截器已提示 */
+    } finally {
+      setActing(false)
+    }
   }
 
   const columns = [
     {
-      title: '会员 / 联系人',
+      title: '会员',
       key: 'member',
-      render: (_: unknown, row: AdmissionIntent) => (
+      render: (_: unknown, row: AppointmentItem) => (
+        <span>{row.member_name || row.contact_name || '-'}</span>
+      ),
+    },
+    { 
+      title: '联系人',
+      dataIndex: 'contact_phone',
+      key: 'contact_phone',
+      width: 120,
+      render: (v, r) => (
+        <div className='table-cell'>
+          <strong>{r.contact_name}</strong>
+          <span>{r.contact_phone}</span>
+        </div>
+      )
+    },
+    {
+      title: '预约类型',
+      dataIndex: 'appointment_type',
+      key: 'appointment_type',
+      width: 100,
+      render: (v: number, row: AppointmentItem) =>
+        APPOINTMENT_TYPE_MAP[v ?? row.appoint_type ?? 0] ?? '-',
+    },
+    {
+      title: '预约到访',
+      key: 'date',
+      width: 160,
+      render: (_: unknown, row: AppointmentItem) => (
         <span>
-          {row.memberName} / {row.targetName}
+          {row.appointment_date || '-'}
+          {row.time_slot ? ` ${row.time_slot}` : ''}
         </span>
       ),
     },
-    { title: '联系方式', dataIndex: 'contactPhone', key: 'contactPhone', width: 130 },
-    { title: '意向机构', dataIndex: 'institution', key: 'institution', width: 130 },
-    { title: '来源', dataIndex: 'source', key: 'source', width: 120 },
-    { title: '最近跟进', dataIndex: 'lastFollow', key: 'lastFollow', width: 140 },
     {
-      title: '跟进状态',
-      dataIndex: 'followStatus',
-      key: 'followStatus',
-      width: 100,
-      render: (v: string) => <Tag color={FOLLOW_TAG_COLOR[v]}>{FOLLOW_STATUS_MAP[v]}</Tag>,
+      title: '服务意向',
+      dataIndex: 'service_interest',
+      key: 'service_interest',
+      render: (v: string) => v || '-',
     },
     {
-      title: '接待结果',
-      dataIndex: 'reception',
-      key: 'reception',
+      title: '接待人员',
+      dataIndex: 'assigned_staff_name',
+      key: 'assigned_staff_name',
+      render: (v: string) => v || '-',
+    },
+    {
+      title: '预约状态',
+      dataIndex: 'status',
+      key: 'status',
       width: 100,
-      render: (v: string) => <Tag color={RECEPTION_TAG_COLOR[v]}>{RECEPTION_MAP[v]}</Tag>,
+      render: (v: number) => (
+        <Tag color={STATUS_TAG_COLOR[v] ?? 'default'}>{APPOINTMENT_STATUS_MAP[v] ?? v ?? '-'}</Tag>
+      ),
+    },
+    {
+      title: '登记时间',
+      dataIndex: 'created_at',
+      key: 'created_at',
+      width: 160,
+      render: (v: number) => (v ? formatDateTime(v * 1000) : '-'),
     },
     {
       title: '操作',
       key: 'action',
       width: 80,
-      render: (_: unknown, row: AdmissionIntent) => (
-        <Button size="small" onClick={() => setFollowTarget(row)}>
-          {row.followStatus === 'done' ? '查看' : '跟进'}
+      render: (_: unknown, row: AppointmentItem) => (
+        <Button size="small" onClick={() => setFollowId(row.id)}>
+          {row.status === 4 || row.status === 9 ? '查看' : '跟进'}
         </Button>
       ),
     },
@@ -237,19 +306,6 @@ export default function AdmissionList() {
           </Button>
         }
       >
-        {/* 统计卡 */}
-        <div className="ad-stats">
-          {mockStats.map((s) => (
-            <div key={s.label} className="ad-stat">
-              <div className="ad-stat__label">{s.label}</div>
-              <div className="ad-stat__value">
-                {s.value}
-                <span className={`ad-stat__sub ad-stat__sub--${s.tone}`}>{s.sub}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-
         {/* 筛选区 */}
         <Card variant="borderless" className="filter-bar">
           <Input
@@ -259,23 +315,14 @@ export default function AdmissionList() {
             allowClear
           />
           <Select
-            placeholder="意向机构：全部"
-            value={filters.institution}
-            onChange={(v) => setFilters((f) => ({ ...f, institution: v }))}
-            options={INSTITUTION_OPTIONS.map((o) => ({ value: o, label: o }))}
+            placeholder="预约状态：全部"
+            value={filters.status}
+            onChange={(v) => setFilters((f) => ({ ...f, status: v }))}
+            options={Object.entries(APPOINTMENT_STATUS_MAP).map(([value, label]) => ({
+              value: Number(value),
+              label,
+            }))}
             allowClear
-          />
-          <Select
-            placeholder="跟进状态：全部"
-            value={filters.followStatus}
-            onChange={(v) => setFilters((f) => ({ ...f, followStatus: v }))}
-            options={Object.entries(FOLLOW_STATUS_MAP).map(([value, label]) => ({ value, label }))}
-            allowClear
-          />
-          <DatePicker
-            placeholder="登记日期"
-            value={filters.date}
-            onChange={(v) => setFilters((f) => ({ ...f, date: v }))}
           />
           <Button type="primary" onClick={onSearch}>
             查询
@@ -285,21 +332,22 @@ export default function AdmissionList() {
 
         {/* 意向列表 */}
         <Card variant="borderless" className="list-card table-fill">
-          <Table<AdmissionIntent>
+          <Table<AppointmentItem>
             rowKey="id"
             columns={columns}
-            dataSource={paged}
+            dataSource={list}
+            loading={loading}
             size="small"
             pagination={{
               current: page,
               pageSize,
-              total: filtered.length,
+              total,
               onChange: (nextPage, nextPageSize) => {
                 setPage(nextPage)
                 setPageSize(nextPageSize)
               },
               showSizeChanger: true,
-              showTotal: (total) => `共 ${total} 条`,
+              showTotal: (t) => `共 ${t} 条`,
             }}
           />
         </Card>
@@ -314,7 +362,7 @@ export default function AdmissionList() {
         footer={
           <div className="ad-drawer__footer">
             <Button onClick={() => setCreateOpen(false)}>取消</Button>
-            <Button type="primary" onClick={onCreate}>
+            <Button type="primary" loading={creating} onClick={onCreate}>
               保存登记
             </Button>
           </div>
@@ -323,27 +371,11 @@ export default function AdmissionList() {
         <div className="ad-section__title">基础信息</div>
         <div className="ad-form__grid">
           <div className="ad-field">
-            <div className="ad-field__label">注册会员</div>
-            <Input
-              placeholder="如：王先生 136****5021"
-              value={form.memberName}
-              onChange={(e) => setForm((f) => ({ ...f, memberName: e.target.value }))}
-            />
-          </div>
-          <div className="ad-field">
             <div className="ad-field__label">联系人</div>
             <Input
               placeholder="如：王先生（家属）"
               value={form.contactName}
               onChange={(e) => setForm((f) => ({ ...f, contactName: e.target.value }))}
-            />
-          </div>
-          <div className="ad-field">
-            <div className="ad-field__label">服务对象</div>
-            <Input
-              placeholder="实际入住老人姓名"
-              value={form.targetName}
-              onChange={(e) => setForm((f) => ({ ...f, targetName: e.target.value }))}
             />
           </div>
           <div className="ad-field">
@@ -359,24 +391,6 @@ export default function AdmissionList() {
         <div className="ad-section__title">入住意向</div>
         <div className="ad-form__grid">
           <div className="ad-field">
-            <div className="ad-field__label">线索来源</div>
-            <Select
-              placeholder="请选择"
-              value={form.source}
-              onChange={(v) => setForm((f) => ({ ...f, source: v }))}
-              options={INTENT_SOURCE_OPTIONS.map((o) => ({ value: o, label: o }))}
-            />
-          </div>
-          <div className="ad-field">
-            <div className="ad-field__label">意向机构</div>
-            <Select
-              placeholder="请选择"
-              value={form.institution}
-              onChange={(v) => setForm((f) => ({ ...f, institution: v }))}
-              options={INSTITUTION_OPTIONS.map((o) => ({ value: o, label: o }))}
-            />
-          </div>
-          <div className="ad-field">
             <div className="ad-field__label">期望到访日期</div>
             <DatePicker
               style={{ width: '100%' }}
@@ -385,12 +399,11 @@ export default function AdmissionList() {
             />
           </div>
           <div className="ad-field">
-            <div className="ad-field__label">入住时间意向</div>
-            <Select
-              placeholder="请选择"
-              value={form.moveIn}
-              onChange={(v) => setForm((f) => ({ ...f, moveIn: v }))}
-              options={MOVE_IN_OPTIONS.map((o) => ({ value: o, label: o }))}
+            <div className="ad-field__label">到访时段</div>
+            <Input
+              placeholder="如：上午 10:00"
+              value={form.timeSlot}
+              onChange={(e) => setForm((f) => ({ ...f, timeSlot: e.target.value }))}
             />
           </div>
         </div>
@@ -403,6 +416,15 @@ export default function AdmissionList() {
             onChange={(e) => setForm((f) => ({ ...f, demand: e.target.value }))}
           />
         </div>
+        <div className="ad-field">
+          <div className="ad-field__label">备注（来源 / 入住时间意向等）</div>
+          <Input.TextArea
+            rows={2}
+            placeholder="如：健康咨询转运营，希望一个月内入住"
+            value={form.remark}
+            onChange={(e) => setForm((f) => ({ ...f, remark: e.target.value }))}
+          />
+        </div>
         <div className="ad-note">一期仅登记意向与跟进，不处理床位、合同、费用和正式入住办理。</div>
       </Drawer>
 
@@ -410,84 +432,49 @@ export default function AdmissionList() {
       <Drawer
         title="入住意向跟进"
         width={520}
-        open={!!followTarget}
-        onClose={() => setFollowTarget(null)}
-        footer={
-          <div className="ad-drawer__footer">
-            <Button onClick={() => setFollowTarget(null)}>取消</Button>
-            <Button type="primary" onClick={onFollow}>
-              保存跟进
-            </Button>
-          </div>
-        }
+        loading={followLoading}
+        open={followId != null}
+        onClose={() => setFollowId(null)}
       >
-        {followTarget && (
+        {followDetail && (
           <>
             <div className="ad-follow__member">
               <div className="ad-follow__member-main">
-                <span className="ad-follow__member-name">{followTarget.contactName}</span>
-                <span>{followTarget.contactPhone}</span>
+                <span className="ad-follow__member-name">
+                  {followDetail.member_name || followDetail.contact_name || '-'}
+                </span>
+                <span>{followDetail.contact_phone || '-'}</span>
               </div>
               <div className="ad-follow__member-sub">
-                服务对象：{followTarget.targetName}　意向机构：{followTarget.institution}
+                预约到访：{followDetail.appointment_date || '-'}
+                {followDetail.time_slot ? ` ${followDetail.time_slot}` : ''}　状态：
+                {APPOINTMENT_STATUS_MAP[followDetail.status ?? 0] ?? '-'}
               </div>
               <div className="ad-follow__member-sub">
-                来源：{followTarget.source}　登记时间：{followTarget.createdAt}
+                服务意向：{followDetail.service_interest || '-'}
               </div>
-            </div>
-
-            <div className="ad-section__title">跟进记录</div>
-            <div className="ad-records">
-              {followTarget.followRecords.length === 0 && (
-                <div className="ad-records__empty">暂无跟进记录</div>
+              {followDetail.remark && (
+                <div className="ad-follow__member-sub">备注：{followDetail.remark}</div>
               )}
-              {followTarget.followRecords.map((r) => (
-                <div key={r.time + r.title} className="ad-record">
-                  <div className="ad-record__head">
-                    <span className="ad-record__time">{r.time}</span>
-                    <span className="ad-record__title">{r.title}</span>
-                  </div>
-                  <div className="ad-record__content">{r.content}</div>
+              {followDetail.created_at && (
+                <div className="ad-follow__member-sub">
+                  登记时间：{formatDateTime(followDetail.created_at * 1000)}
                 </div>
-              ))}
+              )}
             </div>
 
-            <div className="ad-section__title">新增跟进</div>
+            <div className="ad-section__title">跟进操作</div>
             <div className="ad-form__grid">
               <div className="ad-field">
-                <div className="ad-field__label">跟进方式</div>
+                <div className="ad-field__label">预约状态</div>
                 <Select
                   placeholder="请选择"
-                  value={followForm.type}
-                  onChange={(v) => setFollowForm((f) => ({ ...f, type: v }))}
-                  options={FOLLOW_TYPE_OPTIONS.map((o) => ({ value: o, label: o }))}
-                />
-              </div>
-              <div className="ad-field">
-                <div className="ad-field__label">跟进结果</div>
-                <Select
-                  placeholder="请选择"
-                  value={followForm.result}
-                  onChange={(v) => setFollowForm((f) => ({ ...f, result: v }))}
-                  options={FOLLOW_RESULT_OPTIONS.map((o) => ({ value: o, label: o }))}
-                />
-              </div>
-              <div className="ad-field">
-                <div className="ad-field__label">下次跟进时间</div>
-                <DatePicker
-                  showTime
-                  style={{ width: '100%' }}
-                  value={followForm.nextTime}
-                  onChange={(v) => setFollowForm((f) => ({ ...f, nextTime: v }))}
-                />
-              </div>
-              <div className="ad-field">
-                <div className="ad-field__label">线下接待结果</div>
-                <Select
-                  placeholder="请选择"
-                  value={followForm.reception}
-                  onChange={(v) => setFollowForm((f) => ({ ...f, reception: v }))}
-                  options={Object.entries(RECEPTION_MAP).map(([value, label]) => ({ value, label }))}
+                  value={nextStatus}
+                  onChange={(v) => setNextStatus(v)}
+                  options={Object.entries(APPOINTMENT_STATUS_MAP).map(([value, label]) => ({
+                    value: Number(value),
+                    label,
+                  }))}
                 />
               </div>
             </div>
@@ -496,9 +483,25 @@ export default function AdmissionList() {
               <Input.TextArea
                 rows={3}
                 placeholder="家属计划带老人一同参观，重点了解护理服务。"
-                value={followForm.remark}
-                onChange={(e) => setFollowForm((f) => ({ ...f, remark: e.target.value }))}
+                value={followRemark}
+                onChange={(e) => setFollowRemark(e.target.value)}
               />
+            </div>
+            <div className="ad-drawer__footer" style={{ padding: 0 }}>
+              <Button type="primary" loading={acting} onClick={onSaveStatus}>
+                保存状态
+              </Button>
+              <Button loading={acting} onClick={onVisit}>
+                确认到院
+              </Button>
+              <Popconfirm title="确认取消该预约？" onConfirm={onCancel}>
+                <Button danger loading={acting}>
+                  取消预约
+                </Button>
+              </Popconfirm>
+            </div>
+            <div className="ad-note">
+              逐条跟进记录暂无独立接口，跟进内容将随状态回写或到院、取消操作一并提交。
             </div>
           </>
         )}

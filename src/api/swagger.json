@@ -10,6 +10,231 @@
   "host": "",
   "basePath": "",
   "paths": {
+      "/api/v1/staff/activities": {
+          "get": {
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康活动"
+              ],
+              "summary": "健康活动列表",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "页码",
+                      "name": "page",
+                      "in": "query",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数",
+                      "name": "page_size",
+                      "in": "query",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/activities/{id}": {
+          "get": {
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康活动"
+              ],
+              "summary": "健康活动详情",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "活动ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/activities/{id}/registrations": {
+          "get": {
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康活动"
+              ],
+              "summary": "活动报名记录列表",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "活动ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "页码",
+                      "name": "page",
+                      "in": "query",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数",
+                      "name": "page_size",
+                      "in": "query",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "报名状态过滤(1-待参加 2-已签到 3-已取消)",
+                      "name": "status",
+                      "in": "query"
+                  },
+                  {
+                      "type": "string",
+                      "description": "会员关键字(姓名/手机号模糊匹配)",
+                      "name": "keyword",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "post": {
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康活动"
+              ],
+              "summary": "活动代报名",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "活动ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "报名参数",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffActivityRegister"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/activities/{id}/registrations/{registrationId}/cancel": {
+          "post": {
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康活动"
+              ],
+              "summary": "取消活动报名",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "活动ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "报名记录ID",
+                      "name": "registrationId",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/activities/{id}/registrations/{registrationId}/checkin": {
+          "post": {
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康活动"
+              ],
+              "summary": "活动报名签到",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "活动ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "报名记录ID",
+                      "name": "registrationId",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
       "/api/v1/staff/appointments": {
           "get": {
               "security": [
@@ -1583,6 +1808,34 @@
               }
           }
       },
+      "/api/v1/staff/institutions/current": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "返回当前医护所属机构详情，以及该机构下已启用的服务列表（服务ID/名称/分类/单价/单位）。所有岗位可见，不挂权限。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-机构信息"
+              ],
+              "summary": "当前机构信息",
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
       "/api/v1/staff/leads": {
           "get": {
               "security": [
@@ -2653,7 +2906,7 @@
               "tags": [
                   "staff-订单排单"
               ],
-              "summary": "待确定订单列表",
+              "summary": "待确认订单列表",
               "parameters": [
                   {
                       "type": "integer",
@@ -4432,6 +4685,26 @@
               },
               "reason": {
                   "description": "转派原因",
+                  "type": "string"
+              }
+          }
+      },
+      "staff.ReqStaffActivityRegister": {
+          "type": "object",
+          "properties": {
+              "contact_name": {
+                  "type": "string"
+              },
+              "contact_phone": {
+                  "type": "string"
+              },
+              "member_id": {
+                  "type": "integer"
+              },
+              "participant_count": {
+                  "type": "integer"
+              },
+              "remark": {
                   "type": "string"
               }
           }

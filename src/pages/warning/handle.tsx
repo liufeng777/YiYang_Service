@@ -107,14 +107,12 @@ export default function WarningHandle() {
               <span className="wn-card__title">预警与核实信息</span>
             </div>
             <div className="wn-handle__metric">
-              <span className="wn-handle__metric-name">{detail?.title ?? '-'}</span>
+              <span className="wn-handle__metric-name">{detail?.title}</span>
               <span className="wn-handle__metric-value">
-                {detail ? WARNING_SEVERITY_MAP[detail.severity] ?? '' : ''}
+                {detail ? WARNING_SEVERITY_MAP[detail.severity] : undefined}
               </span>
               <div className="wn-handle__metric-meta">
-                {detail
-                  ? `${detail.member_name || `会员 #${detail.member_id}`}${detail.metric_values ? ` · ${detail.metric_values}` : ''}`
-                  : ''}
+                {detail?.member_name}
               </div>
             </div>
 

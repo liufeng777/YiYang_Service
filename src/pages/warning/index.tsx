@@ -7,7 +7,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Button, Card, Select, Table } from 'antd'
 import { useNavigate } from 'react-router-dom'
-import dayjs from 'dayjs'
 import PageContainer from '@/components/PageContainer'
 import { warningApi } from '@/api'
 import {
@@ -40,7 +39,7 @@ export default function WarningList() {
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(20)
+  const [pageSize, setPageSize] = useState(10)
 
   const fetchList = useCallback(async () => {
     setLoading(true)
@@ -51,8 +50,8 @@ export default function WarningList() {
         status: applied.status,
         severity: applied.severity,
       })
-      setList(res.list)
-      setTotal(res.total)
+      setList(res?.list || [])
+      setTotal(res?.total || 0)
     } catch {
       // 错误提示由拦截器统一处理
     } finally {
@@ -76,19 +75,18 @@ export default function WarningList() {
   }
 
   const columns = [
-    { title: '预警编号', dataIndex: 'id', key: 'id', width: 100 },
-    { title: '预警内容', dataIndex: 'title', key: 'title' },
+    { title: '预警内容', dataIndex: 'title', key: 'title'},
     {
       title: '服务对象',
-      key: 'member',
-      render: (_: unknown, row: WarningItem) => row.member_name || `会员 #${row.member_id}`,
+      key: 'member_name',
+      dataIndex: 'member_name',
     },
     {
       title: '预警等级',
       key: 'severity',
       render: (_: unknown, row: WarningItem) => (
         <span className={`wn-tag wn-tag--${SEVERITY_TONE[row.severity] ?? 'blue'}`}>
-          {WARNING_SEVERITY_MAP[row.severity] ?? '-'}
+          {WARNING_SEVERITY_MAP[row.severity]}
         </span>
       ),
     },
@@ -97,25 +95,21 @@ export default function WarningList() {
       key: 'status',
       render: (_: unknown, row: WarningItem) => (
         <span className={`wn-tag wn-tag--${STATUS_TONE[row.warning_status] ?? 'blue'}`}>
-          {WARNING_STATUS_MAP[row.warning_status] ?? '-'}
+          {WARNING_STATUS_MAP[row.warning_status]}
         </span>
       ),
     },
     {
       title: '触发时间',
       dataIndex: 'created_at',
-      key: 'created_at',
-      render: (v: number) => (v ? dayjs(v * 1000).format('YYYY-MM-DD HH:mm') : '-'),
+      key: 'created_at'
     },
     {
       title: '操作',
       key: 'action',
       width: 90,
       render: (_: unknown, row: WarningItem) => (
-        <Button
-          size="small"
-          onClick={() => navigate(`/warning/${row.id}/handle`)}
-        >
+        <Button size="small" onClick={() => navigate(`/warning/${row.id}/handle`)}>
           查看
         </Button>
       ),
@@ -157,7 +151,7 @@ export default function WarningList() {
         {/* 预警表格 */}
         <Card variant="borderless" className="list-card table-fill">
           <Table<WarningItem>
-            rowKey="id"
+            rowKey={(row) => row.id}
             columns={columns}
             dataSource={list}
             loading={loading}

@@ -24,6 +24,7 @@ import {
   ExperimentOutlined,
   ScheduleOutlined,
   AlertOutlined,
+  AuditOutlined,
   ToolOutlined,
   WarningOutlined,
   CarryOutOutlined,
@@ -295,6 +296,27 @@ export const routes: RouteConfig[] = [
 
   /* ===== 服务履约 ===== */
   {
+    path: '/order-audit',
+    meta: {
+      title: '订单审核',
+      icon: <AuditOutlined />,
+      group: '服务履约',
+      permissions: [PERMISSIONS.WO_VIEW],
+    },
+    children: [
+      {
+        path: '',
+        meta: { title: '订单审核' },
+        component: lazy(() => import('@/pages/order-audit/index')),
+      },
+      {
+        path: ':id',
+        meta: { title: '订单审核详情', hideInMenu: true },
+        component: lazy(() => import('@/pages/order-audit/detail')),
+      },
+    ],
+  },
+  {
     path: '/work-order',
     meta: {
       title: '服务工单',
@@ -322,32 +344,6 @@ export const routes: RouteConfig[] = [
         path: ':id/audit-result',
         meta: { title: '审核通过', hideInMenu: true },
         component: lazy(() => import('@/pages/work-order/audit-result')),
-      },
-    ],
-  },
-  {
-    path: '/exception',
-    meta: {
-      title: '工单异常',
-      icon: <WarningOutlined />,
-      group: '服务履约',
-      permissions: [PERMISSIONS.WO_DISPATCH],
-    },
-    children: [
-      {
-        path: '',
-        meta: { title: '异常列表' },
-        component: lazy(() => import('@/pages/exception/index')),
-      },
-      {
-        path: ':id/health',
-        meta: { title: '健康异常处理', hideInMenu: true },
-        component: lazy(() => import('@/pages/exception/health')),
-      },
-      {
-        path: ':id/wo',
-        meta: { title: '工单异常处理', hideInMenu: true },
-        component: lazy(() => import('@/pages/exception/wo')),
       },
     ],
   },
@@ -388,11 +384,6 @@ export const routes: RouteConfig[] = [
         meta: { title: '咨询管理' },
         component: lazy(() => import('@/pages/consultation/index')),
       },
-      {
-        path: 'register',
-        meta: { title: '登记电话咨询', hideInMenu: true },
-        component: lazy(() => import('@/pages/consultation/register')),
-      },
     ],
   },
   {
@@ -421,7 +412,7 @@ export const routes: RouteConfig[] = [
     children: [
       {
         path: '',
-        meta: { title: '机构列表' },
+        meta: { title: '机构信息' },
         component: lazy(() => import('@/pages/institution/list')),
       },
       {

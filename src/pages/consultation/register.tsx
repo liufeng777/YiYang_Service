@@ -1,62 +1,53 @@
-/**
- * 咨询管理 - 来电登记（设计稿：来电登记.png）
- * 登记来电人与实际服务对象；保存后系统自动关联档案或生成线索
- * 已对接 POST /api/v1/staff/consultations（consultation_type=3 电话）
- */
+/** 咨询管理：使用 Drawer + Form 登记电话咨询，字段对齐咨询创建接口。 */
 import { useState } from 'react'
-import { Button, Input, message } from 'antd'
-import { useNavigate } from 'react-router-dom'
-import PageContainer from '@/components/PageContainer'
+import { App, Button, Drawer, Form, Input, InputNumber } from 'antd'
 import { consultApi } from '@/api'
-import { mockConsultRegister } from './mock'
-import './index.less'
+import { useUserStore } from '@/store'
 
-export default function ConsultationRegister() {
-  const navigate = useNavigate()
-  const c = mockConsultRegister
-  const [callerPhone, setCallerPhone] = useState(c.defaultCallerPhone)
-  const [callerName, setCallerName] = useState(c.defaultCallerName)
-  const [source, setSource] = useState(c.defaultSource)
-  const [targetType, setTargetType] = useState(c.defaultTargetType)
-  const [targetName, setTargetName] = useState(c.defaultTargetName)
-  const [targetPhone, setTargetPhone] = useState(c.defaultTargetPhone)
-  const [topic, setTopic] = useState(c.defaultTopic)
-  const [content, setContent] = useState(c.defaultContent)
-  const [result, setResult] = useState(c.defaultResult)
-  const [nextFollowup, setNextFollowup] = useState(c.defaultNextFollowup)
+interface ConsultationRegisterProps {
+  open: boolean
+  onClose: () => void
+  onSuccess: () => void
+}
+
+interface ConsultationFormValues {
+  contact_name: string
+  contact_phone: string
+  question: string
+  answer?: string
+  satisfaction_score?: number
+}
+
+export default function ConsultationRegister({
+  open,
+  onClose,
+  onSuccess,
+}: ConsultationRegisterProps) {
+  const { message } = App.useApp()
+  const currentOrg = useUserStore((state) => state.currentOrg)
+  const [form] = Form.useForm<ConsultationFormValues>()
   const [submitting, setSubmitting] = useState(false)
 
-  const onSave = async () => {
-    if (!callerPhone.trim()) {
-      message.warning('请填写来电号码')
-      return
-    }
-    if (!content.trim()) {
-      message.warning('请填写咨询内容')
-      return
-    }
+  const close = () => {
+    form.resetFields()
+    onClose()
+  }
+
+  const onFinish = async (values: ConsultationFormValues) => {
     setSubmitting(true)
     try {
       await consultApi.createConsultation({
-        contact_name: callerName.trim() || '来电咨询',
-        contact_phone: callerPhone.trim(),
-        question: [
-          topic ? `【${topic}】` : '',
-          content.trim(),
-          targetType !== '来电人本人' && targetName.trim()
-            ? `\n服务对象：${targetName.trim()} ${targetPhone.trim()}（${targetType}）`
-            : '',
-          source ? `\n来源：${source}` : '',
-          nextFollowup.trim() ? `\n下次跟进：${nextFollowup.trim()}` : '',
-        ]
-          .filter(Boolean)
-          .join(''),
-        answer: result.trim() || undefined,
-        /** 3-电话咨询 */
+        contact_name: values.contact_name.trim(),
+        contact_phone: values.contact_phone.trim(),
+        question: values.question.trim(),
+        answer: values.answer?.trim() || undefined,
+        satisfaction_score: values.satisfaction_score,
         consultation_type: 3,
+        institution_id: currentOrg?.id ? Number(currentOrg.id) : undefined,
       })
       message.success('咨询记录已保存')
-      navigate('/consultation')
+      form.resetFields()
+      onSuccess()
     } catch {
       // 错误提示由拦截器统一处理
     } finally {
@@ -65,141 +56,80 @@ export default function ConsultationRegister() {
   }
 
   return (
-    <div className="cs-page">
-      <PageContainer
-        title="登记电话咨询"
-        description="登记来电人与实际服务对象；保存后系统自动关联档案或生成线索"
-      >
-        <div className="cs-register">
-          {/* 左：登记表单 */}
-          <div className="cs-card">
-            <div className="cs-section__title">1. 来电信息</div>
-            <div className="cs-register__grid">
-              <div className="cs-field">
-                <div className="cs-field__label">
-                  来电号码 <span className="cs-required">*</span>
-                </div>
-                <Input value={callerPhone} onChange={(e) => setCallerPhone(e.target.value)} />
-              </div>
-              <div className="cs-field">
-                <div className="cs-field__label">来电人姓名</div>
-                <Input value={callerName} onChange={(e) => setCallerName(e.target.value)} />
-              </div>
-            </div>
-            <div className="cs-field">
-              <div className="cs-field__label">
-                咨询来源 <span className="cs-required">*</span>
-              </div>
-              <div className="cs-pills">
-                {c.sources.map((s) => (
-                  <span
-                    key={s}
-                    className={s === source ? 'cs-pill cs-pill--active' : 'cs-pill'}
-                    onClick={() => setSource(s)}
-                  >
-                    {s}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="cs-section__title">2. 实际服务对象</div>
-            <div className="cs-field">
-              <div className="cs-pills">
-                {c.targetTypes.map((t) => (
-                  <span
-                    key={t}
-                    className={t === targetType ? 'cs-pill cs-pill--active' : 'cs-pill'}
-                    onClick={() => setTargetType(t)}
-                  >
-                    {t}
-                  </span>
-                ))}
-              </div>
-            </div>
-            {targetType !== '来电人本人' && targetType !== '尚未明确' && (
-              <div className="cs-register__grid">
-                <div className="cs-field">
-                  <div className="cs-field__label">服务对象姓名</div>
-                  <Input value={targetName} onChange={(e) => setTargetName(e.target.value)} />
-                </div>
-                <div className="cs-field">
-                  <div className="cs-field__label">服务对象手机号</div>
-                  <Input value={targetPhone} onChange={(e) => setTargetPhone(e.target.value)} />
-                </div>
-              </div>
-            )}
-
-            <div className="cs-section__title">3. 咨询内容</div>
-            <div className="cs-field">
-              <div className="cs-pills">
-                {c.topics.map((t) => (
-                  <span
-                    key={t}
-                    className={t === topic ? 'cs-pill cs-pill--active' : 'cs-pill'}
-                    onClick={() => setTopic(t)}
-                  >
-                    {t}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className="cs-field">
-              <Input.TextArea rows={3} value={content} onChange={(e) => setContent(e.target.value)} />
-            </div>
-            <div className="cs-field">
-              <div className="cs-field__label">咨询处理结果</div>
-              <Input.TextArea rows={2} value={result} onChange={(e) => setResult(e.target.value)} />
-            </div>
-            <div className="cs-field">
-              <div className="cs-field__label">下次跟进时间</div>
-              <Input
-                className="cs-register__next"
-                value={nextFollowup}
-                onChange={(e) => setNextFollowup(e.target.value)}
-              />
-            </div>
-            <div className="cs-register__submit">
-              <Button type="primary" onClick={onSave} loading={submitting}>
-                保存咨询记录
-              </Button>
-            </div>
-          </div>
-
-          {/* 右：身份校验与处理预览 */}
-          <div className="cs-register__rail">
-            <div className="cs-card">
-              <div className="cs-card__header">
-                <span className="cs-card__title">身份校验与处理预览</span>
-              </div>
-              <div className="cs-field__label">来电账号</div>
-              <div className="cs-register__kv-value">{c.preview.callerAccount}</div>
-              <div className="cs-field__label cs-register__kv-gap">实际服务对象</div>
-              <div className="cs-register__kv-value">{c.preview.target}</div>
-              <div className="cs-preview">
-                <div className="cs-preview__title">预计处理</div>
-                <ol className="cs-preview__list">
-                  {c.preview.steps.map((s) => (
-                    <li key={s}>{s}</li>
-                  ))}
-                </ol>
-              </div>
-              <div className="cs-field__label cs-register__kv-gap">自动建立的线索带入</div>
-              <div className="cs-register__lead-fields">
-                {c.leadFields.map((f) => (
-                  <div key={f}>{f}</div>
-                ))}
-              </div>
-              <div className="cs-boundary">
-                <div className="cs-boundary__title">业务边界</div>
-                {c.boundary.split('\n\n').map((p) => (
-                  <p key={p.slice(0, 8)}>{p}</p>
-                ))}
-              </div>
-            </div>
-          </div>
+    <Drawer
+      title="登记电话咨询"
+      width={560}
+      open={open}
+      onClose={close}
+      destroyOnHidden
+      footer={
+        <div className="cs-drawer__footer">
+          <Button onClick={close}>取消</Button>
+          <Button type="primary" loading={submitting} onClick={() => form.submit()}>
+            保存咨询记录
+          </Button>
         </div>
-      </PageContainer>
-    </div>
+      }
+    >
+      <Form<ConsultationFormValues>
+        form={form}
+        layout="vertical"
+        requiredMark="optional"
+        onFinish={onFinish}
+        autoComplete="off"
+      >
+        <Form.Item
+          name="contact_name"
+          label="联系人姓名"
+          rules={[
+            { required: true, whitespace: true, message: '请输入联系人姓名' },
+            { max: 50, message: '联系人姓名不能超过 50 个字符' },
+          ]}
+        >
+          <Input placeholder="请输入来电人姓名" maxLength={50} />
+        </Form.Item>
+        <Form.Item
+          name="contact_phone"
+          label="联系电话"
+          rules={[
+            { required: true, whitespace: true, message: '请输入联系电话' },
+            { pattern: /^[\d\s+\-()]{5,20}$/, message: '请输入有效的联系电话' },
+          ]}
+        >
+          <Input placeholder="请输入手机号或座机号码" maxLength={20} />
+        </Form.Item>
+        <Form.Item
+          name="question"
+          label="咨询内容"
+          rules={[
+            { required: true, whitespace: true, message: '请输入咨询内容' },
+            { max: 1000, message: '咨询内容不能超过 1000 个字符' },
+          ]}
+        >
+          <Input.TextArea
+            rows={6}
+            maxLength={1000}
+            showCount
+            placeholder="请记录客户咨询的问题、涉及的服务及重点诉求"
+          />
+        </Form.Item>
+        <Form.Item
+          name="answer"
+          label="咨询处理结果"
+          tooltip="如已当场解答，可同步登记处理结果"
+          rules={[{ max: 1000, message: '处理结果不能超过 1000 个字符' }]}
+        >
+          <Input.TextArea
+            rows={4}
+            maxLength={1000}
+            showCount
+            placeholder="选填，记录本次答复或处理情况"
+          />
+        </Form.Item>
+        <Form.Item name="satisfaction_score" label="满意度评分" extra="选填，范围为 0～5 分">
+          <InputNumber min={0} max={5} precision={0} placeholder="请输入评分" style={{ width: '100%' }} />
+        </Form.Item>
+      </Form>
+    </Drawer>
   )
 }

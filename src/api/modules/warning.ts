@@ -46,6 +46,13 @@ export interface WarningItem {
   warning_status: number
   /** 触发指标值快照 */
   metric_values?: string
+  /** 以下来源、关联工单与处置字段由详情接口按需返回 */
+  warning_source?: number
+  content?: string
+  remark?: string
+  handled_reason?: string
+  handled_by_name: string
+  handled_at?: number
   created_at: number
 }
 

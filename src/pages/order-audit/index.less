@@ -1,0 +1,519 @@
+/* ===== 订单审核 ===== */
+.oa-text--warn { color: @color-risk-mid; }
+.oa-text--ok { color: @color-primary; }
+.oa-text--danger { color: @color-risk-high; }
+
+.oa-card {
+  .card-surface();
+  padding: @spacing-xl;
+}
+
+.oa-detail {
+  .ant-spin-nested-loading,
+  .ant-spin-container {
+    min-height: @spacing-3xl;
+  }
+
+  &__layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) minmax(280px, 1fr);
+    gap: @spacing-md;
+    margin-top: @spacing-md;
+    align-items: start;
+  }
+
+  &__main,
+  &__aside {
+    display: flex;
+    flex-direction: column;
+    gap: @spacing-md;
+    min-width: 0;
+  }
+
+  &__aside {
+    position: sticky;
+    top: @spacing-md;
+  }
+
+  &__empty-text {
+    .text-auxiliary();
+  }
+
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: @spacing-xs;
+
+    .ant-tag { margin-inline-end: 0; }
+  }
+
+  &__remark {
+    .text-body();
+    margin: @spacing-md 0 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  &__inline-empty {
+    .text-auxiliary();
+    padding: @spacing-md;
+    background: @color-bg-active;
+    border-radius: @radius-sm;
+  }
+
+  &__loading { min-height: 320px; }
+}
+
+/* 订单概要 */
+.oa-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: @spacing-xl;
+
+  &__main { min-width: 0; }
+
+  &__eyebrow {
+    .text-auxiliary();
+    margin-bottom: @spacing-2xs;
+  }
+
+  &__title-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: @spacing-sm;
+
+    h3 {
+      .text-title-module();
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: @spacing-xs @spacing-lg;
+    margin-top: @spacing-xs;
+    .text-auxiliary();
+  }
+
+  &__amount {
+    flex-shrink: 0;
+    padding-left: @spacing-2xl;
+    border-left: 1px solid @color-border;
+    text-align: right;
+
+    span {
+      display: block;
+      .text-auxiliary();
+    }
+
+    strong {
+      display: block;
+      margin-top: @spacing-2xs;
+      font-size: @font-size-metric;
+      line-height: @line-height-metric;
+      font-weight: @font-weight-metric;
+      color: @color-primary;
+    }
+  }
+}
+
+.oa-status {
+  display: inline-flex;
+  align-items: center;
+  gap: @spacing-2xs;
+  padding: @spacing-2xs @spacing-xs;
+  border-radius: @radius-full;
+  font-size: @font-size-auxiliary;
+  line-height: @line-height-auxiliary;
+  font-weight: @font-weight-body-medium;
+  white-space: nowrap;
+
+  &::before {
+    content: '';
+    width: @spacing-xs;
+    height: @spacing-xs;
+    border-radius: @radius-full;
+    background: currentColor;
+  }
+
+  &--pending {
+    color: @color-risk-mid;
+    background: @color-risk-mid-bg;
+  }
+
+  &--approved {
+    color: @color-primary;
+    background: @color-primary-light;
+  }
+
+  &--rejected {
+    color: @color-risk-high;
+    background: @color-risk-high-bg;
+  }
+}
+
+/* 内容区块 */
+.oa-section {
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: @spacing-md;
+    padding-bottom: @spacing-md;
+    border-bottom: 1px solid @color-border;
+  }
+
+  &__heading {
+    display: flex;
+    align-items: center;
+    gap: @spacing-xs;
+    min-width: 0;
+
+    > .anticon {
+      color: @color-primary;
+      font-size: @font-size-title-card;
+    }
+
+    h3 {
+      .text-title-card();
+      margin: 0;
+    }
+  }
+
+  &__hint { .text-auxiliary(); }
+}
+
+.oa-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: @spacing-lg @spacing-xl;
+  margin: @spacing-lg 0 0;
+
+  &__item {
+    min-width: 0;
+
+    &--wide { grid-column: 1 / -1; }
+
+    dt {
+      .text-auxiliary();
+      margin-bottom: @spacing-xs;
+    }
+
+    dd {
+      .text-body-medium();
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+  }
+}
+
+/* 服务对象 */
+.oa-member {
+  display: flex;
+  align-items: center;
+  gap: @spacing-sm;
+  padding: @spacing-lg 0;
+
+  &__avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: @spacing-3xl;
+    height: @spacing-3xl;
+    border-radius: @radius-full;
+    color: @color-primary;
+    background: @color-primary-light;
+    font-size: @font-size-title-module;
+  }
+
+  &__identity {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: @spacing-xs;
+    flex-shrink: 0;
+
+    strong {
+      .text-title-card();
+      margin-right: @spacing-2xs;
+    }
+
+    span { .text-auxiliary(); }
+  }
+
+  &__diseases {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: @spacing-xs;
+    margin-left: auto;
+    padding-left: @spacing-lg;
+    border-left: 1px solid @color-border;
+
+    > span {
+      .text-auxiliary();
+      flex-shrink: 0;
+    }
+  }
+}
+
+.oa-health-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: @spacing-xs;
+  margin-bottom: @spacing-sm;
+
+  > div {
+    display: flex;
+    align-items: center;
+    gap: @spacing-xs;
+
+    strong { .text-body-medium(); }
+    span { .text-auxiliary(); }
+  }
+
+  &__warning {
+    color: @color-risk-mid;
+    font-size: @font-size-auxiliary;
+    line-height: @line-height-auxiliary;
+  }
+}
+
+.oa-health-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: @spacing-sm;
+}
+
+.oa-health-card {
+  padding: @spacing-md;
+  background: @color-bg-active;
+  border: 1px solid @color-border;
+  border-radius: @radius-sm;
+
+  &--abnormal {
+    background: @color-risk-mid-bg;
+    border-color: @color-warning;
+  }
+
+  &__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: @spacing-xs;
+
+    > span {
+      .text-body-medium();
+      .ellipsis();
+    }
+
+    .ant-tag { margin-inline-end: 0; }
+  }
+
+  &__value {
+    margin-top: @spacing-sm;
+    font-size: @font-size-title-module;
+    line-height: @line-height-title-module;
+    font-weight: @font-weight-title-module;
+    color: @color-text-primary;
+
+    small {
+      font-size: @font-size-auxiliary;
+      line-height: @line-height-auxiliary;
+      font-weight: @font-weight-body;
+      color: @color-text-secondary;
+    }
+  }
+
+  &__time {
+    display: flex;
+    align-items: center;
+    gap: @spacing-2xs;
+    margin-top: @spacing-xs;
+    .text-auxiliary();
+  }
+}
+
+/* 侧边信息 */
+.oa-side-list {
+  margin: @spacing-md 0 0;
+
+  > div {
+    display: grid;
+    grid-template-columns: 5em minmax(0, 1fr);
+    gap: @spacing-sm;
+    padding: @spacing-xs 0;
+  }
+
+  dt { .text-auxiliary(); }
+
+  dd {
+    .text-body();
+    margin: 0;
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+
+  &__amount {
+    color: @color-primary !important;
+    font-weight: @font-weight-body-medium !important;
+  }
+}
+
+.oa-contact {
+  margin-top: @spacing-md;
+
+  &__person {
+    display: flex;
+    align-items: baseline;
+    gap: @spacing-xs;
+
+    strong { .text-title-card(); }
+    span { .text-auxiliary(); }
+  }
+
+  > a {
+    display: flex;
+    align-items: center;
+    gap: @spacing-xs;
+    margin-top: @spacing-sm;
+    .text-body-medium();
+  }
+
+  &__address {
+    display: flex;
+    align-items: flex-start;
+    gap: @spacing-xs;
+    margin-top: @spacing-md;
+    padding-top: @spacing-md;
+    border-top: 1px solid @color-border;
+    .text-body();
+
+    .anticon {
+      flex-shrink: 0;
+      margin-top: @spacing-2xs;
+      color: @color-primary;
+    }
+  }
+}
+
+/* 审核操作 */
+.oa-audit {
+  &--pending { border-top: @spacing-2xs solid @color-primary; }
+
+  > p {
+    .text-body();
+    margin: @spacing-md 0 0;
+  }
+
+  &__notice {
+    .text-auxiliary();
+    margin-top: @spacing-sm;
+    padding: @spacing-sm;
+    background: @color-bg-active;
+    border-radius: @radius-sm;
+  }
+
+  &__actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: @spacing-sm;
+    margin-top: @spacing-lg;
+  }
+
+  &__result {
+    display: flex;
+    align-items: flex-start;
+    gap: @spacing-sm;
+
+    > .anticon {
+      margin-top: @spacing-2xs;
+      color: @color-primary;
+      font-size: @font-size-title-module;
+    }
+
+    strong { .text-title-card(); }
+
+    p {
+      .text-auxiliary();
+      margin: @spacing-2xs 0 0;
+    }
+  }
+
+  &--rejected &__result > .anticon { color: @color-risk-high; }
+}
+
+/* 审核不通过弹窗 */
+.oa-reject {
+  &__tip {
+    .text-auxiliary();
+    margin: @spacing-xs 0 @spacing-md;
+  }
+
+  &__reasons {
+    display: flex;
+    flex-direction: column;
+    gap: @spacing-sm;
+    margin-bottom: @spacing-lg;
+  }
+
+  &__label {
+    .text-body-medium();
+    margin-bottom: @spacing-xs;
+
+    span { color: @color-risk-high; }
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: @spacing-sm;
+    margin-top: @spacing-lg;
+  }
+}
+
+@media (max-width: 1200px) {
+  .oa-detail__layout { grid-template-columns: minmax(0, 1fr); }
+  .oa-detail__aside {
+    position: static;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .oa-audit { grid-column: 1 / -1; }
+}
+
+@media (max-width: 768px) {
+  .oa-detail .oa-card { padding: @spacing-md; }
+  .oa-detail__aside { display: flex; }
+  .oa-summary { align-items: flex-start; }
+  .oa-summary__amount { padding-left: @spacing-md; }
+  .oa-member { align-items: flex-start; flex-wrap: wrap; }
+  .oa-member__diseases {
+    width: 100%;
+    margin-left: 0;
+    padding: @spacing-sm 0 0;
+    border-left: 0;
+    border-top: 1px solid @color-border;
+  }
+  .oa-health-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .oa-summary { flex-direction: column; }
+  .oa-summary__amount {
+    width: 100%;
+    padding: @spacing-md 0 0;
+    border-left: 0;
+    border-top: 1px solid @color-border;
+    text-align: left;
+  }
+  .oa-section__header { align-items: flex-start; }
+  .oa-section__hint { display: none; }
+}
