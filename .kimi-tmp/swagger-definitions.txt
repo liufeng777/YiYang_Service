@@ -1,0 +1,1150 @@
+
+## pkg.Meta
+{
+  "type": "object",
+  "properties": {
+    "request_id": {
+      "type": "string"
+    },
+    "timestamp": {
+      "type": "integer"
+    }
+  }
+}
+
+## pkg.Response
+{
+  "type": "object",
+  "properties": {
+    "code": {
+      "type": "integer"
+    },
+    "data": {},
+    "message": {
+      "type": "string"
+    },
+    "meta": {
+      "$ref": "#/definitions/pkg.Meta"
+    }
+  }
+}
+
+## shared.ReqAllergy
+{
+  "type": "object",
+  "properties": {
+    "allergen_code": {
+      "type": "string"
+    },
+    "allergen_name": {
+      "type": "string"
+    },
+    "allergy_type": {
+      "type": "integer"
+    },
+    "id": {
+      "type": "integer"
+    },
+    "member_id": {
+      "type": "integer"
+    },
+    "onset_date": {
+      "description": "首次发现日期(UTC秒,0=未填)",
+      "type": "integer"
+    },
+    "reaction": {
+      "type": "string"
+    },
+    "remark": {
+      "type": "string"
+    },
+    "severity": {
+      "type": "integer"
+    }
+  }
+}
+
+## shared.ReqArchiveChronicAssessment
+{
+  "type": "object",
+  "properties": {
+    "assess_date": {
+      "type": "integer"
+    },
+    "batch_no": {
+      "type": "string"
+    },
+    "disease_history_id": {
+      "type": "integer"
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "source": {
+      "type": "integer"
+    }
+  }
+}
+
+## shared.ReqArchiveChronicCreate
+{
+  "type": "object",
+  "properties": {
+    "assess_date": {
+      "type": "integer"
+    },
+    "diagnose_date": {
+      "type": "integer"
+    },
+    "disease_code": {
+      "type": "string"
+    },
+    "disease_name": {
+      "type": "string"
+    },
+    "member_id": {
+      "type": "integer"
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "remark": {
+      "type": "string"
+    },
+    "source": {
+      "type": "integer"
+    }
+  }
+}
+
+## shared.ReqArchiveChronicStatus
+{
+  "type": "object",
+  "properties": {
+    "chronic_status": {
+      "type": "integer"
+    },
+    "remark": {
+      "type": "string"
+    }
+  }
+}
+
+## shared.ReqArchiveChronicTerminate
+{
+  "type": "object",
+  "properties": {
+    "end_date": {
+      "type": "integer"
+    },
+    "reason": {
+      "type": "string"
+    }
+  }
+}
+
+## shared.ReqDisease
+{
+  "type": "object",
+  "properties": {
+    "diagnose_hospital": {
+      "type": "string"
+    },
+    "disease_name": {
+      "type": "string"
+    },
+    "disease_status": {
+      "type": "integer"
+    },
+    "id": {
+      "type": "integer"
+    },
+    "member_id": {
+      "type": "integer"
+    },
+    "onset_date": {
+      "description": "发病日期(UTC秒,0=未填)",
+      "type": "integer"
+    },
+    "remark": {
+      "type": "string"
+    },
+    "treatment_desc": {
+      "type": "string"
+    }
+  }
+}
+
+## shared.ReqFamily
+{
+  "type": "object",
+  "properties": {
+    "disease_name": {
+      "type": "string"
+    },
+    "icd10_code": {
+      "type": "string"
+    },
+    "id": {
+      "type": "integer"
+    },
+    "is_dead": {
+      "type": "integer"
+    },
+    "member_id": {
+      "type": "integer"
+    },
+    "onset_age": {
+      "type": "integer"
+    },
+    "relation": {
+      "type": "integer"
+    },
+    "remark": {
+      "type": "string"
+    }
+  }
+}
+
+## shared.ReqLifestyle
+{
+  "type": "object",
+  "properties": {
+    "activity_level": {
+      "description": "活动强度:1卧床 2轻体力劳动 3中度体力劳动 4重体力劳动",
+      "type": "integer"
+    },
+    "diet_desc": {
+      "description": "饮食补充描述",
+      "type": "string"
+    },
+    "diet_habit": {
+      "description": "饮食口味:1清淡 2偏咸 3重油重糖",
+      "type": "integer"
+    },
+    "drink_status": {
+      "description": "饮酒情况:1不饮酒 2偶尔 3经常 4酗酒",
+      "type": "integer"
+    },
+    "drink_type": {
+      "description": "酒类型",
+      "type": "string"
+    },
+    "eating_mode": {
+      "description": "主进食方式:1自主进食 2部分协助 3完全协助 4管饲 5静脉营养",
+      "type": "integer"
+    },
+    "exercise_duration": {
+      "description": "单次运动时长:1<15分 2 15~30分 3 30~60分 4>60分",
+      "type": "integer"
+    },
+    "exercise_freq": {
+      "description": "运动频率:1几乎不 2每周1-2次 3每周≥3次",
+      "type": "integer"
+    },
+    "exercise_habit": {
+      "description": "运动习惯:1规律运动 2偶尔运动 3不运动",
+      "type": "integer"
+    },
+    "exercise_type": {
+      "description": "运动类型",
+      "type": "string"
+    },
+    "hearing_status": {
+      "description": "听力情况:1正常 2下降 3失聪",
+      "type": "integer"
+    },
+    "id": {
+      "description": "记录ID（一人一条后由服务端忽略，前端可不传）",
+      "type": "integer"
+    },
+    "member_id": {
+      "description": "会员ID（必填）",
+      "type": "integer"
+    },
+    "mental_status": {
+      "description": "情绪状态自评:1稳定 2焦虑 3低落 4易怒",
+      "type": "integer"
+    },
+    "occupational_hazard": {
+      "description": "职业有害因素",
+      "type": "string"
+    },
+    "oral_status": {
+      "description": "口腔情况:1正常 2缺牙 3义齿",
+      "type": "integer"
+    },
+    "sleep_hour": {
+      "description": "日均睡眠小时(可含小数,如7.5)",
+      "type": "string"
+    },
+    "sleep_medication": {
+      "description": "是否使用助眠药:1否 2是",
+      "type": "integer"
+    },
+    "sleep_quality": {
+      "description": "睡眠质量:1好 2一般 3差",
+      "type": "integer"
+    },
+    "smoke_daily": {
+      "description": "每日支数",
+      "type": "integer"
+    },
+    "smoke_years": {
+      "description": "烟龄(年)",
+      "type": "integer"
+    },
+    "smoking_status": {
+      "description": "吸烟情况:1从不 2已戒烟 3当前吸烟",
+      "type": "integer"
+    },
+    "staple_food": {
+      "description": "主食",
+      "type": "string"
+    },
+    "vision_status": {
+      "description": "视力情况:1正常 2下降 3失明",
+      "type": "integer"
+    }
+  }
+}
+
+## shared.ReqOperation
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "integer"
+    },
+    "member_id": {
+      "type": "integer"
+    },
+    "op_code": {
+      "type": "string"
+    },
+    "op_date": {
+      "description": "手术日期(UTC秒,0=未填)",
+      "type": "integer"
+    },
+    "op_hospital": {
+      "type": "string"
+    },
+    "op_name": {
+      "type": "string"
+    },
+    "op_type": {
+      "type": "integer"
+    },
+    "outcome": {
+      "type": "integer"
+    },
+    "remark": {
+      "type": "string"
+    }
+  }
+}
+
+## shared.ReqUpsertBasic
+{
+  "type": "object",
+  "properties": {
+    "archive_no": {
+      "type": "string"
+    },
+    "blood_type": {
+      "type": "integer"
+    },
+    "height": {
+      "type": "string"
+    },
+    "marital_status": {
+      "type": "integer"
+    },
+    "member_id": {
+      "description": "member 维度，必填",
+      "type": "integer"
+    },
+    "nation": {
+      "type": "string"
+    },
+    "occupation": {
+      "type": "string"
+    },
+    "remark": {
+      "type": "string"
+    },
+    "weight": {
+      "type": "string"
+    }
+  }
+}
+
+## staff.ReqStaffAccessAssign
+{
+  "type": "object",
+  "required": [
+    "staff_id"
+  ],
+  "properties": {
+    "staff_id": {
+      "description": "目标健管师ID",
+      "type": "integer"
+    }
+  }
+}
+
+## staff.ReqStaffAccessConfirm
+{
+  "type": "object",
+  "properties": {
+    "relation": {
+      "description": "关系(默认1)",
+      "type": "integer"
+    }
+  }
+}
+
+## staff.ReqStaffAccessCreate
+{
+  "type": "object",
+  "required": [
+    "member_id"
+  ],
+  "properties": {
+    "demand_desc": {
+      "description": "需求描述",
+      "type": "string"
+    },
+    "demand_tags": {
+      "description": "需求标签(JSON数组)",
+      "type": "string"
+    },
+    "health_intent": {
+      "description": "健康管理意向",
+      "type": "string"
+    },
+    "institution_id": {
+      "description": "机构ID(默认当前机构)",
+      "type": "integer"
+    },
+    "member_id": {
+      "description": "会员ID，必填",
+      "type": "integer"
+    },
+    "relation": {
+      "description": "关系(默认1)",
+      "type": "integer"
+    },
+    "remark": {
+      "description": "备注",
+      "type": "string"
+    },
+    "source_type": {
+      "description": "来源:1线下登记",
+      "type": "integer"
+    }
+  }
+}
+
+## staff.ReqStaffAccessFollowup
+{
+  "type": "object",
+  "required": [
+    "content"
+  ],
+  "properties": {
+    "content": {
+      "description": "跟进内容",
+      "type": "string"
+    }
+  }
+}
+
+## staff.ReqStaffAccessReject
+{
+  "type": "object",
+  "properties": {
+    "reason": {
+      "description": "拒绝原因",
+      "type": "string"
+    }
+  }
+}
+
+## staff.ReqStaffAccessTransfer
+{
+  "type": "object",
+  "required": [
+    "institution_id"
+  ],
+  "properties": {
+    "institution_id": {
+      "description": "目标机构ID（必填）",
+      "type": "integer"
+    },
+    "reason": {
+      "description": "转派原因",
+      "type": "string"
+    }
+  }
+}
+
+## staff.ReqStaffActivityRegister
+{
+  "type": "object",
+  "properties": {
+    "contact_name": {
+      "type": "string"
+    },
+    "contact_phone": {
+      "type": "string"
+    },
+    "member_id": {
+      "type": "integer"
+    },
+    "participant_count": {
+      "type": "integer"
+    },
+    "remark": {
+      "type": "string"
+    }
+  }
+}
+
+## staff.ReqStaffApproveRefund
+{
+  "type": "object",
+  "required": [
+    "approve"
+  ],
+  "properties": {
+    "approve": {
+      "description": "true-通过 false-拒绝，必填",
+      "type": "boolean"
+    },
+    "opinion": {
+      "description": "审批意见，选填",
+      "type": "string"
+    }
+  }
+}
+
+## staff.ReqStaffAssignLead
+{
+  "type": "object",
+  "required": [
+    "assignee"
+  ],
+  "properties": {
+    "assignee": {
+      "description": "认领人(员工)ID，必填",
+      "type": "integer"
+    }
+  }
+}
+
+## staff.ReqStaffBatchTransferLeads
+{
+  "type": "object",
+  "required": [
+    "lead_ids",
+    "new_assignee"
+  ],
+  "properties": {
+    "lead_ids": {
+      "description": "线索ID数组，必填",
+      "type": "array",
+      "items": {
+        "type": "integer"
+      }
+    },
+    "new_assignee": {
+      "description": "新负责人(员工)ID，必填",
+      "type": "integer"
+    },
+    "reason": {
+      "description": "转派原因（留痕），选填",
+      "type": "string"
+    }
+  }
+}
+
+## staff.ReqStaffChronicDiseaseCreate
+{
+  "type": "object",
+  "required": [
+    "disease_name_cn",
+    "icd10_code"
+  ],
+  "properties": {
+    "disease_name_cn": {
+      "description": "中文名",
+      "type": "string"
+    },
+    "disease_name_en": {
+      "description": "英文名",
+      "type": "string"
+    },
+    "icd10_code": {
+      "description": "ICD-10编码",
+      "type": "string"
+    },
+    "level": {
+      "description": "层级(顶级=1)",
+      "type": "integer"
+    },
+    "parent_disease_id": {
+      "description": "父级ID(0=顶级)",
+      "type": "integer"
+    },
+    "sort_order": {
+      "description": "排序",
+      "type": "integer"
+    }
+  }
+}
+
+## staff.ReqStaffChronicDiseaseStatus
+{
+  "type": "object",
+  "required": [
+    "status"
+  ],
+  "properties": {
+    "status": {
+      "description": "状态:1启用服务追踪/9未启用仅展示（models.ChronicDiseaseStatusTracking/Display）",
+      "type": "integer"
+    }
+  }
+}
+
+## staff.ReqStaffChronicDiseaseUpdate
+{
+  "type": "object",
+  "properties": {
+    "disease_name_cn": {
+      "description": "中文名",
+      "type": "string"
+    },
+    "disease_name_en": {
+      "description": "英文名",
+      "type": "string"
+    },
+    "sort_order": {
+      "description": "排序",
+      "type": "integer"
+    }
+  }
+}
+
+## staff.ReqStaffCreateLead
+{
+  "type": "object",
+  "required": [
+    "name",
+    "phone"
+  ],
+  "properties": {
+    "name": {
+      "description": "联系人，必填",
+      "type": "string"
+    },
+    "phone": {
+      "description": "联系电话，必填",
+      "type": "string"
+    },
+    "remark": {
+      "description": "备注，选填",
+      "type": "string"
+    },
+    "source_id": {
+      "description": "来源关联ID，选填",
+      "type": "integer"
+    },
+    "source_type": {
+      "description": "来源类型(活动/咨询/预约/转介绍等)，选填",
+      "type": "integer"
+    }
+  }
+}
+
+## staff.ReqStaffDiseaseCreate
+{
+  "type": "object",
+  "required": [
+    "disease_code"
+  ],
+  "properties": {
+    "disease_code": {
+      "description": "病种编码(ICD10)",
+      "type": "string"
+    },
+    "is_required": {
+      "description": "该病种下是否必填：1是",
+      "type": "integer"
+    },
+    "sort_order": {
+      "description": "该病种内表单排序",
+      "type": "integer"
+    }
+  }
+}
+
+## staff.ReqStaffFollowupLead
+{
+  "type": "object",
+  "required": [
+    "content"
+  ],
+  "properties": {
+    "content": {
+      "description": "跟进内容，必填",
+      "type": "string"
+    },
+    "followup_type": {
+      "description": "跟进方式，选填：1-语音 2-文字 3-视频 4-在店 5-上门（models.LeanFollowupAction*）",
+      "type": "integer"
+    }
+  }
+}
+
+## staff.ReqStaffMarkLeadLost
+{
+  "type": "object",
+  "required": [
+    "status"
+  ],
+  "properties": {
+    "reason": {
+      "description": "流失原因，选填",
+      "type": "string"
+    },
+    "status": {
+      "description": "目标状态，必填：9-流失(models.LeanStatusLost)，无效可复用 4-转化失败",
+      "type": "integer"
+    }
+  }
+}
+
+## staff.ReqStaffMetricCategoryCreate
+{
+  "type": "object",
+  "required": [
+    "category_name"
+  ],
+  "properties": {
+    "category_code": {
+      "description": "分类编码",
+      "type": "string"
+    },
+    "category_level": {
+      "description": "层级",
+      "type": "integer"
+    },
+    "category_name": {
+      "description": "分类名称",
+      "type": "string"
+    },
+    "parent_id": {
+      "description": "父级ID(0=一级)",
+      "type": "integer"
+    },
+    "sort_order": {
+      "description": "排序",
+      "type": "integer"
+    }
+  }
+}
+
+## staff.ReqStaffMetricCategoryStatus
+{
+  "type": "object",
+  "required": [
+    "status"
+  ],
+  "properties": {
+    "status": {
+      "description": "状态:1启用/9停用（models.MetricStatusValid/Invalid）",
+      "type": "integer"
+    }
+  }
+}
+
+## staff.ReqStaffMetricCategoryUpdate
+{
+  "type": "object",
+  "properties": {
+    "category_code": {
+      "description": "分类编码",
+      "type": "string"
+    },
+    "category_name": {
+      "description": "分类名称",
+      "type": "string"
+    },
+    "sort_order": {
+      "description": "排序",
+      "type": "integer"
+    }
+  }
+}
+
+## staff.ReqStaffMetricCreate
+{
+  "type": "object",
+  "required": [
+    "category_id",
+    "metric_code",
+    "metric_name_cn"
+  ],
+  "properties": {
+    "abbreviation": {
+      "description": "缩写",
+      "type": "string"
+    },
+    "category_id": {
+      "description": "所属分类ID",
+      "type": "integer"
+    },
+    "data_type": {
+      "description": "数据类型:1数值/2枚举",
+      "type": "integer"
+    },
+    "is_multi": {
+      "description": "是否可多选:0否/1是",
+      "type": "integer"
+    },
+    "metric_code": {
+      "description": "指标编码",
+      "type": "string"
+    },
+    "metric_group": {
+      "description": "慢病表单分组(仅专有/派生项)",
+      "type": "string"
+    },
+    "metric_name_cn": {
+      "description": "指标中文名",
+      "type": "string"
+    },
+    "metric_name_en": {
+      "description": "指标英文名",
+      "type": "string"
+    },
+    "metric_scope": {
+      "description": "以下为 2026-11-08 字典归一新增：1常规(默认)/2慢病专有/3慢病派生",
+      "type": "integer"
+    },
+    "metric_unit": {
+      "description": "单位",
+      "type": "string"
+    },
+    "option_json": {
+      "description": "枚举选项(JSON)",
+      "type": "string"
+    },
+    "remark": {
+      "description": "备注",
+      "type": "string"
+    },
+    "sort_order": {
+      "description": "排序",
+      "type": "integer"
+    },
+    "unit_symbol": {
+      "description": "单位符号",
+      "type": "string"
+    }
+  }
+}
+
+## staff.ReqStaffMetricStatus
+{
+  "type": "object",
+  "required": [
+    "status"
+  ],
+  "properties": {
+    "status": {
+      "description": "状态:1启用/9停用（models.MetricStatusValid/Invalid）",
+      "type": "integer"
+    }
+  }
+}
+
+## staff.ReqStaffMetricUpdate
+{
+  "type": "object",
+  "required": [
+    "category_id"
+  ],
+  "properties": {
+    "category_id": {
+      "description": "所属分类ID",
+      "type": "integer"
+    },
+    "data_type": {
+      "description": "数据类型",
+      "type": "integer"
+    },
+    "metric_group": {
+      "description": "慢病表单分组(空=不修改)",
+      "type": "string"
+    },
+    "metric_name_cn": {
+      "description": "指标中文名",
+      "type": "string"
+    },
+    "metric_name_en": {
+      "description": "指标英文名",
+      "type": "string"
+    },
+    "option_json": {
+      "description": "枚举选项(JSON)",
+      "type": "string"
+    },
+    "remark": {
+      "description": "备注",
+      "type": "string"
+    },
+    "unit_symbol": {
+      "description": "单位符号",
+      "type": "string"
+    }
+  }
+}
+
+## staff.ReqStaffRefRangeCreate
+{
+  "type": "object",
+  "properties": {
+    "age_max": {
+      "description": "年龄上限",
+      "type": "integer"
+    },
+    "age_min": {
+      "description": "年龄下限",
+      "type": "integer"
+    },
+    "gender": {
+      "description": "性别:0不限/1男/2女",
+      "type": "integer"
+    },
+    "id": {
+      "description": "范围ID(编辑时传)",
+      "type": "integer"
+    },
+    "is_default": {
+      "description": "是否默认范围:1默认/2非默认",
+      "type": "integer"
+    },
+    "ref_lower": {
+      "description": "参考下限",
+      "type": "string"
+    },
+    "ref_upper": {
+      "description": "参考上限",
+      "type": "string"
+    },
+    "sort_order": {
+      "description": "排序",
+      "type": "integer"
+    }
+  }
+}
+
+## staff.ReqStaffRefRangeDefault
+{
+  "type": "object",
+  "required": [
+    "is_default"
+  ],
+  "properties": {
+    "is_default": {
+      "description": "1默认/0取消默认",
+      "type": "integer"
+    }
+  }
+}
+
+## staff.ReqStaffTransferLead
+{
+  "type": "object",
+  "required": [
+    "new_assignee"
+  ],
+  "properties": {
+    "new_assignee": {
+      "description": "新负责人(员工)ID，必填",
+      "type": "integer"
+    },
+    "reason": {
+      "description": "转派原因（留痕），选填",
+      "type": "string"
+    }
+  }
+}
+
+## staff.StaffChangePasswordRequest
+{
+  "type": "object",
+  "required": [
+    "new_password",
+    "old_password"
+  ],
+  "properties": {
+    "new_password": {
+      "type": "string",
+      "minLength": 6,
+      "example": "654321"
+    },
+    "old_password": {
+      "type": "string",
+      "example": "123456"
+    }
+  }
+}
+
+## staff.StaffLoginRequest
+{
+  "type": "object",
+  "required": [
+    "password",
+    "phone"
+  ],
+  "properties": {
+    "password": {
+      "type": "string",
+      "example": "123456"
+    },
+    "phone": {
+      "type": "string",
+      "example": "13800000000"
+    }
+  }
+}
+
+## staff.StaffSmsCodeRequest
+{
+  "type": "object",
+  "required": [
+    "phone",
+    "scene"
+  ],
+  "properties": {
+    "phone": {
+      "type": "string",
+      "example": "13800000000"
+    },
+    "scene": {
+      "description": "login | reset",
+      "type": "string",
+      "example": "login"
+    }
+  }
+}
+
+## staff.StaffSmsLoginRequest
+{
+  "type": "object",
+  "required": [
+    "code",
+    "phone"
+  ],
+  "properties": {
+    "code": {
+      "type": "string",
+      "example": "123456"
+    },
+    "phone": {
+      "type": "string",
+      "example": "13800000000"
+    }
+  }
+}
+
+## staff.SwitchInstitutionRequest
+{
+  "type": "object",
+  "required": [
+    "institution_id"
+  ],
+  "properties": {
+    "institution_id": {
+      "type": "integer",
+      "example": 1
+    }
+  }
+}
+
+## staff.appointmentCreateReq
+{
+  "type": "object",
+  "properties": {
+    "appointment_date": {
+      "description": "预约日期(UTC秒)",
+      "type": "integer"
+    },
+    "appointment_type": {
+      "description": "1-咨询 2-体检 3-参观 4-服务",
+      "type": "integer"
+    },
+    "assigned_staff_id": {
+      "type": "integer"
+    },
+    "contact_name": {
+      "type": "string"
+    },
+    "contact_phone": {
+      "type": "string"
+    },
+    "institution_id": {
+      "type": "integer"
+    },
+    "remark": {
+      "type": "string"
+    },
+    "service_interest": {
+      "type": "string"
+    },
+    "status": {
+      "type": "integer"
+    },
+    "time_slot": {
+      "type": "string"
+    }
+  }
+}
+
+## staff.consultationCreateReq
+{
+  "type": "object",
+  "properties": {
+    "answer": {
+      "type": "string"
+    },
+    "consultation_type": {
+      "type": "integer"
+    },
+    "contact_name": {
+      "type": "string"
+    },
+    "contact_phone": {
+      "type": "string"
+    },
+    "institution_id": {
+      "type": "integer"
+    },
+    "question": {
+      "type": "string"
+    },
+    "satisfaction_score": {
+      "type": "integer"
+    }
+  }
+}

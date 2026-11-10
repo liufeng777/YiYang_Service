@@ -98,7 +98,6 @@ export default function WorkOrderList() {
       case 1:
         return (
           <Button
-            type="primary"
             size="small"
             onClick={() => navigate(`/work-order/${row.id}?dispatch=1`)}
           >

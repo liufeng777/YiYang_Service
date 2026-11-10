@@ -21,7 +21,6 @@ import dayjs from 'dayjs'
 import PageContainer from '@/components/PageContainer'
 import { orderApi } from '@/api'
 import { ORDER_STATUS_MAP, type OrderDetail } from '@/api/modules/order'
-import { mockOrderDetail } from './mock'
 import './index.less'
 
 const REJECT_REASONS = [
@@ -69,14 +68,8 @@ export default function OrderAuditDetail() {
   const [rejectOpen, setRejectOpen] = useState(false)
   const [reasons, setReasons] = useState<string[]>([])
   const [note, setNote] = useState('')
-  const isMock = id === 'mock'
-
   const fetchDetail = useCallback(async () => {
     if (!id) return
-    if (isMock) {
-      setOrder(mockOrderDetail)
-      return
-    }
     setLoading(true)
     try {
       setOrder(await orderApi.getOrderDetail(id))
@@ -85,7 +78,7 @@ export default function OrderAuditDetail() {
     } finally {
       setLoading(false)
     }
-  }, [id, isMock])
+  }, [id])
 
   useEffect(() => {
     fetchDetail()
@@ -100,10 +93,6 @@ export default function OrderAuditDetail() {
 
   const onApprove = () => {
     if (!id) return
-    if (isMock) {
-      message.info('演示数据仅用于预览，不会提交审核')
-      return
-    }
     modal.confirm({
       title: '确认审核通过？',
       content: '通过后订单将进入后续服务流程，请确认已核对服务内容及健康信息。',
@@ -138,11 +127,6 @@ export default function OrderAuditDetail() {
       message.warning('选择「其他」时必须填写补充说明')
       return
     }
-    if (isMock) {
-      message.success('演示审核不通过提交成功，未发起接口请求')
-      closeReject()
-      return
-    }
     setSubmitting(true)
     try {
       await orderApi.rejectOrder(id, {
@@ -165,7 +149,7 @@ export default function OrderAuditDetail() {
         title="订单审核详情"
         description={order ? (
           <span className="oa-detail__description">
-            订单号：{order.order_no || '-'} {isMock && <Tag color="blue">模拟数据</Tag>}
+            订单号：{order.order_no || '-'}
           </span>
         ) : '核对订单资料与健康信息'}
         extra={<Button color="primary" variant="outlined" icon={<ArrowLeftOutlined />} onClick={() => navigate('/order-audit')}>返回审核列表</Button>}
@@ -223,7 +207,7 @@ export default function OrderAuditDetail() {
                         <UserOutlined />
                         <h3>服务对象与健康信息</h3>
                       </div>
-                      <Button size="small" disabled={!order.member_id} onClick={() => navigate(`/member/${order.member_id}`)}>
+                      <Button size="small" disabled={!order.member_id} onClick={() => navigate(`/health-record/${order.member_id}`)}>
                         查看完整健康档案
                       </Button>
                     </div>

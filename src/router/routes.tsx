@@ -29,6 +29,7 @@ import {
   CarryOutOutlined,
   MessageOutlined,
   HomeOutlined,
+  FolderOutlined,
   BankOutlined,
   UserOutlined,
   TeamOutlined,
@@ -120,6 +121,27 @@ export const routes: RouteConfig[] = [
 
   /* ===== 健康管理 ===== */
   {
+    path: '/health-record',
+    meta: { title: '健康档案', icon: <FolderOutlined />, group: '健康管理', permissions: [PERMISSIONS.HEALTH_VIEW] },
+    children: [
+      {
+        path: '',
+        meta: { title: '健康档案列表' },
+        component: lazy(() => import('@/pages/health-archive/list')),
+      },
+      {
+        path: 'metric-management',
+        meta: { title: '检测项管理', hideInMenu: true },
+        component: lazy(() => import('@/pages/metric-management/index')),
+      },
+      {
+        path: ':id',
+        meta: { title: '健康档案维护', hideInMenu: true },
+        component: lazy(() => import('@/pages/health-archive/detail')),
+      },
+    ],
+  },
+  {
     path: '/member',
     meta: { title: '健康会员', icon: <TeamOutlined />, group: '健康管理', permissions: [PERMISSIONS.HEALTH_VIEW] },
     children: [
@@ -127,11 +149,6 @@ export const routes: RouteConfig[] = [
         path: '',
         meta: { title: '健康会员列表' },
         component: lazy(() => import('@/pages/member/list')),
-      },
-      {
-        path: ':id',
-        meta: { title: '健康会员详情', hideInMenu: true },
-        component: lazy(() => import('@/pages/member/detail')),
       },
     ],
   },
@@ -229,23 +246,18 @@ export const routes: RouteConfig[] = [
         component: lazy(() => import('@/pages/assess/create')),
       },
       {
-        path: 'templates',
-        meta: { title: '测评模板', hideInMenu: true },
-        component: lazy(() => import('@/pages/assess/templates')),
-      },
-      {
         path: ':id',
         meta: { title: '健康力测评详情', hideInMenu: true },
         component: lazy(() => import('@/pages/assess/detail')),
       },
       {
         path: ':id/entry',
-        meta: { title: '健康力测评录入', hideInMenu: true },
+        meta: { title: '健康力测评原始数据', hideInMenu: true },
         component: lazy(() => import('@/pages/assess/entry')),
       },
       {
         path: ':id/analysis',
-        meta: { title: 'AI分析与专业确认', hideInMenu: true },
+        meta: { title: '健康力测评专业确认', hideInMenu: true },
         component: lazy(() => import('@/pages/assess/analysis')),
       },
     ],
@@ -334,16 +346,7 @@ export const routes: RouteConfig[] = [
         meta: { title: '服务工单详情', hideInMenu: true },
         component: lazy(() => import('@/pages/work-order/detail')),
       },
-      {
-        path: ':id/audit',
-        meta: { title: '审核服务订单', hideInMenu: true },
-        component: lazy(() => import('@/pages/work-order/audit')),
-      },
-      {
-        path: ':id/audit-result',
-        meta: { title: '审核通过', hideInMenu: true },
-        component: lazy(() => import('@/pages/work-order/audit-result')),
-      },
+
     ],
   },
 
@@ -386,8 +389,7 @@ export const routes: RouteConfig[] = [
     ],
   },
   {
-    // 入住协同：登记会员入住意向并持续跟进（设计稿：16.入住协同）
-    // swagger 无对应接口，页面以本地 mock 演示完整交互（见 BasicLayout NO_API_PREFIXES）
+    // 入住协同复用预约接口：appointment_type=3（参观），日期按 UTC 秒提交。
     path: '/admission',
     meta: {
       title: '入住协同',
@@ -414,16 +416,6 @@ export const routes: RouteConfig[] = [
         meta: { title: '机构信息' },
         component: lazy(() => import('@/pages/institution/list')),
       },
-      {
-        path: 'create',
-        meta: { title: '新增机构', hideInMenu: true },
-        component: lazy(() => import('@/pages/institution/create')),
-      },
-      {
-        path: ':id',
-        meta: { title: '机构详情', hideInMenu: true },
-        component: lazy(() => import('@/pages/institution/detail')),
-      },
     ],
   },
   {
@@ -436,26 +428,6 @@ export const routes: RouteConfig[] = [
         component: lazy(() => import('@/pages/staff/list')),
       },
       {
-        path: 'credentials',
-        meta: { title: '执业资质', hideInMenu: true },
-        component: lazy(() => import('@/pages/staff/credentials')),
-      },
-      {
-        path: 'qualification',
-        meta: { title: '派单资格', hideInMenu: true },
-        component: lazy(() => import('@/pages/staff/qualification')),
-      },
-      {
-        path: 'audit',
-        meta: { title: '资质审核', hideInMenu: true },
-        component: lazy(() => import('@/pages/staff/audit')),
-      },
-      {
-        path: 'audit/:id',
-        meta: { title: '专业人员统一审核', hideInMenu: true },
-        component: lazy(() => import('@/pages/staff/audit-detail')),
-      },
-      {
         path: 'create',
         meta: { title: '新增人员', hideInMenu: true },
         component: lazy(() => import('@/pages/staff/create')),
@@ -464,11 +436,6 @@ export const routes: RouteConfig[] = [
         path: ':id',
         meta: { title: '人员详情', hideInMenu: true },
         component: lazy(() => import('@/pages/staff/detail')),
-      },
-      {
-        path: ':id/authorize',
-        meta: { title: '配置服务授权', hideInMenu: true },
-        component: lazy(() => import('@/pages/staff/authorize')),
       },
       {
         path: ':id/credential-upload',

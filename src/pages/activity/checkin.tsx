@@ -184,15 +184,6 @@ export default function ActivityCheckin() {
           allowClear
         />
         <Button
-          type="primary"
-          onClick={() => {
-            setApplied({ keyword, status })
-            setPage(1)
-          }}
-        >
-          查询
-        </Button>
-        <Button
           onClick={() => {
             setKeyword('')
             setStatus(1)
@@ -201,6 +192,15 @@ export default function ActivityCheckin() {
           }}
         >
           重置
+        </Button>
+        <Button
+          type="primary"
+          onClick={() => {
+            setApplied({ keyword, status })
+            setPage(1)
+          }}
+        >
+          查询
         </Button>
       </Card>
 

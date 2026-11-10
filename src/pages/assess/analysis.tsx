@@ -1,80 +1,90 @@
-/**
- * AI长者健康力测评 - AI分析与专业确认（设计稿：W-HEALTH-P1-04）
- * 六维结果 + AI 初步分析（待确认）+ 专业人员确认表单
- * TODO: 接入后端后对齐 API §4.6 评估完成/确认 POST /api/v1/staff/assessments/:id/confirm
- */
-import { Button, Input, message } from 'antd'
+/** 健康评估专业确认：调用 POST /assessments/{id}/confirm。 */
+import { useEffect, useState } from 'react'
+import { Alert, App, Button, Card, Input, Space, Spin } from 'antd'
+import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
-import { DimensionCards } from './dim-cards'
-import { mockAiAnalysis, mockProConfirm } from './mock'
+import { memberApi } from '@/api'
+import { asObject, JsonView, type ApiObject } from './data-view'
 import './index.less'
 
 export default function AssessAnalysis() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const ai = mockAiAnalysis
-  const pro = mockProConfirm
+  const { message } = App.useApp()
+  const [detail, setDetail] = useState<ApiObject>({})
+  const [confirmation, setConfirmation] = useState('{}')
+  const [loading, setLoading] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+
+  useEffect(() => {
+    if (!id) return
+    setLoading(true)
+    memberApi.getAssessmentDetail(id)
+      .then((res) => setDetail(asObject(res)))
+      .catch(() => undefined)
+      .finally(() => setLoading(false))
+  }, [id])
+
+  const confirm = async () => {
+    if (!id) return
+    let body: ApiObject
+    try {
+      const parsed: unknown = JSON.parse(confirmation)
+      if (parsed == null || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('object required')
+      body = parsed as ApiObject
+    } catch {
+      message.error('确认结果必须是 JSON 对象')
+      return
+    }
+    setSubmitting(true)
+    try {
+      await memberApi.confirmAssessment(id, body)
+      message.success('评估已确认')
+      navigate(`/assessment/${id}`)
+    } catch {
+      // 请求失败时停留当前页
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   return (
     <PageContainer
-      title="AI健康力分析与专业确认"
-      description="六维结果分别呈现；AI辅助解释与专业人员意见明确区分"
+      title={`健康评估专业确认 #${id ?? '-'}`}
+      description="核对评估结果并调用评估确认接口"
+      extra={<Button icon={<ArrowLeftOutlined />} onClick={() => navigate(`/assessment/${id}`)}>返回详情</Button>}
     >
-      {/* 健康力概览 */}
-      <div className="as-card">
-        <div className="as-card__header">
-          <span className="as-card__title">健康力概览</span>
-          <span className="as-row__sub">六维结果分别呈现，不合并为单一总分</span>
-        </div>
-        <DimensionCards />
-      </div>
-
-      <div className="as-analysis">
-        {/* 左：AI 初步分析 */}
-        <div className="as-card as-analysis__ai">
-          <div className="as-card__header">
-            <span className="as-card__title">AI 初步分析</span>
-            <span className="as-tag as-tag--pending">AI生成 · 待专业确认</span>
-          </div>
-          {ai.sections.map((s) => (
-            <div key={s.title} className="as-ai-section">
-              <div className="as-ai-section__title">{s.title}</div>
-              <div className="as-ai-section__content">{s.content}</div>
-            </div>
-          ))}
-          <div className="as-footnote as-footnote--yellow">{ai.disclaimer}</div>
-        </div>
-
-        {/* 右：专业人员确认 */}
-        <div className="as-card as-analysis__pro">
-          <div className="as-card__header">
-            <span className="as-card__title">专业人员确认</span>
-            <span className="as-row__sub">确认人：{pro.doctor}</span>
-          </div>
-          {pro.fields.map((f) => (
-            <div key={f.label} className="as-pro-field">
-              <div className="as-pro-field__label">{f.label}</div>
-              <Input.TextArea rows={2} defaultValue={f.value} />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 底部操作 */}
-      <div className="as-footer-actions">
-        <Button onClick={() => navigate(`/assessment/${id ?? 'A20260819001'}/entry`)}>返回修改</Button>
-        <Button onClick={() => message.success('草稿已保存（mock）')}>保存草稿</Button>
-        <Button
-          type="primary"
-          onClick={() => {
-            message.success('已确认完成，结果归入健康档案（mock）')
-            navigate(`/assessment/${id ?? 'A20260819001'}`)
-          }}
-        >
-          确认完成
-        </Button>
-      </div>
+      <Spin spinning={loading}>
+        <Card variant="borderless" className="as-card" title="评估结果与分析数据">
+          <Alert
+            type="info"
+            showIcon
+            title="AI 六维分析结构未在 Swagger 中定义"
+            description="本页仅展示接口实际返回的 result / analysis 数据，不生成模拟评分或医学结论。"
+          />
+          <JsonView value={detail.result ?? detail.analysis} />
+        </Card>
+        <Card variant="borderless" className="as-card" title="确认结果">
+          <Alert
+            type="warning"
+            showIcon
+            title="确认请求体为通用 object"
+            description="可输入后端约定的确认字段；不需要附加字段时保持 {}。评估 ID 由 API 模块一并提交。"
+          />
+          <Input.TextArea
+            className="as-confirmation-input"
+            rows={8}
+            value={confirmation}
+            onChange={(event) => setConfirmation(event.target.value)}
+            spellCheck={false}
+          />
+          <Space>
+            <Button onClick={() => navigate(`/assessment/${id}/entry`)}>查看原始数据</Button>
+            <Button type="primary" loading={submitting} onClick={confirm}>确认完成</Button>
+          </Space>
+        </Card>
+      </Spin>
     </PageContainer>
   )
 }

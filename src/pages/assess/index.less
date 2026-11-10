@@ -611,3 +611,42 @@
   position: sticky;
   top: @spacing-md;
 }
+
+.as-filter-card {
+  display: flex;
+  flex-wrap: wrap;
+  gap: @spacing-sm;
+  margin-bottom: @spacing-md;
+
+  .ant-input-affix-wrapper {
+    max-width: 320px;
+  }
+
+  .ant-select {
+    min-width: 280px;
+  }
+}
+
+.as-card {
+  margin-bottom: @spacing-md;
+
+  .ant-alert {
+    margin-bottom: @spacing-md;
+  }
+}
+
+.as-json {
+  margin: 0;
+  padding: @spacing-md;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: @color-bg-active;
+  border-radius: @radius-sm;
+  .text-body();
+}
+
+.as-confirmation-input {
+  margin-bottom: @spacing-md;
+  font-family: monospace;
+}

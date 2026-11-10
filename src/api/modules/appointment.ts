@@ -30,8 +30,8 @@ export interface AppointmentItem {
   member_name?: string
   contact_name?: string
   contact_phone?: string
-  /** YYYY-MM-DD */
-  appointment_date?: string
+  /** 创建/更新时为 UTC 秒；兼容服务端可能返回的日期字符串 */
+  appointment_date?: number | string
   time_slot?: string
   /** 见 APPOINTMENT_TYPE_MAP */
   appointment_type?: number
@@ -45,10 +45,9 @@ export interface AppointmentItem {
   created_at?: number
 }
 
-/** 创建预约入参（appointmentCreateReq） */
+/** staff.appointmentCreateReq；appointment_date 为 UTC 秒。 */
 export interface AppointmentCreateReq {
-  /** YYYY-MM-DD */
-  appointment_date: string
+  appointment_date: number
   /** 1-咨询 2-体检 3-参观 4-服务 */
   appointment_type: number
   assigned_staff_id?: number
@@ -59,7 +58,6 @@ export interface AppointmentCreateReq {
   service_interest?: string
   status?: number
   time_slot?: string
-  member_id?: number
 }
 
 /** 预约分页列表（GET /appointments） */
@@ -100,7 +98,7 @@ export function cancelAppointment(id: number | string, data?: { reason?: string 
 }
 
 /** 更新预约状态（POST /appointments/{id}/status） */
-export function updateAppointmentStatus(id: number | string, data: { status: number }) {
+export function updateAppointmentStatus(id: number | string, data: { status: number; remark?: string }) {
   return http.post<null>(`/v1/staff/appointments/${id}/status`, data)
 }
 

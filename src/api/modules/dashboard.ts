@@ -1,14 +1,3 @@
-import { http } from '@/utils/request'
-
-/** 经营指标总览 */
-export interface OverviewData {
-  todayOrderCount: number
-  todayOrderAmount: number
-  todayRefundCount: number
-  totalInstitution: number
-}
-
-/** 获取运营首页总览数据 */
-export function getOverview() {
-  return http.get<OverviewData>('/dashboard/overview')
-}
+/** 兼容旧模块名；实际接口为 staff 工作台 Dashboard。 */
+export { getOverview, getWarnings } from './workbench'
+export type { DashboardOverview, DashboardWarningItem } from './workbench'

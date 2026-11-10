@@ -184,9 +184,7 @@ export default function StaffDetail() {
                   <div className="staff-card__title">服务授权</div>
                   <div className="staff-card__sub">查看该人员已授权的机构服务项目</div>
                 </div>
-                <Button type="primary" onClick={() => navigate(`/staff/${detail.id}/authorize`)}>
-                  调整服务授权
-                </Button>
+                <span className="staff-text--muted">服务项目名称与独立授权接口未在 Swagger 中定义</span>
               </div>
               <div className="staff-field">
                 <div className="staff-field__label">已授权项目</div>

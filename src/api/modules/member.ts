@@ -1,39 +1,18 @@
 import { http } from '@/utils/request'
 import type { PageParams, PageResult } from '@/types/api'
 
-/**
- * 健康档案 / 会员（协同工作台端 §4 Member & Health）
- * 网关前缀：/api/v1/staff
- */
+export const RISK_LEVEL_MAP: Record<number, string> = { 1: '低风险', 2: '中风险', 3: '高风险' }
+export const MEMBER_STATUS_MAP: Record<number, string> = { 1: '待完善', 2: '待分配', 3: '管理中', 4: '已结案' }
+export const MEMBER_ACTIVE_STATUS_MAP: Record<number, string> = { 1: '非活跃', 2: '活跃', 3: '挂起', 4: '拉黑', 5: '注销' }
 
-/** 风险等级（对齐 §4 risk_level） */
-export const RISK_LEVEL_MAP: Record<number, string> = {
-  1: '低风险',
-  2: '中风险',
-  3: '高风险',
-}
-
-/** 会员状态（设计稿枚举，待与后端字典确认） */
-export const MEMBER_STATUS_MAP: Record<number, string> = {
-  1: '待完善',
-  2: '待分配',
-  3: '管理中',
-  4: '已结案',
-}
-
-/** 会员列表项（GET /members 出参） */
 export interface MemberItem {
   id: number
   name: string
-  /** 1-男 2-女 */
   gender: number
-  /** YYYY-MM-DD */
   birthday: string
-  /** 脱敏手机号 */
   phone: string
   nursing_home_id?: number | null
   station_id?: number | null
-  /** 见 MEMBER_STATUS_MAP */
   status: number
   risk_level?: {
     level_type: string | number
@@ -49,11 +28,9 @@ export interface MemberItem {
   } | null
   chronic_disease_count: number
   assessment_count: number
-  /** UTC 秒 */
   last_assessment_time?: number
 }
 
-/** 慢病（健康档案聚合出参） */
 export interface ChronicDisease {
   disease_id: number
   disease_name: string
@@ -62,19 +39,16 @@ export interface ChronicDisease {
   is_active: boolean
 }
 
-/** 最新健康指标（健康档案聚合出参） */
 export interface LatestMetric {
   metric_id: number
   metric_code: string
   metric_name_cn: string
   metric_value: string
   metric_unit: string
-  /** UTC 秒 */
   measurement_time: number
   is_abnormal: boolean
 }
 
-/** 健康档案聚合详情（GET /members/:id/health-profile 出参，字段对齐服务端实际返回） */
 export interface HealthProfile {
   member: Partial<MemberItem> & {
     id: number
@@ -83,17 +57,9 @@ export interface HealthProfile {
     emergency_contact?: string
     emergency_phone?: string
   }
-  contact?: {
-    name?: string
-    phone?: string
-    relation?: string
-    emergency_contact?: string
-    emergency_phone?: string
-  }
+  contact?: { name?: string; phone?: string; relation?: string; emergency_contact?: string; emergency_phone?: string }
   addresses?: Array<{ type: string; detail: string }>
-  levels?:
-    | { care_level?: number; risk_level?: number }
-    | Array<{ level_type: string; level_value: number; level_name: string }>
+  levels?: { care_level?: number; risk_level?: number } | Array<{ level_type: string; level_value: number; level_name: string }>
   risk_tags?: Array<{ tag: string; source: string }>
   chronic_diseases: ChronicDisease[]
   latest_metrics: LatestMetric[]
@@ -101,7 +67,6 @@ export interface HealthProfile {
   recent_goals?: Array<{ id: number; name: string; status: number }>
 }
 
-/** 会员列表查询参数（对齐 swagger：keyword / risk_level / care_level / institution_id） */
 export interface MemberListParams extends PageParams {
   keyword?: string
   risk_level?: number
@@ -109,31 +74,10 @@ export interface MemberListParams extends PageParams {
   institution_id?: number
 }
 
-/** 会员（健康档案）分页列表（权限 health:view） */
 export function getMemberList(params: MemberListParams) {
   return http.get<PageResult<MemberItem>>('/v1/staff/members', { ...params })
 }
 
-/** 会员活跃状态：1-非活跃 2-活跃 3-挂起 4-拉黑 5-注销 */
-export const MEMBER_ACTIVE_STATUS_MAP: Record<number, string> = {
-  1: '非活跃',
-  2: '活跃',
-  3: '挂起',
-  4: '拉黑',
-  5: '注销',
-}
-
-/** 设置会员活跃状态（PUT /members/active-status） */
-export function setMemberActiveStatus(data: { member_id: number; active_status: number }) {
-  return http.put<null>('/v1/staff/members/active-status', data)
-}
-
-/** 健康档案聚合详情（权限 health:view） */
-export function getHealthProfile(id: number | string) {
-  return http.get<HealthProfile>(`/v1/staff/members/${id}/health-profile`)
-}
-
-/** 新建健康档案 / 建档（权限 health:profile） */
 export function createMember(data: {
   name: string
   gender: number
@@ -148,52 +92,91 @@ export function createMember(data: {
   return http.post<{ id: number }>('/v1/staff/members', data)
 }
 
-/** 健康指标录入（权限 health:record） */
-export function recordHealthMetrics(
-  id: number | string,
-  data: {
-    metrics: Array<{
-      metric_code: string
-      metric_value: string
-      measurement_time: number
-      source?: string
-    }>
-  },
-) {
-  return http.post<null>(`/v1/staff/members/${id}/health-records`, data)
+export function setMemberActiveStatus(data: { member_id: number; active_status: number }) {
+  return http.put<null>('/v1/staff/members/active-status', data)
 }
 
-/** 评估列表 / 发起评估（权限 health:assess） */
+export function getHealthProfile(id: number | string) {
+  return http.get<HealthProfile>(`/v1/staff/members/${id}/health-profile`)
+}
+
+export interface AssessmentItem extends Record<string, unknown> {
+  id: number
+  type?: string
+  created_at?: number
+}
+
+/** 发起评估的请求体在 Swagger 中仅为 object，具体字段由后端评估模板决定。 */
 export function getAssessments(id: number | string, params?: PageParams) {
-  return http.get<PageResult<{ id: number; type: string; created_at: number }>>(
+  return http.get<PageResult<AssessmentItem>>(
     `/v1/staff/members/${id}/assessments`,
     { ...params },
   )
 }
 
-export function createAssessment(id: number | string, data: { type: string; answers: unknown }) {
+export function createAssessment(id: number | string, data: Record<string, unknown>) {
   return http.post<{ id: number }>(`/v1/staff/members/${id}/assessments`, data)
 }
 
-/** 评估详情（GET /assessments/{id}） */
 export function getAssessmentDetail(id: number | string) {
   return http.get<Record<string, unknown>>(`/v1/staff/assessments/${id}`)
 }
 
-/** 评估专业确认（POST /assessments/{id}/confirm） */
-export function confirmAssessment(id: number | string, data?: Record<string, unknown>) {
-  return http.post<null>(`/v1/staff/assessments/${id}/confirm`, data)
+export function confirmAssessment(id: number | string, data: Record<string, unknown> = {}) {
+  return http.post<null>(`/v1/staff/assessments/${id}/confirm`, { id: Number(id), ...data })
 }
 
-/**
- * TODO: 批量导入相关接口（模板下载 / 上传校验 / 确认导入 / 导入结果）
- * API v0.1 未定义，设计稿含完整流程，路径与入参待后端补充。
- * 当前页面以本地 mock 演示完整交互。
- */
+export interface MetricRecordPayload {
+  metric_code: string
+  metric_value: string
+  measurement_time: number
+  source?: string
+  [key: string]: unknown
+}
 
-/**
- * TODO: 专病档案相关接口（按病种详情 / 编辑提交 / 版本记录）
- * 设计稿含高血压 / 糖尿病 / 冠心病 / 慢阻肺四类专病档案与编辑抽屉，
- * API v0.1 仅在健康档案聚合出参中含 chronic_diseases 列表，详情与编辑接口待后端补充。
- * 用药记录接口（当前/历史/待确认 + 依从性）同样待后端补充。
- */
+/** 批量录入对应 /metric-records/batch；旧 /health-records 路径已移除。 */
+export function recordHealthMetrics(id: number | string, data: { metrics: MetricRecordPayload[] }) {
+  return http.post<null>(`/v1/staff/members/${id}/metric-records/batch`, data)
+}
+
+export function getMetricRecords(id: number | string, params: PageParams & {
+  metric_code?: string
+  is_abnormal?: 1 | 2
+  start_ts?: number
+  end_ts?: number
+}) {
+  return http.get<PageResult<Record<string, unknown>>>(`/v1/staff/members/${id}/metric-records`, { ...params })
+}
+
+export function createMetricRecord(id: number | string, data: MetricRecordPayload) {
+  return http.post<null>(`/v1/staff/members/${id}/metric-records`, data)
+}
+
+export function updateMetricRecord(id: number | string, rid: number | string, data: Partial<MetricRecordPayload>) {
+  return http.put<null>(`/v1/staff/members/${id}/metric-records/${rid}`, data)
+}
+
+export function getMetricTrend(id: number | string, params: {
+  metric_codes: string
+  limit?: number
+  start_ts?: number
+  end_ts?: number
+}) {
+  return http.get<Record<string, unknown>>(`/v1/staff/members/${id}/metric-records/trend`, { ...params })
+}
+
+export function getHealthGoals(id: number | string, params?: PageParams) {
+  return http.get<PageResult<Record<string, unknown>>>(`/v1/staff/members/${id}/goals`, { ...params })
+}
+
+export function createHealthGoal(id: number | string, data: Record<string, unknown>) {
+  return http.post<{ id: number }>(`/v1/staff/members/${id}/goals`, data)
+}
+
+export function getHealthPlans(id: number | string, params?: PageParams) {
+  return http.get<PageResult<Record<string, unknown>>>(`/v1/staff/members/${id}/plans`, { ...params })
+}
+
+export function generateHealthPlan(id: number | string, data: Record<string, unknown>) {
+  return http.post<Record<string, unknown>>(`/v1/staff/members/${id}/plans/ai-generate`, data)
+}

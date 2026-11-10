@@ -41,6 +41,12 @@ interface Filters {
   status?: number
 }
 
+/** 创建入参为 UTC 秒；列表兼容数字时间戳与日期字符串。 */
+function formatAppointmentDate(value?: number | string) {
+  if (value == null || value === '') return '-'
+  return typeof value === 'number' ? formatDateTime(value * 1000, 'YYYY-MM-DD') : value
+}
+
 export default function AdmissionList() {
   const { message } = App.useApp()
   const currentOrg = useUserStore((s) => s.currentOrg)
@@ -136,11 +142,11 @@ export default function AdmissionList() {
     try {
       await createAppointment({
         appointment_type: 3,
-        appointment_date: form.expectedVisit.format('YYYY-MM-DD'),
+        appointment_date: form.expectedVisit.startOf('day').unix(),
         time_slot: form.timeSlot.trim() || undefined,
         contact_name: form.contactName.trim(),
         contact_phone: form.contactPhone.trim(),
-        institution_id: +(currentOrg?.id || 0),
+        institution_id: currentOrg ? Number(currentOrg.id) : undefined,
         service_interest: form.demand.trim() || undefined,
         remark: form.remark.trim() || undefined,
         status: 1,
@@ -172,7 +178,10 @@ export default function AdmissionList() {
     }
     setActing(true)
     try {
-      await updateAppointmentStatus(followId, { status: nextStatus })
+      await updateAppointmentStatus(followId, {
+        status: nextStatus,
+        remark: followRemark.trim() || undefined,
+      })
       message.success('预约状态已更新')
       load()
     } catch {
@@ -250,7 +259,7 @@ export default function AdmissionList() {
       width: 160,
       render: (_: unknown, row: AppointmentItem) => (
         <span>
-          {row.appointment_date || '-'}
+          {formatAppointmentDate(row.appointment_date)}
           {row.time_slot ? ` ${row.time_slot}` : ''}
         </span>
       ),
@@ -324,10 +333,10 @@ export default function AdmissionList() {
             }))}
             allowClear
           />
+          <Button onClick={onReset}>重置</Button>
           <Button type="primary" onClick={onSearch}>
             查询
           </Button>
-          <Button onClick={onReset}>重置</Button>
         </Card>
 
         {/* 意向列表 */}
@@ -446,7 +455,7 @@ export default function AdmissionList() {
                 <span>{followDetail.contact_phone || '-'}</span>
               </div>
               <div className="ad-follow__member-sub">
-                预约到访：{followDetail.appointment_date || '-'}
+                预约到访：{formatAppointmentDate(followDetail.appointment_date)}
                 {followDetail.time_slot ? ` ${followDetail.time_slot}` : ''}　状态：
                 {APPOINTMENT_STATUS_MAP[followDetail.status ?? 0] ?? '-'}
               </div>

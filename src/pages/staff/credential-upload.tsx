@@ -1,143 +1,128 @@
 /**
- * 人员管理 - 上传执业资质（设计稿：2.服务授权/展开.png）
- * 为专业人员上传证照照片，系统识别后提交人工审核
- * TODO: 接口见 @/api/modules/staff（§7.3 资质新增 POST /staff/staffs/:id/credentials），
- *       证照 OCR 识别接口待后端补充
+ * 新增执业资质
+ * 文件先经 /upload 上传，再调用 /staffs/{id}/credentials；不包含未定义的 OCR 流程。
  */
-import { useState } from 'react'
-import { Button, Checkbox, Input, Select, message } from 'antd'
-import { ArrowLeftOutlined, CheckCircleFilled, PlusOutlined } from '@ant-design/icons'
+import { useEffect, useState } from 'react'
+import { Alert, App, Button, Card, DatePicker, Form, Input, Spin, Upload } from 'antd'
+import type { UploadFile, UploadProps } from 'antd'
+import { ArrowLeftOutlined, UploadOutlined } from '@ant-design/icons'
+import type { Dayjs } from 'dayjs'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
-import { mockCredentialUpload as u } from './mock'
+import { staffApi, uploadApi } from '@/api'
+import type { StaffDetail } from '@/api/modules/staff'
 import './index.less'
+
+interface CredentialForm {
+  credential_type: string
+  valid_until: Dayjs
+}
 
 export default function CredentialUpload() {
   const navigate = useNavigate()
   const { id } = useParams()
-  const [certType, setCertType] = useState(u.certTypes[0])
-  const [files, setFiles] = useState(u.uploaded)
-  const [confirmed, setConfirmed] = useState(false)
+  const { message } = App.useApp()
+  const [form] = Form.useForm<CredentialForm>()
+  const [staff, setStaff] = useState<StaffDetail>()
+  const [fileList, setFileList] = useState<UploadFile[]>([])
+  const [uploadedUrls, setUploadedUrls] = useState<Record<string, string>>({})
+  const [loading, setLoading] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const fileUrls = Object.values(uploadedUrls)
 
-  const onSave = () => {
-    if (files.length === 0) {
-      message.warning('请至少上传 1 张证照照片')
+  useEffect(() => {
+    if (!id) return
+    setLoading(true)
+    staffApi.getStaffDetail(id).then(setStaff).catch(() => undefined).finally(() => setLoading(false))
+  }, [id])
+
+  const customRequest: UploadProps['customRequest'] = async (options) => {
+    const file = options.file as File & { uid: string }
+    setUploading(true)
+    try {
+      const res = await uploadApi.uploadFile(file, 'credentials')
+      if (!res.url) throw new Error('上传响应未包含 URL')
+      setUploadedUrls((prev) => ({ ...prev, [file.uid]: res.url as string }))
+      options.onSuccess?.(res)
+      message.success(`${options.filename}上传成功`)
+    } catch (error) {
+      options.onError?.(error as Error)
+      message.error(`${options.filename}上传失败`)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const submit = async () => {
+    if (!id) return
+    const values = await form.validateFields()
+    if (!fileUrls.length) {
+      message.warning('请至少成功上传一份资质文件')
       return
     }
-    if (!confirmed) {
-      message.warning('请先勾选「我已核对照片与识别信息一致」')
-      return
+    setSubmitting(true)
+    try {
+      await staffApi.createCredential(id, {
+        credential_type: values.credential_type.trim(),
+        valid_until: values.valid_until.format('YYYY-MM-DD'),
+        file_urls: fileUrls,
+      })
+      message.success('执业资质已保存')
+      navigate(`/staff/${id}`)
+    } catch {
+      // 请求失败时保留表单
+    } finally {
+      setSubmitting(false)
     }
-    // TODO: staffApi.createCredential(id, {...})；OCR 识别字段以后端返回为准
-    message.success('证照已保存并提交人工审核（演示）')
-    navigate(`/staff/${id ?? u.staff.id}`)
   }
 
   return (
     <div className="staff-page">
       <PageContainer
-        title="上传执业资质"
-        description={`为${u.staff.name}（护士）上传证照照片，系统识别后提交人工审核`}
-        extra={<Button icon={<ArrowLeftOutlined />} color="primary" variant="outlined" onClick={() => navigate(`/staff/${id ?? u.staff.id}`)}>返回执业资质</Button>}
+        title="新增执业资质"
+        description={staff ? `为 ${staff.name} 上传资质文件并登记有效期` : '上传资质文件并登记有效期'}
+        extra={<Button icon={<ArrowLeftOutlined />} onClick={() => navigate(`/staff/${id}`)}>返回人员详情</Button>}
       >
-        {/* 人员头卡 */}
-        <div className="staff-card staff-profile">
-          <div className="staff-profile__main">
-            <div className="staff-profile__avatar">{u.staff.name[0]}</div>
-            <div>
-              <div className="staff-profile__name">{u.staff.name}</div>
-              <div className="staff-profile__meta">{u.staff.roleOrg}</div>
+        <Spin spinning={loading}>
+          <Card variant="borderless" className="staff-card">
+            <Alert
+              type="info"
+              showIcon
+              title="资质请求体为通用 object"
+              description="按现有 API 约定提交 credential_type、valid_until、file_urls。Swagger 未提供 OCR、统一审核或服务授权联动接口，本页不展示这些模拟步骤。"
+            />
+            <Form form={form} layout="vertical">
+              <Form.Item name="credential_type" label="资质类型" rules={[{ required: true, whitespace: true, message: '请输入资质类型' }]}>
+                <Input placeholder="如：护士执业证书" maxLength={100} />
+              </Form.Item>
+              <Form.Item name="valid_until" label="有效期至" rules={[{ required: true, message: '请选择有效期' }]}>
+                <DatePicker />
+              </Form.Item>
+              <Form.Item label="资质文件" required>
+                <Upload
+                  multiple
+                  fileList={fileList}
+                  customRequest={customRequest}
+                  onChange={({ fileList: nextFiles }) => setFileList(nextFiles)}
+                  onRemove={(file) => {
+                    setUploadedUrls((prev) => {
+                      const next = { ...prev }
+                      delete next[file.uid]
+                      return next
+                    })
+                  }}
+                >
+                  <Button icon={<UploadOutlined />} loading={uploading}>上传文件</Button>
+                </Upload>
+              </Form.Item>
+            </Form>
+            <div className="staff-detail__actions">
+              <Button onClick={() => navigate(`/staff/${id}`)}>取消</Button>
+              <Button type="primary" loading={submitting} disabled={uploading} onClick={submit}>保存资质</Button>
             </div>
-            <span className="status-tag status-tag--blue">{u.staff.tag}</span>
-          </div>
-          <div className="staff-profile__side">
-            <span className="staff-text--muted">{u.headNote}</span>
-          </div>
-        </div>
-
-        <div className="staff-upload-layout">
-          {/* 左：上传证照照片 */}
-          <div className="staff-card">
-            <div className="staff-card__title">1. 上传证照照片</div>
-            <div className="staff-card__sub">{u.uploadTip}</div>
-            <div className="staff-field">
-              <div className="staff-field__label">
-                证照类型 <span className="staff-required">*</span>
-              </div>
-              <Select
-                value={certType}
-                onChange={setCertType}
-                options={u.certTypes.map((v) => ({ value: v, label: v }))}
-              />
-            </div>
-            <div
-              className="staff-upload-box"
-              onClick={() => {
-                setFiles((f) => [...f, { name: `${certType}·照片${f.length + 1}`, meta: 'JPG · 1.0MB' }])
-                message.success('照片已上传（演示）')
-              }}
-            >
-              <PlusOutlined className="staff-upload-box__icon" />
-              <div className="staff-upload-box__title">点击上传证照照片</div>
-              <div className="staff-upload-box__sub">{u.uploadLimit}</div>
-              <Button type="primary">选择图片</Button>
-            </div>
-            <div className="staff-field__label">已上传</div>
-            <div className="staff-uploaded">
-              {files.map((f, i) => (
-                <div key={`${f.name}-${i}`} className="staff-uploaded__item">
-                  <div className="staff-uploaded__name">{f.name}</div>
-                  <div className="staff-uploaded__meta">{f.meta}</div>
-                  <span
-                    className="staff-text--danger staff-uploaded__del"
-                    onClick={() => setFiles((l) => l.filter((_, x) => x !== i))}
-                  >
-                    删除
-                  </span>
-                </div>
-              ))}
-            </div>
-            {files.length > 0 && (
-              <div className="staff-note staff-note--check">
-                <CheckCircleFilled /> {u.ocrDoneNote}
-              </div>
-            )}
-          </div>
-
-          {/* 右：核对识别结果 */}
-          <div className="staff-card">
-            <div className="staff-card__header">
-              <div className="staff-card__title">2. 核对识别结果</div>
-              <span className="status-tag status-tag--green">系统已识别</span>
-            </div>
-            <div className="staff-card__sub">识别内容可修改；无法识别的字段再人工填写。</div>
-            <div className="staff-form__grid staff-form__grid--2">
-              {u.ocrFields.map((f) => (
-                <div key={f.label} className="staff-field">
-                  <div className="staff-field__label">
-                    {f.label} {f.required && <span className="staff-required">*</span>}
-                  </div>
-                  <Input defaultValue={f.value} />
-                </div>
-              ))}
-            </div>
-            <div className="staff-note staff-note--warn">{u.ocrTip}</div>
-            <Checkbox checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)}>
-              {u.confirmCheck}
-            </Checkbox>
-          </div>
-        </div>
-
-        {/* 底部操作 */}
-        <div className="staff-card staff-auth-footer">
-          <span className="staff-text--muted">{u.footerNote}</span>
-          <div className="staff-detail__actions">
-            <Button onClick={() => navigate(`/staff/${id ?? u.staff.id}`)}>取消</Button>
-            <Button type="primary" onClick={onSave}>
-              保存并返回
-            </Button>
-          </div>
-        </div>
+          </Card>
+        </Spin>
       </PageContainer>
     </div>
   )

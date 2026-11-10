@@ -4,20 +4,16 @@
  * 操作：报名名单（/health-activity/:id/registrations）、现场签到（/health-activity/:id/check-in）
  */
 import { useCallback, useEffect, useState } from 'react'
-import { Button, Card, Table, Tag } from 'antd'
+import { Button, Card, Table, Tag, Space } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import { activityApi } from '@/api'
 import type { ActivityItem } from '@/api/modules/activity'
 import { formatDateTime } from '@/utils'
 
-/** 活动状态配色（枚举未定义，常见值预置，未知值原样展示） */
-const ACTIVITY_STATUS: Record<number, { label: string; color: string }> = {
-  0: { label: '未开始', color: 'blue' },
-  1: { label: '报名中', color: 'green' },
-  2: { label: '进行中', color: 'green' },
-  3: { label: '已结束', color: 'default' },
-  4: { label: '已下架', color: 'default' },
+/** Swagger 未定义活动状态枚举，展示原始状态值，避免前端猜测业务含义。 */
+function formatActivityTime(value?: number) {
+  return value == null ? '-' : formatDateTime(value * 1000, 'YYYY-MM-DD')
 }
 
 export default function ActivityList() {
@@ -54,23 +50,20 @@ export default function ActivityList() {
     {
       title: '活动时间',
       key: 'time',
-      width: 220,
       render: (_: unknown, row: ActivityItem) => (
         <span>
-          {formatDateTime(row.start_date * 1000, 'YYYY-MM-DD')} ~ {formatDateTime(row.end_date * 1000, 'YYYY-MM-DD')}
+          {formatActivityTime(row.start_date)} ~ {formatActivityTime(row.end_date)}
         </span>
       ),
     },
     {
       title: '活动地点',
       key: 'location',
-      width: 180,
       render: (_: unknown, row: ActivityItem) => row.location ?? row.address ?? '-',
     },
     {
       title: '报名情况',
       key: 'quota',
-      width: 110,
       render: (_: unknown, row: ActivityItem) =>
         row.registered_count != null
           ? `${row.registered_count}${row.quota != null ? ` / ${row.quota}` : ''} 人`
@@ -80,33 +73,28 @@ export default function ActivityList() {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
-      width: 90,
-      render: (v: number) => {
-        const s = ACTIVITY_STATUS[v]
-        return s ? <Tag color={s.color}>{s.label}</Tag> : <Tag>{v ?? '-'}</Tag>
-      },
+      render: (value?: number) => <Tag>{value != null ? `状态 ${value}` : '-'}</Tag>,
     },
     {
       title: '操作',
       key: 'action',
-      width: 170,
+      width: 200,
       render: (_: unknown, row: ActivityItem) => (
-        <>
+        <Space>
           <Button
             size="small"
-            type="link"
+            
             onClick={() => navigate(`/health-activity/${row.id}/registrations`)}
           >
             报名名单
           </Button>
           <Button
             size="small"
-            type="link"
             onClick={() => navigate(`/health-activity/${row.id}/check-in`)}
           >
             现场签到
           </Button>
-        </>
+        </Space>
       ),
     },
   ]

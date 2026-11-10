@@ -1,119 +1,170 @@
 /**
- * 健康会员 - 健康会员详情（设计稿：2.健康会员/健康会员详情.png）
- * 已对接 GET /api/v1/staff/members/:id/health-profile（健康档案聚合）
- * 接口未覆盖的字段（关联注册会员/团队/健康目标/最近随访）以「-」占位，待后端补充
+ * 健康会员详情
+ * 聚合会员健康档案与健康档案卡；Swagger 未建模的响应对字段做安全兼容展示。
  */
 import { useEffect, useState } from 'react'
-import { Button, Input, App } from 'antd'
-import { ArrowLeftOutlined, CheckCircleFilled } from '@ant-design/icons'
+import { Alert, Button, Card, Descriptions, Empty, List, Spin, Tag } from 'antd'
+import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
-import { memberApi } from '@/api'
+import { healthArchiveApi, memberApi } from '@/api'
 import { MEMBER_STATUS_MAP, RISK_LEVEL_MAP, type HealthProfile } from '@/api/modules/member'
+import { formatDateTime } from '@/utils'
 import './index.less'
+
+type ApiObject = Record<string, unknown>
+
+function asObject(value: unknown): ApiObject | undefined {
+  return value != null && typeof value === 'object' && !Array.isArray(value) ? value as ApiObject : undefined
+}
+
+function pick(source: ApiObject | undefined, keys: string[]) {
+  if (!source) return undefined
+  for (const key of keys) {
+    if (source[key] != null) return source[key]
+  }
+  return undefined
+}
+
+function display(value: unknown): string {
+  if (value == null || value === '') return '-'
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return String(value)
+  return JSON.stringify(value)
+}
+
+function ArchiveData({ value }: { value: unknown }) {
+  const items = Array.isArray(value) ? value : [value]
+  const meaningful = items.filter((item) => item != null && (!Array.isArray(item) || item.length > 0))
+  if (meaningful.length === 0 || (meaningful.length === 1 && typeof meaningful[0] === 'object' && Object.keys(asObject(meaningful[0]) ?? {}).length === 0)) {
+    return <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="暂无记录" />
+  }
+  return (
+    <List
+      dataSource={meaningful}
+      renderItem={(item, index) => {
+        const object = asObject(item)
+        return (
+          <List.Item key={index}>
+            {object ? (
+              <Descriptions size="small" column={{ xs: 1, md: 2, xl: 3 }}>
+                {Object.entries(object).map(([key, fieldValue]) => (
+                  <Descriptions.Item key={key} label={key}>{display(fieldValue)}</Descriptions.Item>
+                ))}
+              </Descriptions>
+            ) : display(item)}
+          </List.Item>
+        )
+      }}
+    />
+  )
+}
 
 export default function MemberDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { message } = App.useApp()
   const [profile, setProfile] = useState<HealthProfile>()
+  const [archive, setArchive] = useState<ApiObject>()
   const [loading, setLoading] = useState(false)
+  const [archiveFailed, setArchiveFailed] = useState(false)
 
   useEffect(() => {
     if (!id) return
+    let active = true
     setLoading(true)
-    memberApi
-      .getHealthProfile(id)
-      .then((res) => setProfile(res))
-      .catch(() => undefined)
-      .finally(() => setLoading(false))
+    setArchiveFailed(false)
+    Promise.allSettled([
+      memberApi.getHealthProfile(id),
+      healthArchiveApi.getHealthArchiveOverview(id),
+    ]).then(([profileResult, archiveResult]) => {
+      if (!active) return
+      if (profileResult.status === 'fulfilled') setProfile(profileResult.value)
+      if (archiveResult.status === 'fulfilled') setArchive(asObject(archiveResult.value))
+      else setArchiveFailed(true)
+    }).finally(() => {
+      if (active) setLoading(false)
+    })
+    return () => { active = false }
   }, [id])
 
   const m = profile?.member
-  const riskValue =
-    profile?.levels && !Array.isArray(profile.levels) ? profile.levels.risk_level : undefined
-  const riskText = riskValue ? (RISK_LEVEL_MAP[riskValue] ?? '-') : '-'
-  const statusText = m?.status ? (MEMBER_STATUS_MAP[m.status] ?? '-') : '-'
+  const levels = profile?.levels && !Array.isArray(profile.levels) ? profile.levels : undefined
+  const levelItems = Array.isArray(profile?.levels) ? profile.levels : []
+  const riskText = levels?.risk_level != null
+    ? RISK_LEVEL_MAP[levels.risk_level] ?? `等级 ${levels.risk_level}`
+    : levelItems.find((item) => String(item.level_type).includes('risk'))?.level_name ?? '-'
+  const careText = levels?.care_level != null
+    ? `等级 ${levels.care_level}`
+    : levelItems.find((item) => String(item.level_type).includes('care'))?.level_name ?? '-'
+
+  const archiveSections = [
+    { title: '主档案', value: pick(archive, ['basic', 'archive', 'main']) },
+    { title: '过敏史', value: pick(archive, ['allergy', 'allergies', 'allergy_histories']) },
+    { title: '既往疾病史', value: pick(archive, ['disease', 'diseases', 'disease_histories']) },
+    { title: '家族史', value: pick(archive, ['family', 'families', 'family_histories']) },
+    { title: '手术史', value: pick(archive, ['operation', 'operations', 'operation_histories']) },
+    { title: '生活习惯', value: pick(archive, ['lifestyle', 'life_style']) },
+  ]
 
   return (
     <PageContainer
       title="健康会员详情"
-      description="查看服务对象基础信息、健康管理状态及专业团队归属"
-      extra={
-        <>
-          <span className="mb-tag mb-tag--verify">系统实名校验：已通过</span>
-          <Button icon={<ArrowLeftOutlined />} color="primary" variant="outlined" onClick={() => navigate('/member')}>
-            返回列表
-          </Button>
-        </>
-      }
+      description="查看会员基础信息、健康档案、慢病与近期指标"
+      extra={<Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/member')}>返回列表</Button>}
     >
-      <div className="mb-card mb-detail">
-        {/* 基本信息 */}
-        <div className="mb-detail__section-title">基本信息</div>
-        <div className="mb-detail__grid">
-          <div className="mb-detail__field">
-            <span className="mb-detail__label">姓名</span>
-            <Input value={m?.name ?? '-'} readOnly />
-          </div>
-          <div className="mb-detail__field">
-            <span className="mb-detail__label">联系电话</span>
-            <Input value={m?.phone ?? profile?.contact?.emergency_phone ?? '-'} readOnly />
-          </div>
-          <div className="mb-detail__field">
-            <span className="mb-detail__label">关联注册会员</span>
-            <Input value="-" readOnly />
-          </div>
-        </div>
+      <Spin spinning={loading}>
+        <Card variant="borderless" className="mb-card">
+          <Descriptions title="基本信息" bordered column={{ xs: 1, md: 2, xl: 3 }}>
+            <Descriptions.Item label="姓名">{m?.name || '-'}</Descriptions.Item>
+            <Descriptions.Item label="联系电话">{m?.phone || '-'}</Descriptions.Item>
+            <Descriptions.Item label="性别">{m?.gender === 1 ? '男' : m?.gender === 2 ? '女' : '未知'}</Descriptions.Item>
+            <Descriptions.Item label="生日">{m?.birthday || '-'}</Descriptions.Item>
+            <Descriptions.Item label="档案状态">{m?.status != null ? MEMBER_STATUS_MAP[m.status] ?? `状态 ${m.status}` : '-'}</Descriptions.Item>
+            <Descriptions.Item label="风险分层">{riskText}</Descriptions.Item>
+            <Descriptions.Item label="照护等级">{careText}</Descriptions.Item>
+            <Descriptions.Item label="紧急联系人">{m?.emergency_contact || profile?.contact?.emergency_contact || '-'}</Descriptions.Item>
+            <Descriptions.Item label="紧急联系电话">{m?.emergency_phone || profile?.contact?.emergency_phone || '-'}</Descriptions.Item>
+          </Descriptions>
+        </Card>
 
-        {/* 健康管理信息 */}
-        <div className="mb-detail__section-title">健康管理信息</div>
-        <div className="mb-detail__grid">
+        <Card variant="borderless" className="mb-card" title="慢病与健康目标">
           <div className="mb-detail__field">
-            <span className="mb-detail__label">健康档案</span>
-            <Input value={m?.status && m.status > 1 ? '已建档' : '待完善'} readOnly />
+            <span className="mb-detail__label">慢病</span>
+            <div>
+              {profile?.chronic_diseases?.length
+                ? profile.chronic_diseases.map((disease) => <Tag key={`${disease.disease_id}-${disease.disease_name}`}>{disease.disease_name || disease.disease_id}</Tag>)
+                : '-'}
+            </div>
           </div>
-          <div className="mb-detail__field">
-            <span className="mb-detail__label">风险分层</span>
-            <Input value={riskText} readOnly />
+          <div className="mb-detail__field mb-detail__field--full">
+            <span className="mb-detail__label">当前健康目标</span>
+            <div>{profile?.recent_goals?.map((goal) => goal.name).filter(Boolean).join('；') || '-'}</div>
           </div>
-          <div className="mb-detail__field">
-            <span className="mb-detail__label">健康管理团队</span>
-            <Input value={statusText === '管理中' ? '已纳管' : '待分配团队'} readOnly />
-          </div>
-        </div>
-        <div className="mb-detail__field mb-detail__field--full">
-          <span className="mb-detail__label">当前健康目标</span>
-          <Input.TextArea
-            rows={4}
-            readOnly
-            value={profile?.recent_goals?.map((g) => g.name).join('；') || '-'}
+        </Card>
+
+        <Card variant="borderless" className="mb-card" title="近期健康指标">
+          <List
+            dataSource={profile?.latest_metrics ?? []}
+            locale={{ emptyText: '暂无指标记录' }}
+            renderItem={(metric) => (
+              <List.Item key={`${metric.metric_id}-${metric.measurement_time}`}>
+                <List.Item.Meta
+                  title={`${metric.metric_name_cn || metric.metric_code}：${metric.metric_value} ${metric.metric_unit || ''}`}
+                  description={`测量时间：${metric.measurement_time ? formatDateTime(metric.measurement_time * 1000) : '-'}${metric.is_abnormal ? ' · 异常' : ''}`}
+                />
+              </List.Item>
+            )}
           />
-        </div>
-        <div className="mb-detail__field mb-detail__field--full">
-          <span className="mb-detail__label">最近随访</span>
-          <Input value="-" readOnly />
-        </div>
+        </Card>
 
-        {/* 实名校验留痕 */}
-        <div className="mb-verify-banner">实名校验由系统自动完成，留痕信息接口暂未提供</div>
-        <div className="mb-verify-note">
-          <CheckCircleFilled className="mb-verify-note__icon" />
-          姓名与身份证号由系统自动校验；失败由用户修改后重新提交，不产生人工审核任务。
-        </div>
-
-        {/* 底部操作 */}
-        <div className="mb-detail__actions">
-          <Button onClick={() => navigate('/member')}>取消</Button>
-          <Button
-            type="primary"
-            loading={loading}
-            onClick={() => message.info('保存配置接口暂未提供')}
-          >
-            保存配置
-          </Button>
-        </div>
-      </div>
+        {archiveFailed && (
+          <Alert type="warning" showIcon title="健康档案卡加载失败" description="会员聚合信息仍可查看，请稍后重试。" />
+        )}
+        {!archiveFailed && archiveSections.map((section) => (
+          <Card variant="borderless" className="mb-card" title={section.title} key={section.title}>
+            <ArchiveData value={section.value} />
+          </Card>
+        ))}
+      </Spin>
     </PageContainer>
   )
 }

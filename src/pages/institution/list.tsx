@@ -2,8 +2,8 @@
  * 机构信息（设计稿：11.机构管理/基本与服务信息.png）
  * 已对接 GET /api/v1/staff/institutions/current：
  * 展示当前登录机构的基本信息与已启用服务列表（所有岗位可见，不挂权限）
- * 说明：机构列表/新增/同步运营平台等平台侧端点 swagger 未定义，
- * 新增机构、机构详情页保留本地 mock 演示，未接入真实接口
+ * 说明：机构列表/新增/详情/同步运营平台等平台侧端点 Swagger 未定义，
+ * 对应 mock 页面已从路由移除，仅保留当前机构真实信息。
  */
 import { useEffect, useState } from 'react'
 import { Table, Tag } from 'antd'

@@ -233,10 +233,10 @@ export default function ActivityRegistrations() {
           }))}
           allowClear
         />
+        <Button onClick={onReset}>重置</Button>
         <Button type="primary" onClick={onSearch}>
           查询
         </Button>
-        <Button onClick={onReset}>重置</Button>
       </Card>
 
       <Card variant="borderless" className="list-card table-fill">

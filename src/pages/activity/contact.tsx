@@ -115,7 +115,7 @@ export default function ActivityContact() {
                 </div>
                 <div className="ac-field">
                   <div className="ac-field__label">报名备注</div>
-                  <div>{registration.remark, '无备注'}</div>
+                  <div>{registration.remark}</div>
                 </div>
               </div>
 

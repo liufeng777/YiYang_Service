@@ -962,6 +962,257 @@
               }
           }
       },
+      "/api/v1/staff/chronic-diseases": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "按 level/parent_id 筛选，keyword 对 icd10_code/中文名/英文名模糊匹配。parent_id 未指定时返回顶级(可含 children)。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-慢性病字典"
+              ],
+              "summary": "慢性病字典列表",
+              "parameters": [
+                  {
+                      "type": "string",
+                      "description": "关键字(编码/中文名/英文名模糊)",
+                      "name": "keyword",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "父级ID",
+                      "name": "parent_id",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "层级(如1=顶级)",
+                      "name": "level",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "页码(默认1)",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页大小(默认20)",
+                      "name": "page_size",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-慢性病字典"
+              ],
+              "summary": "新增慢性病字典",
+              "parameters": [
+                  {
+                      "description": "新增慢性病参数",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffChronicDiseaseCreate"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/chronic-diseases/{id}": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "返回指定慢性病及其启用中的子级(chidren)。",
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-慢性病字典"
+              ],
+              "summary": "慢性病字典详情",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "慢性病ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-慢性病字典"
+              ],
+              "summary": "编辑慢性病字典",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "慢性病ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "编辑参数",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffChronicDiseaseUpdate"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "delete": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "软删慢性病字典记录。已被监测项关联的删除后，关联列表不再展示该字典名。",
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-慢性病字典"
+              ],
+              "summary": "删除慢性病字典（软删）",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "慢性病ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/chronic-diseases/{id}/status": {
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "状态:1=启用服务追踪 / 9=未启用(仅展示)。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-慢性病字典"
+              ],
+              "summary": "启停慢性病字典",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "慢性病ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "启停参数",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffChronicDiseaseStatus"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
       "/api/v1/staff/consultations": {
           "get": {
               "security": [
@@ -1293,6 +1544,42 @@
               }
           }
       },
+      "/api/v1/staff/disease-links/{linkId}": {
+          "delete": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-监测项字典"
+              ],
+              "summary": "删除监测项-慢病关联",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "关联ID",
+                      "name": "linkId",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
       "/api/v1/staff/followups": {
           "get": {
               "security": [
@@ -1300,7 +1587,7 @@
                       "BearerAuth": []
                   }
               ],
-              "description": "本机构随访待办，含系统与手动。",
+              "description": "本机构随访列表（含系统与手动）。列表项含计划时间、会员姓名/性别/年龄、随访类型、来源、上次随访时间，不含随访子项。",
               "consumes": [
                   "application/json"
               ],
@@ -1314,8 +1601,14 @@
               "parameters": [
                   {
                       "type": "integer",
-                      "description": "随访状态",
+                      "description": "随访状态：1待回访 2已回访；0/不传=全部",
                       "name": "status",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "随访类型：1日常随访 2健康预警回访；0/不传=全部",
+                      "name": "followup_type",
                       "in": "query"
                   },
                   {
@@ -1326,33 +1619,52 @@
                   },
                   {
                       "type": "integer",
-                      "description": "负责人ID",
-                      "name": "staff_id",
-                      "in": "query"
-                  },
-                  {
-                      "type": "integer",
-                      "description": "机构ID",
-                      "name": "institution_id",
-                      "in": "query"
-                  },
-                  {
-                      "type": "string",
-                      "description": "下次随访日期",
-                      "name": "next_followup_date",
-                      "in": "query"
-                  },
-                  {
-                      "type": "integer",
-                      "description": "页码",
+                      "description": "页码，默认1",
                       "name": "page",
                       "in": "query"
                   },
                   {
                       "type": "integer",
-                      "description": "每页条数",
+                      "description": "每页条数，默认10，最大100",
                       "name": "page_size",
                       "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/followups/{id}": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "主记录 + 随访子项（按 item_type 分组）。若历史记录无子项，按模板回退展开空值子项。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-随访回访"
+              ],
+              "summary": "随访详情",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "随访ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
                   }
               ],
               "responses": {
@@ -1372,6 +1684,7 @@
                       "BearerAuth": []
                   }
               ],
+              "description": "写入随访结果（1已完成 2未接通 3需跟进）与补充说明、子项值；完成时间由服务端自动写入，状态置为已回访。",
               "consumes": [
                   "application/json"
               ],
@@ -1381,7 +1694,7 @@
               "tags": [
                   "staff-随访回访"
               ],
-              "summary": "随访完成",
+              "summary": "完成随访",
               "parameters": [
                   {
                       "type": "integer",
@@ -1389,6 +1702,61 @@
                       "name": "id",
                       "in": "path",
                       "required": true
+                  },
+                  {
+                      "description": "随访结果",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/followups/{id}/save": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "仅保存已填写内容（开始随访时间/补充说明/子项值/下次随访日期），不改随访状态、不写完成时间；可多次调用。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-随访回访"
+              ],
+              "summary": "保存随访（草稿）",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "随访ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "草稿内容",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
                   }
               ],
               "responses": {
@@ -1796,6 +2164,1175 @@
                       "schema": {
                           "$ref": "#/definitions/staff.ReqStaffAccessTransfer"
                       }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/health-archives": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "返回 health_access.institution_id=当前机构 的全部会员（含状态1-5）中「已建档」的会员档案摘要；\n未建档会员不返回；手机号脱敏（131****1234）。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案"
+              ],
+              "summary": "健康档案列表（本机构关联的健康会员）",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "页码，默认1",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数，默认10，最大100",
+                      "name": "page_size",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "档案管理状态：1待管理员分配 2管理员拒绝 3待健管师确认 4健管师拒绝 5健管师确认；0/不传=全部",
+                      "name": "status",
+                      "in": "query"
+                  },
+                  {
+                      "type": "string",
+                      "description": "关键字：模糊匹配 会员姓名/档案号/联系电话",
+                      "name": "key",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/health-archives/allergy": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案"
+              ],
+              "summary": "过敏史列表",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "member_id",
+                      "in": "query",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案"
+              ],
+              "summary": "更新过敏史",
+              "parameters": [
+                  {
+                      "description": "过敏史（id必填）",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/shared.ReqAllergy"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案"
+              ],
+              "summary": "新增过敏史",
+              "parameters": [
+                  {
+                      "description": "过敏史（member_id必填）",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/shared.ReqAllergy"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "delete": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案"
+              ],
+              "summary": "删除过敏史",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "记录ID",
+                      "name": "id",
+                      "in": "query",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "member_id",
+                      "in": "query",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/health-archives/basic": {
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案"
+              ],
+              "summary": "新建/更新主档案",
+              "parameters": [
+                  {
+                      "description": "主档案（member_id必填）",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/shared.ReqUpsertBasic"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/health-archives/chronic-diseases": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案-慢病专病"
+              ],
+              "summary": "会员慢病专病条目列表",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "member_id",
+                      "in": "query",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "控制状态筛选：1控制良好 2基本控制 3控制不佳 4急性加重期 9已终止(0=全部)",
+                      "name": "chronic_status",
+                      "in": "query"
+                  },
+                  {
+                      "type": "boolean",
+                      "description": "是否包含已终止(默认false)",
+                      "name": "include_ended",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案-慢病专病"
+              ],
+              "summary": "新建专病条目并录入当次评估",
+              "parameters": [
+                  {
+                      "description": "专病条目（member_id/disease_code/metrics 必填）",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/shared.ReqArchiveChronicCreate"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/health-archives/chronic-diseases/dict/{code}": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案-慢病专病"
+              ],
+              "summary": "专病评估指标字典（按病种编码取表单定义）",
+              "parameters": [
+                  {
+                      "type": "string",
+                      "description": "病种编码(ICD10，如 I10/E11/I25/J44.9)",
+                      "name": "code",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/health-archives/chronic-diseases/{id}/assessments": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案-慢病专病"
+              ],
+              "summary": "专病评估记录列表（按批次倒序）",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "专病条目ID(disease_history_id)",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "member_id",
+                      "in": "query",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "页码(默认1)",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数(默认5)",
+                      "name": "page_size",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/health-archives/chronic-diseases/{id}/assessments/{batch_no}": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案-慢病专病"
+              ],
+              "summary": "单次评估详情（含全部指标与表单定义）",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "专病条目ID(disease_history_id)",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "type": "string",
+                      "description": "评估批次号",
+                      "name": "batch_no",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "member_id",
+                      "in": "query",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案-慢病专病"
+              ],
+              "summary": "更新某次评估（整批覆盖，派生项自动重算）",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "专病条目ID(disease_history_id)",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "type": "string",
+                      "description": "评估批次号",
+                      "name": "batch_no",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "member_id",
+                      "in": "query",
+                      "required": true
+                  },
+                  {
+                      "description": "指标取值(metrics)",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/shared.ReqArchiveChronicAssessment"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/health-archives/chronic-diseases/{id}/status": {
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案-慢病专病"
+              ],
+              "summary": "变更控制状态",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "专病条目ID(disease_history_id)",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "member_id",
+                      "in": "query",
+                      "required": true
+                  },
+                  {
+                      "description": "chronic_status(1~4，终止请用 terminate 接口)",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/shared.ReqArchiveChronicStatus"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/health-archives/chronic-diseases/{id}/terminate": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案-慢病专病"
+              ],
+              "summary": "终止某专病管理",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "专病条目ID(disease_history_id)",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "member_id",
+                      "in": "query",
+                      "required": true
+                  },
+                  {
+                      "description": "终止日期(0=今天)/原因",
+                      "name": "body",
+                      "in": "body",
+                      "schema": {
+                          "$ref": "#/definitions/shared.ReqArchiveChronicTerminate"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/health-archives/disease": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案"
+              ],
+              "summary": "既往疾病史列表",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "member_id",
+                      "in": "query",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案"
+              ],
+              "summary": "更新既往疾病史",
+              "parameters": [
+                  {
+                      "description": "疾病史（id必填）",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/shared.ReqDisease"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案"
+              ],
+              "summary": "新增既往疾病史",
+              "parameters": [
+                  {
+                      "description": "疾病史（member_id必填）",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/shared.ReqDisease"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "delete": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案"
+              ],
+              "summary": "删除既往疾病史",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "记录ID",
+                      "name": "id",
+                      "in": "query",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "member_id",
+                      "in": "query",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/health-archives/family": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案"
+              ],
+              "summary": "家族史列表",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "member_id",
+                      "in": "query",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案"
+              ],
+              "summary": "更新家族史",
+              "parameters": [
+                  {
+                      "description": "家族史（id必填）",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/shared.ReqFamily"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案"
+              ],
+              "summary": "新增家族史",
+              "parameters": [
+                  {
+                      "description": "家族史（member_id必填）",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/shared.ReqFamily"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "delete": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案"
+              ],
+              "summary": "删除家族史",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "记录ID",
+                      "name": "id",
+                      "in": "query",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "member_id",
+                      "in": "query",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/health-archives/lifestyle": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案"
+              ],
+              "summary": "获取生活习惯（一人一条：每个会员只有一条，无记录返回空对象）",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "member_id",
+                      "in": "query",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案"
+              ],
+              "summary": "保存生活习惯（一人一条：POST 即保存，已有则整条覆盖、无则新增，不区分新增/编辑）",
+              "parameters": [
+                  {
+                      "description": "生活习惯（member_id必填）",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/shared.ReqLifestyle"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/health-archives/operation": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案"
+              ],
+              "summary": "手术史列表",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "member_id",
+                      "in": "query",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案"
+              ],
+              "summary": "更新手术史",
+              "parameters": [
+                  {
+                      "description": "手术史（id必填）",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/shared.ReqOperation"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案"
+              ],
+              "summary": "新增手术史",
+              "parameters": [
+                  {
+                      "description": "手术史（member_id必填）",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/shared.ReqOperation"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "delete": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案"
+              ],
+              "summary": "删除手术史",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "记录ID",
+                      "name": "id",
+                      "in": "query",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "member_id",
+                      "in": "query",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/health-archives/overview": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案"
+              ],
+              "summary": "会员健康档案卡（主表+5子表+生活习惯）",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "member_id",
+                      "in": "query",
+                      "required": true
                   }
               ],
               "responses": {
@@ -2578,6 +4115,56 @@
               }
           }
       },
+      "/api/v1/staff/members/{id}/followup-template": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "按随访类型 + 会员在管慢病返回应填写的子集与子项（值为空），前端用于渲染随访表单。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-随访回访"
+              ],
+              "summary": "随访表单模板",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "随访类型：1日常随访 2健康预警回访",
+                      "name": "followup_type",
+                      "in": "query",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "预警ID（健康预警回访时传）",
+                      "name": "warning_id",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
       "/api/v1/staff/members/{id}/followups": {
           "post": {
               "security": [
@@ -2585,6 +4172,7 @@
                       "BearerAuth": []
                   }
               ],
+              "description": "为会员创建一条随访（状态=待回访），并按「随访类型 + 会员在管慢病」自动展开随访子项模板。\n日常随访不需要 warning_id；健康预警回访必须传 warning_id 且预警属于该会员。",
               "consumes": [
                   "application/json"
               ],
@@ -2750,23 +4338,21 @@
               }
           }
       },
-      "/api/v1/staff/members/{id}/health-records": {
-          "post": {
+      "/api/v1/staff/members/{id}/metric-records": {
+          "get": {
               "security": [
                   {
                       "BearerAuth": []
                   }
               ],
-              "consumes": [
-                  "application/json"
-              ],
+              "description": "按测量时间倒序分页返回会员的指标记录，支持指标编码、异常标记、测量时间区间筛选。",
               "produces": [
                   "application/json"
               ],
               "tags": [
-                  "staff-健康评估"
+                  "staff-健康档案-指标"
               ],
-              "summary": "健康指标录入",
+              "summary": "指标记录列表",
               "parameters": [
                   {
                       "type": "integer",
@@ -2776,7 +4362,236 @@
                       "required": true
                   },
                   {
-                      "description": "指标列表",
+                      "type": "string",
+                      "description": "指标编码，为空返回全部指标",
+                      "name": "metric_code",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "异常标记：1-异常 2-正常 不传=全部",
+                      "name": "is_abnormal",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "测量时间起(秒)，0=不限",
+                      "name": "start_ts",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "测量时间止(秒)，0=不限",
+                      "name": "end_ts",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "页码，默认1",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数，默认10",
+                      "name": "page_size",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "健管师为会员录入一条体征/健康指标记录（如血压 sbp、血糖 glu）。来源固定记为「医护人员录入」，source_name 取当前登录员工姓名。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案-指标"
+              ],
+              "summary": "新增指标记录",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "指标记录",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/members/{id}/metric-records/batch": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "一次提交多条指标记录（如一次测量录入 sbp/dbp/hr）。任一条失败即中断返回错误，成功返回实际写入条数。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案-指标"
+              ],
+              "summary": "批量新增指标记录",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "指标记录列表",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/members/{id}/metric-records/trend": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "数据源为常规体征记录 member_metric_records（不限慢病专有指标，任何字典指标均可查）。\nmetric_codes 支持 sbp,dbp 或重复参数；每个指标各取最近 limit 条，points 按 measurement_time 升序。",
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案-指标"
+              ],
+              "summary": "健康指标趋势（多指标折线）",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "type": "string",
+                      "description": "指标编码，逗号分隔（常规如 sbp,dbp；专病专有如 lvef,cat_score）",
+                      "name": "metric_codes",
+                      "in": "query",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每个指标取最近N条(默认30,最大200)",
+                      "name": "limit",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "起始时间戳(秒),0=不限",
+                      "name": "start_ts",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "结束时间戳(秒),0=不限",
+                      "name": "end_ts",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/members/{id}/metric-records/{rid}": {
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "修改指定会员的一条指标记录。只改传入的字段：metric_value/measurement_time/is_abnormal 为 0 或空表示不改；纠正指标项时须同时给 metric_value（不同指标缩放系数不同）。记录归属由会员 ID 校验，跨会员改会报「记录不存在或不属于该会员」。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案-指标"
+              ],
+              "summary": "修改指标记录",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "记录ID",
+                      "name": "rid",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "待修改字段",
                       "name": "body",
                       "in": "body",
                       "required": true,
@@ -2876,6 +4691,601 @@
                       "required": true,
                       "schema": {
                           "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/metric-categories": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "按层级返回监测项分类树（一级含 children）。level/parent_id 均可选，默认返回全量树。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-监测项字典"
+              ],
+              "summary": "监测项分类列表(树)",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "层级(如1=一级)",
+                      "name": "level",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "父级ID",
+                      "name": "parent_id",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-监测项字典"
+              ],
+              "summary": "新增监测项分类",
+              "parameters": [
+                  {
+                      "description": "新增分类参数",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffMetricCategoryCreate"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/metric-categories/{id}": {
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-监测项字典"
+              ],
+              "summary": "编辑监测项分类",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "分类ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "编辑分类参数",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffMetricCategoryUpdate"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/metric-categories/{id}/status": {
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-监测项字典"
+              ],
+              "summary": "启停监测项分类",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "分类ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "启停参数",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffMetricCategoryStatus"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/metrics": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "按分类/状态/关键字/指标范围(metric_scope: 0全部 1常规(默认) 2慢病专有 3慢病派生)分页查询监测项字典。分类树信息通常由 GET /metric-categories 单独获取。关键字支持对 metric_code/metric_name/metric_name_en/abbreviation 模糊匹配。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-监测项字典"
+              ],
+              "summary": "监测项列表(分页)",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "页码(默认1)",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数(默认10)",
+                      "name": "page_size",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "分类ID(0=全部)",
+                      "name": "category_id",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "状态:1启用/2停用(0=全部)",
+                      "name": "status",
+                      "in": "query"
+                  },
+                  {
+                      "type": "string",
+                      "description": "关键字(匹配编码/中文名/英文名/缩写,模糊)",
+                      "name": "keyword",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "指标范围:0全部/1常规(默认)/2慢病专有/3慢病派生",
+                      "name": "metric_scope",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-监测项字典"
+              ],
+              "summary": "新增监测项",
+              "parameters": [
+                  {
+                      "description": "新增监测项参数",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffMetricCreate"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/metrics/{code}": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "返回监测项基本信息 + 参考范围列表。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-监测项字典"
+              ],
+              "summary": "监测项详情(含参考范围)",
+              "parameters": [
+                  {
+                      "type": "string",
+                      "description": "监测项编码(metric_code)",
+                      "name": "code",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-监测项字典"
+              ],
+              "summary": "编辑监测项",
+              "parameters": [
+                  {
+                      "type": "string",
+                      "description": "监测项编码(metric_code)",
+                      "name": "code",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "编辑监测项参数",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffMetricUpdate"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "delete": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-监测项字典"
+              ],
+              "summary": "删除监测项",
+              "parameters": [
+                  {
+                      "type": "string",
+                      "description": "监测项编码(metric_code)",
+                      "name": "code",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/metrics/{code}/diseases": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "disease_code 可选；不传按当前监测项返回全部已关联病种。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-监测项字典"
+              ],
+              "summary": "监测项已关联慢病列表",
+              "parameters": [
+                  {
+                      "type": "string",
+                      "description": "监测项编码(metric_code)",
+                      "name": "code",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "type": "string",
+                      "description": "病种编码(ICD10,可选)",
+                      "name": "disease_code",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-监测项字典"
+              ],
+              "summary": "新增监测项-慢病关联",
+              "parameters": [
+                  {
+                      "type": "string",
+                      "description": "监测项编码(metric_code)",
+                      "name": "code",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "病种编码(ICD10)",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffDiseaseCreate"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/metrics/{code}/ref-ranges": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-监测项字典"
+              ],
+              "summary": "监测项参考范围列表",
+              "parameters": [
+                  {
+                      "type": "string",
+                      "description": "监测项编码(metric_code)",
+                      "name": "code",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "id\u003e0 为编辑，=0 为新增；同一监测项可分性别/年龄维护多区间。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-监测项字典"
+              ],
+              "summary": "保存监测项参考范围(新增/编辑)",
+              "parameters": [
+                  {
+                      "type": "string",
+                      "description": "监测项编码(metric_code)",
+                      "name": "code",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "参考范围参数",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffRefRangeCreate"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/metrics/{code}/status": {
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-监测项字典"
+              ],
+              "summary": "启停监测项",
+              "parameters": [
+                  {
+                      "type": "string",
+                      "description": "监测项编码(metric_code)",
+                      "name": "code",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "启停参数",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffMetricStatus"
                       }
                   }
               ],
@@ -3190,6 +5600,87 @@
                   "staff-人员管理"
               ],
               "summary": "岗位配置列表",
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/ref-ranges/{refId}": {
+          "delete": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-监测项字典"
+              ],
+              "summary": "删除参考范围",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "参考范围ID",
+                      "name": "refId",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/ref-ranges/{refId}/status": {
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-监测项字典"
+              ],
+              "summary": "设置参考范围是否默认",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "参考范围ID",
+                      "name": "refId",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "默认标记",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffRefRangeDefault"
+                      }
+                  }
+              ],
               "responses": {
                   "200": {
                       "description": "OK",
@@ -4111,7 +6602,7 @@
                   "application/json"
               ],
               "tags": [
-                  "staff-预警随访"
+                  "staff-健康预警"
               ],
               "summary": "预警列表",
               "parameters": [
@@ -4176,7 +6667,7 @@
                   "application/json"
               ],
               "tags": [
-                  "staff-高危预警"
+                  "staff-健康预警"
               ],
               "summary": "预警详情",
               "parameters": [
@@ -4212,7 +6703,7 @@
                   "application/json"
               ],
               "tags": [
-                  "staff-高危预警"
+                  "staff-健康预警"
               ],
               "summary": "预警处置",
               "parameters": [
@@ -4257,7 +6748,7 @@
                   "application/json"
               ],
               "tags": [
-                  "staff-高危预警"
+                  "staff-健康预警"
               ],
               "summary": "预警忽略",
               "parameters": [
@@ -4591,6 +7082,342 @@
               }
           }
       },
+      "shared.ReqAllergy": {
+          "type": "object",
+          "properties": {
+              "allergen_code": {
+                  "type": "string"
+              },
+              "allergen_name": {
+                  "type": "string"
+              },
+              "allergy_type": {
+                  "type": "integer"
+              },
+              "id": {
+                  "type": "integer"
+              },
+              "member_id": {
+                  "type": "integer"
+              },
+              "onset_date": {
+                  "description": "首次发现日期(UTC秒,0=未填)",
+                  "type": "integer"
+              },
+              "reaction": {
+                  "type": "string"
+              },
+              "remark": {
+                  "type": "string"
+              },
+              "severity": {
+                  "type": "integer"
+              }
+          }
+      },
+      "shared.ReqArchiveChronicAssessment": {
+          "type": "object",
+          "properties": {
+              "assess_date": {
+                  "type": "integer"
+              },
+              "batch_no": {
+                  "type": "string"
+              },
+              "disease_history_id": {
+                  "type": "integer"
+              },
+              "metrics": {
+                  "type": "object",
+                  "additionalProperties": {
+                      "type": "string"
+                  }
+              },
+              "source": {
+                  "type": "integer"
+              }
+          }
+      },
+      "shared.ReqArchiveChronicCreate": {
+          "type": "object",
+          "properties": {
+              "assess_date": {
+                  "type": "integer"
+              },
+              "diagnose_date": {
+                  "type": "integer"
+              },
+              "disease_code": {
+                  "type": "string"
+              },
+              "disease_name": {
+                  "type": "string"
+              },
+              "member_id": {
+                  "type": "integer"
+              },
+              "metrics": {
+                  "type": "object",
+                  "additionalProperties": {
+                      "type": "string"
+                  }
+              },
+              "remark": {
+                  "type": "string"
+              },
+              "source": {
+                  "type": "integer"
+              }
+          }
+      },
+      "shared.ReqArchiveChronicStatus": {
+          "type": "object",
+          "properties": {
+              "chronic_status": {
+                  "type": "integer"
+              },
+              "remark": {
+                  "type": "string"
+              }
+          }
+      },
+      "shared.ReqArchiveChronicTerminate": {
+          "type": "object",
+          "properties": {
+              "end_date": {
+                  "type": "integer"
+              },
+              "reason": {
+                  "type": "string"
+              }
+          }
+      },
+      "shared.ReqDisease": {
+          "type": "object",
+          "properties": {
+              "diagnose_hospital": {
+                  "type": "string"
+              },
+              "disease_name": {
+                  "type": "string"
+              },
+              "disease_status": {
+                  "type": "integer"
+              },
+              "id": {
+                  "type": "integer"
+              },
+              "member_id": {
+                  "type": "integer"
+              },
+              "onset_date": {
+                  "description": "发病日期(UTC秒,0=未填)",
+                  "type": "integer"
+              },
+              "remark": {
+                  "type": "string"
+              },
+              "treatment_desc": {
+                  "type": "string"
+              }
+          }
+      },
+      "shared.ReqFamily": {
+          "type": "object",
+          "properties": {
+              "disease_name": {
+                  "type": "string"
+              },
+              "icd10_code": {
+                  "type": "string"
+              },
+              "id": {
+                  "type": "integer"
+              },
+              "is_dead": {
+                  "type": "integer"
+              },
+              "member_id": {
+                  "type": "integer"
+              },
+              "onset_age": {
+                  "type": "integer"
+              },
+              "relation": {
+                  "type": "integer"
+              },
+              "remark": {
+                  "type": "string"
+              }
+          }
+      },
+      "shared.ReqLifestyle": {
+          "type": "object",
+          "properties": {
+              "activity_level": {
+                  "description": "活动强度:1卧床 2轻体力劳动 3中度体力劳动 4重体力劳动",
+                  "type": "integer"
+              },
+              "diet_desc": {
+                  "description": "饮食补充描述",
+                  "type": "string"
+              },
+              "diet_habit": {
+                  "description": "饮食口味:1清淡 2偏咸 3重油重糖",
+                  "type": "integer"
+              },
+              "drink_status": {
+                  "description": "饮酒情况:1不饮酒 2偶尔 3经常 4酗酒",
+                  "type": "integer"
+              },
+              "drink_type": {
+                  "description": "酒类型",
+                  "type": "string"
+              },
+              "eating_mode": {
+                  "description": "主进食方式:1自主进食 2部分协助 3完全协助 4管饲 5静脉营养",
+                  "type": "integer"
+              },
+              "exercise_duration": {
+                  "description": "单次运动时长:1\u003c15分 2 15~30分 3 30~60分 4\u003e60分",
+                  "type": "integer"
+              },
+              "exercise_freq": {
+                  "description": "运动频率:1几乎不 2每周1-2次 3每周≥3次",
+                  "type": "integer"
+              },
+              "exercise_habit": {
+                  "description": "运动习惯:1规律运动 2偶尔运动 3不运动",
+                  "type": "integer"
+              },
+              "exercise_type": {
+                  "description": "运动类型",
+                  "type": "string"
+              },
+              "hearing_status": {
+                  "description": "听力情况:1正常 2下降 3失聪",
+                  "type": "integer"
+              },
+              "id": {
+                  "description": "记录ID（一人一条后由服务端忽略，前端可不传）",
+                  "type": "integer"
+              },
+              "member_id": {
+                  "description": "会员ID（必填）",
+                  "type": "integer"
+              },
+              "mental_status": {
+                  "description": "情绪状态自评:1稳定 2焦虑 3低落 4易怒",
+                  "type": "integer"
+              },
+              "occupational_hazard": {
+                  "description": "职业有害因素",
+                  "type": "string"
+              },
+              "oral_status": {
+                  "description": "口腔情况:1正常 2缺牙 3义齿",
+                  "type": "integer"
+              },
+              "sleep_hour": {
+                  "description": "日均睡眠小时(可含小数,如7.5)",
+                  "type": "string"
+              },
+              "sleep_medication": {
+                  "description": "是否使用助眠药:1否 2是",
+                  "type": "integer"
+              },
+              "sleep_quality": {
+                  "description": "睡眠质量:1好 2一般 3差",
+                  "type": "integer"
+              },
+              "smoke_daily": {
+                  "description": "每日支数",
+                  "type": "integer"
+              },
+              "smoke_years": {
+                  "description": "烟龄(年)",
+                  "type": "integer"
+              },
+              "smoking_status": {
+                  "description": "吸烟情况:1从不 2已戒烟 3当前吸烟",
+                  "type": "integer"
+              },
+              "staple_food": {
+                  "description": "主食",
+                  "type": "string"
+              },
+              "vision_status": {
+                  "description": "视力情况:1正常 2下降 3失明",
+                  "type": "integer"
+              }
+          }
+      },
+      "shared.ReqOperation": {
+          "type": "object",
+          "properties": {
+              "id": {
+                  "type": "integer"
+              },
+              "member_id": {
+                  "type": "integer"
+              },
+              "op_code": {
+                  "type": "string"
+              },
+              "op_date": {
+                  "description": "手术日期(UTC秒,0=未填)",
+                  "type": "integer"
+              },
+              "op_hospital": {
+                  "type": "string"
+              },
+              "op_name": {
+                  "type": "string"
+              },
+              "op_type": {
+                  "type": "integer"
+              },
+              "outcome": {
+                  "type": "integer"
+              },
+              "remark": {
+                  "type": "string"
+              }
+          }
+      },
+      "shared.ReqUpsertBasic": {
+          "type": "object",
+          "properties": {
+              "archive_no": {
+                  "type": "string"
+              },
+              "blood_type": {
+                  "type": "integer"
+              },
+              "height": {
+                  "type": "string"
+              },
+              "marital_status": {
+                  "type": "integer"
+              },
+              "member_id": {
+                  "description": "member 维度，必填",
+                  "type": "integer"
+              },
+              "nation": {
+                  "type": "string"
+              },
+              "occupation": {
+                  "type": "string"
+              },
+              "remark": {
+                  "type": "string"
+              },
+              "weight": {
+                  "type": "string"
+              }
+          }
+      },
       "staff.ReqStaffAccessAssign": {
           "type": "object",
           "required": [
@@ -4761,6 +7588,68 @@
               }
           }
       },
+      "staff.ReqStaffChronicDiseaseCreate": {
+          "type": "object",
+          "required": [
+              "disease_name_cn",
+              "icd10_code"
+          ],
+          "properties": {
+              "disease_name_cn": {
+                  "description": "中文名",
+                  "type": "string"
+              },
+              "disease_name_en": {
+                  "description": "英文名",
+                  "type": "string"
+              },
+              "icd10_code": {
+                  "description": "ICD-10编码",
+                  "type": "string"
+              },
+              "level": {
+                  "description": "层级(顶级=1)",
+                  "type": "integer"
+              },
+              "parent_disease_id": {
+                  "description": "父级ID(0=顶级)",
+                  "type": "integer"
+              },
+              "sort_order": {
+                  "description": "排序",
+                  "type": "integer"
+              }
+          }
+      },
+      "staff.ReqStaffChronicDiseaseStatus": {
+          "type": "object",
+          "required": [
+              "status"
+          ],
+          "properties": {
+              "status": {
+                  "description": "状态:1启用服务追踪/9未启用仅展示（models.ChronicDiseaseStatusTracking/Display）",
+                  "type": "integer"
+              }
+          }
+      },
+      "staff.ReqStaffChronicDiseaseUpdate": {
+          "type": "object",
+          "properties": {
+              "disease_name_cn": {
+                  "description": "中文名",
+                  "type": "string"
+              },
+              "disease_name_en": {
+                  "description": "英文名",
+                  "type": "string"
+              },
+              "sort_order": {
+                  "description": "排序",
+                  "type": "integer"
+              }
+          }
+      },
       "staff.ReqStaffCreateLead": {
           "type": "object",
           "required": [
@@ -4786,6 +7675,26 @@
               },
               "source_type": {
                   "description": "来源类型(活动/咨询/预约/转介绍等)，选填",
+                  "type": "integer"
+              }
+          }
+      },
+      "staff.ReqStaffDiseaseCreate": {
+          "type": "object",
+          "required": [
+              "disease_code"
+          ],
+          "properties": {
+              "disease_code": {
+                  "description": "病种编码(ICD10)",
+                  "type": "string"
+              },
+              "is_required": {
+                  "description": "该病种下是否必填：1是",
+                  "type": "integer"
+              },
+              "sort_order": {
+                  "description": "该病种内表单排序",
                   "type": "integer"
               }
           }
@@ -4818,6 +7727,230 @@
               },
               "status": {
                   "description": "目标状态，必填：9-流失(models.LeanStatusLost)，无效可复用 4-转化失败",
+                  "type": "integer"
+              }
+          }
+      },
+      "staff.ReqStaffMetricCategoryCreate": {
+          "type": "object",
+          "required": [
+              "category_name"
+          ],
+          "properties": {
+              "category_code": {
+                  "description": "分类编码",
+                  "type": "string"
+              },
+              "category_level": {
+                  "description": "层级",
+                  "type": "integer"
+              },
+              "category_name": {
+                  "description": "分类名称",
+                  "type": "string"
+              },
+              "parent_id": {
+                  "description": "父级ID(0=一级)",
+                  "type": "integer"
+              },
+              "sort_order": {
+                  "description": "排序",
+                  "type": "integer"
+              }
+          }
+      },
+      "staff.ReqStaffMetricCategoryStatus": {
+          "type": "object",
+          "required": [
+              "status"
+          ],
+          "properties": {
+              "status": {
+                  "description": "状态:1启用/9停用（models.MetricStatusValid/Invalid）",
+                  "type": "integer"
+              }
+          }
+      },
+      "staff.ReqStaffMetricCategoryUpdate": {
+          "type": "object",
+          "properties": {
+              "category_code": {
+                  "description": "分类编码",
+                  "type": "string"
+              },
+              "category_name": {
+                  "description": "分类名称",
+                  "type": "string"
+              },
+              "sort_order": {
+                  "description": "排序",
+                  "type": "integer"
+              }
+          }
+      },
+      "staff.ReqStaffMetricCreate": {
+          "type": "object",
+          "required": [
+              "category_id",
+              "metric_code",
+              "metric_name_cn"
+          ],
+          "properties": {
+              "abbreviation": {
+                  "description": "缩写",
+                  "type": "string"
+              },
+              "category_id": {
+                  "description": "所属分类ID",
+                  "type": "integer"
+              },
+              "data_type": {
+                  "description": "数据类型:1数值/2枚举",
+                  "type": "integer"
+              },
+              "is_multi": {
+                  "description": "是否可多选:0否/1是",
+                  "type": "integer"
+              },
+              "metric_code": {
+                  "description": "指标编码",
+                  "type": "string"
+              },
+              "metric_group": {
+                  "description": "慢病表单分组(仅专有/派生项)",
+                  "type": "string"
+              },
+              "metric_name_cn": {
+                  "description": "指标中文名",
+                  "type": "string"
+              },
+              "metric_name_en": {
+                  "description": "指标英文名",
+                  "type": "string"
+              },
+              "metric_scope": {
+                  "description": "以下为 2026-11-08 字典归一新增：1常规(默认)/2慢病专有/3慢病派生",
+                  "type": "integer"
+              },
+              "metric_unit": {
+                  "description": "单位",
+                  "type": "string"
+              },
+              "option_json": {
+                  "description": "枚举选项(JSON)",
+                  "type": "string"
+              },
+              "remark": {
+                  "description": "备注",
+                  "type": "string"
+              },
+              "sort_order": {
+                  "description": "排序",
+                  "type": "integer"
+              },
+              "unit_symbol": {
+                  "description": "单位符号",
+                  "type": "string"
+              }
+          }
+      },
+      "staff.ReqStaffMetricStatus": {
+          "type": "object",
+          "required": [
+              "status"
+          ],
+          "properties": {
+              "status": {
+                  "description": "状态:1启用/9停用（models.MetricStatusValid/Invalid）",
+                  "type": "integer"
+              }
+          }
+      },
+      "staff.ReqStaffMetricUpdate": {
+          "type": "object",
+          "required": [
+              "category_id"
+          ],
+          "properties": {
+              "category_id": {
+                  "description": "所属分类ID",
+                  "type": "integer"
+              },
+              "data_type": {
+                  "description": "数据类型",
+                  "type": "integer"
+              },
+              "metric_group": {
+                  "description": "慢病表单分组(空=不修改)",
+                  "type": "string"
+              },
+              "metric_name_cn": {
+                  "description": "指标中文名",
+                  "type": "string"
+              },
+              "metric_name_en": {
+                  "description": "指标英文名",
+                  "type": "string"
+              },
+              "option_json": {
+                  "description": "枚举选项(JSON)",
+                  "type": "string"
+              },
+              "remark": {
+                  "description": "备注",
+                  "type": "string"
+              },
+              "unit_symbol": {
+                  "description": "单位符号",
+                  "type": "string"
+              }
+          }
+      },
+      "staff.ReqStaffRefRangeCreate": {
+          "type": "object",
+          "properties": {
+              "age_max": {
+                  "description": "年龄上限",
+                  "type": "integer"
+              },
+              "age_min": {
+                  "description": "年龄下限",
+                  "type": "integer"
+              },
+              "gender": {
+                  "description": "性别:0不限/1男/2女",
+                  "type": "integer"
+              },
+              "id": {
+                  "description": "范围ID(编辑时传)",
+                  "type": "integer"
+              },
+              "is_default": {
+                  "description": "是否默认范围:1默认/2非默认",
+                  "type": "integer"
+              },
+              "ref_lower": {
+                  "description": "参考下限",
+                  "type": "string"
+              },
+              "ref_upper": {
+                  "description": "参考上限",
+                  "type": "string"
+              },
+              "sort_order": {
+                  "description": "排序",
+                  "type": "integer"
+              }
+          }
+      },
+      "staff.ReqStaffRefRangeDefault": {
+          "type": "object",
+          "required": [
+              "is_default"
+          ],
+          "properties": {
+              "is_default": {
+                  "description": "1默认/0取消默认",
                   "type": "integer"
               }
           }
@@ -4924,8 +8057,8 @@
           "type": "object",
           "properties": {
               "appointment_date": {
-                  "description": "YYYY-MM-DD",
-                  "type": "string"
+                  "description": "预约日期(UTC秒)",
+                  "type": "integer"
               },
               "appointment_type": {
                   "description": "1-咨询 2-体检 3-参观 4-服务",

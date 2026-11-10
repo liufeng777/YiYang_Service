@@ -1,0 +1,202 @@
+/* 健康档案列表与维护工作台 */
+
+.archive-member {
+  display: flex;
+  flex-direction: column;
+  gap: @spacing-2xs;
+
+  span {
+    .text-auxiliary();
+    color: @color-text-secondary;
+  }
+}
+
+.archive-detail {
+  .card-surface();
+  padding: @spacing-md @spacing-lg;
+
+  > .ant-tabs > .ant-tabs-content-holder {
+    padding-top: @spacing-md;
+  }
+}
+
+.archive-basic-layout {
+  display: flex;
+  flex-direction: column;
+  gap: @spacing-lg;
+}
+
+.archive-form-card {
+  > .ant-card-head {
+    border-bottom-color: @color-border;
+  }
+}
+
+.archive-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 @spacing-lg;
+
+  &--basic {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  &--lifestyle {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .ant-input-number,
+  .ant-picker {
+    width: 100%;
+  }
+}
+
+.archive-field-wide {
+  grid-column: 1 / -1;
+}
+
+.archive-lifestyle-form {
+  display: flex;
+  flex-direction: column;
+  gap: @spacing-md;
+}
+
+.archive-form-section {
+  padding: @spacing-md @spacing-lg;
+  background: @color-bg-active;
+  border: 1px solid @color-border;
+  border-radius: @radius-sm;
+
+  > h4 {
+    margin: 0 0 @spacing-md;
+    .text-title-card();
+    color: @color-text-primary;
+  }
+
+  .ant-form-item {
+    margin-bottom: @spacing-sm;
+  }
+}
+
+.archive-habit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: @spacing-md;
+}
+
+.archive-inline-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: @spacing-sm;
+  align-items: center;
+  margin-bottom: @spacing-md;
+
+  > .ant-select {
+    min-width: 200px;
+  }
+}
+
+.archive-full-width {
+  width: 100%;
+}
+
+.archive-json {
+  max-width: 100%;
+  margin: 0;
+  padding: @spacing-md;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: @color-bg-active;
+  border-radius: @radius-sm;
+  .text-auxiliary();
+  color: @color-text-primary;
+}
+
+.archive-code-input {
+  font-family: @font-family-base;
+}
+
+.archive-drawer-sections {
+  width: 100%;
+
+  > .ant-space-item,
+  .ant-card {
+    width: 100%;
+  }
+}
+
+.archive-section {
+  margin-top: @spacing-md;
+}
+
+.chronic-form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: @spacing-md;
+
+  &--three {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .ant-input-number {
+    width: 100%;
+  }
+}
+
+.chronic-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 @spacing-md;
+  padding: @spacing-md;
+  margin-bottom: @spacing-md;
+  background: @color-bg-active;
+  border-radius: @radius-sm;
+
+  .ant-input-number {
+    width: 100%;
+  }
+}
+
+@media (max-width: 1400px) {
+  .archive-fields--basic,
+  .archive-fields--lifestyle {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1100px) {
+  .archive-habit-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .archive-detail {
+    padding: @spacing-sm;
+  }
+
+  .archive-fields,
+  .archive-fields--basic,
+  .archive-fields--lifestyle {
+    grid-template-columns: 1fr;
+  }
+
+  .archive-form-section {
+    padding: @spacing-md;
+  }
+
+  .archive-field-wide {
+    grid-column: auto;
+  }
+
+  .chronic-form-row,
+  .chronic-form-row--three,
+  .chronic-metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .archive-inline-filter > .ant-select {
+    width: 100%;
+  }
+}

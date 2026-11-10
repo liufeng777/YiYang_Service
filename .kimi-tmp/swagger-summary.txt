@@ -1,0 +1,1127 @@
+
+## GET /api/v1/staff/activities
+summary: 健康活动列表
+tags: staff-健康活动
+- query page: integer (required) 页码
+- query page_size: integer (required) 每页条数
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/activities/{id}
+summary: 健康活动详情
+tags: staff-健康活动
+- path id: integer (required) 活动ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/activities/{id}/registrations
+summary: 活动报名记录列表
+tags: staff-健康活动
+- path id: integer (required) 活动ID
+- query page: integer (required) 页码
+- query page_size: integer (required) 每页条数
+- query status: integer (optional) 报名状态过滤(1-待参加 2-已签到 3-已取消)
+- query keyword: string (optional) 会员关键字(姓名/手机号模糊匹配)
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/activities/{id}/registrations
+summary: 活动代报名
+tags: staff-健康活动
+- path id: integer (required) 活动ID
+- body body (required) 报名参数: {"$ref": "#/definitions/staff.ReqStaffActivityRegister"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/activities/{id}/registrations/{registrationId}/cancel
+summary: 取消活动报名
+tags: staff-健康活动
+- path id: integer (required) 活动ID
+- path registrationId: integer (required) 报名记录ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/activities/{id}/registrations/{registrationId}/checkin
+summary: 活动报名签到
+tags: staff-健康活动
+- path id: integer (required) 活动ID
+- path registrationId: integer (required) 报名记录ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/appointments
+summary: 预约/咨询列表
+tags: staff-预约服务
+- query appoint_type: integer (optional) 类型
+- query status: integer (optional) 状态
+- query member_id: integer (optional) 会员ID
+- query keyword: string (optional) 关键字
+- query page: integer (optional) 页码
+- query page_size: integer (optional) 每页条数
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/appointments
+summary: 预约创建（staff 端）
+tags: staff-预约咨询
+- body body (required) 预约创建信息: {"$ref": "#/definitions/staff.appointmentCreateReq"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/appointments/{id}
+summary: 预约详情
+tags: staff-预约咨询
+- path id: integer (required) 预约ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## PUT /api/v1/staff/appointments/{id}
+summary: 预约更新（staff 端）
+tags: staff-预约咨询
+- path id: integer (required) 预约ID
+- body body (required) 预约更新信息: {"$ref": "#/definitions/staff.appointmentCreateReq"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## DELETE /api/v1/staff/appointments/{id}
+summary: 预约删除
+tags: staff-预约咨询
+- path id: integer (required) 预约ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/appointments/{id}/cancel
+summary: 取消预约
+tags: staff-预约咨询
+- path id: integer (required) 预约ID
+- body body (required) 取消信息: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/appointments/{id}/status
+summary: 预约状态回写
+tags: staff-预约咨询
+- path id: integer (required) 预约ID
+- body body (required) 状态信息: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/appointments/{id}/visit
+summary: 到院/上门接送登记
+tags: staff-预约咨询
+- path id: integer (required) 预约ID
+- body body (required) 登记信息: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/assessments/{id}
+summary: 评估详情
+tags: staff-健康评估
+- path id: integer (required) 评估ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/assessments/{id}/confirm
+summary: 评估完成/确认
+tags: staff-健康评估
+- body id (required) 评估ID: {"type": "integer"}
+- body body (required) 评估结果: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/auth/change-password
+summary: 修改密码
+tags: 医护认证
+- body body (required) 修改密码请求: {"$ref": "#/definitions/staff.StaffChangePasswordRequest"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/auth/login
+summary: 医护管理人员登录
+tags: 医护认证
+- body body (required) 登录请求: {"$ref": "#/definitions/staff.StaffLoginRequest"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/auth/logout
+summary: 登出
+tags: 医护认证
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/auth/profile
+summary: 获取当前医护用户信息
+tags: 医护认证
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/auth/refresh
+summary: 刷新令牌
+tags: 医护认证
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/auth/sms-code
+summary: 发送短信验证码
+tags: 医护认证
+- body body (required) 发送验证码请求: {"$ref": "#/definitions/staff.StaffSmsCodeRequest"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/auth/sms-login
+summary: 短信验证码登录
+tags: 医护认证
+- body body (required) 短信登录请求: {"$ref": "#/definitions/staff.StaffSmsLoginRequest"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/auth/switch-institution
+summary: 切换当前机构
+tags: 医护认证
+- body body (required) 目标机构: {"$ref": "#/definitions/staff.SwitchInstitutionRequest"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/chronic-diseases
+summary: 慢性病字典列表
+tags: staff-慢性病字典
+- query keyword: string (optional) 关键字(编码/中文名/英文名模糊)
+- query parent_id: integer (optional) 父级ID
+- query level: integer (optional) 层级(如1=顶级)
+- query page: integer (optional) 页码(默认1)
+- query page_size: integer (optional) 每页大小(默认20)
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/chronic-diseases
+summary: 新增慢性病字典
+tags: staff-慢性病字典
+- body body (required) 新增慢性病参数: {"$ref": "#/definitions/staff.ReqStaffChronicDiseaseCreate"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/chronic-diseases/{id}
+summary: 慢性病字典详情
+tags: staff-慢性病字典
+- path id: integer (required) 慢性病ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## PUT /api/v1/staff/chronic-diseases/{id}
+summary: 编辑慢性病字典
+tags: staff-慢性病字典
+- path id: integer (required) 慢性病ID
+- body body (required) 编辑参数: {"$ref": "#/definitions/staff.ReqStaffChronicDiseaseUpdate"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## DELETE /api/v1/staff/chronic-diseases/{id}
+summary: 删除慢性病字典（软删）
+tags: staff-慢性病字典
+- path id: integer (required) 慢性病ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## PUT /api/v1/staff/chronic-diseases/{id}/status
+summary: 启停慢性病字典
+tags: staff-慢性病字典
+- path id: integer (required) 慢性病ID
+- body body (required) 启停参数: {"$ref": "#/definitions/staff.ReqStaffChronicDiseaseStatus"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/consultations
+summary: 咨询列表
+tags: staff-预约咨询
+- query status: integer (optional) 状态
+- query keyword: string (optional) 关键字
+- query page: integer (optional) 页码
+- query page_size: integer (optional) 每页条数
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/consultations
+summary: 咨询创建（staff 端）
+tags: staff-预约咨询
+- body body (required) 咨询创建信息: {"$ref": "#/definitions/staff.consultationCreateReq"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/consultations/{id}
+summary: 咨询详情
+tags: staff-预约咨询
+- path id: integer (required) 咨询ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## PUT /api/v1/staff/consultations/{id}
+summary: 咨询更新
+tags: staff-预约咨询
+- path id: integer (required) 咨询ID
+- body body (required) 咨询更新信息: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## DELETE /api/v1/staff/consultations/{id}
+summary: 咨询删除
+tags: staff-预约咨询
+- path id: integer (required) 咨询ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## PUT /api/v1/staff/credentials/{id}
+summary: 资质状态/到期
+tags: staff-人员管理
+- path id: integer (required) 资质ID
+- body body (required) 资质信息: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/dashboard/overview
+summary: 今日工作概览
+tags: staff-工作台
+- query staff_id: integer (optional) 当前员工ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/dashboard/warnings
+summary: 首页预警快捷提示
+tags: staff-工作台
+- query page: integer (optional) 页码
+- query page_size: integer (optional) 每页条数
+- query severity: integer (optional) 等级筛选
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## DELETE /api/v1/staff/disease-links/{linkId}
+summary: 删除监测项-慢病关联
+tags: staff-监测项字典
+- path linkId: integer (required) 关联ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/followups
+summary: 随访列表
+tags: staff-随访回访
+- query status: integer (optional) 随访状态
+- query member_id: integer (optional) 会员ID
+- query staff_id: integer (optional) 负责人ID
+- query institution_id: integer (optional) 机构ID
+- query next_followup_date: string (optional) 下次随访日期
+- query page: integer (optional) 页码
+- query page_size: integer (optional) 每页条数
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/followups/{id}/complete
+summary: 随访完成
+tags: staff-随访回访
+- path id: integer (required) 随访ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/goals/{id}/items
+summary: 健康目标指标项更新
+tags: staff-健康方案
+- path id: integer (required) 目标ID
+- body body (required) 指标项达成: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/health-accesses
+summary: 健康服务接入列表
+tags: staff-健康服务
+- query page: integer (optional) 页码(默认1)
+- query page_size: integer (optional) 每页条数(默认10)
+- query status: integer (optional) 状态:1待处理/2管理拒绝/3待健管师/4健管师拒绝/5已接入
+- query source_type: integer (optional) 来源:1-线下登记
+- query key: string (optional) 关键字(会员名/手机号/编号)
+- query days: integer (optional) 最近N天(按创建时间,>0生效)
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/health-accesses
+summary: 新增健康服务接入(线下登记)
+tags: staff-健康服务
+- body body (required) 新增接入参数: {"$ref": "#/definitions/staff.ReqStaffAccessCreate"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/health-accesses/{id}
+summary: 健康服务接入详情
+tags: staff-健康服务
+- path id: integer (required) 接入记录ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/health-accesses/{id}/assign
+summary: 分配健管师(医护管理员)
+tags: staff-健康服务
+- path id: integer (required) 接入记录ID
+- body body (required) 分配参数(staff_id=目标健管师): {"$ref": "#/definitions/staff.ReqStaffAccessAssign"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/health-accesses/{id}/confirm
+summary: 健管师确认接入
+tags: staff-健康服务
+- path id: integer (required) 接入记录ID
+- body body (required) 确认参数(relation 可选): {"$ref": "#/definitions/staff.ReqStaffAccessConfirm"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/health-accesses/{id}/followup
+summary: 跟进健康接入
+tags: staff-健康服务
+- path id: integer (required) 接入记录ID
+- body body (required) 跟进参数(content): {"$ref": "#/definitions/staff.ReqStaffAccessFollowup"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/health-accesses/{id}/reject
+summary: 拒绝健康接入
+tags: staff-健康服务
+- path id: integer (required) 接入记录ID
+- body body (required) 拒绝参数: {"$ref": "#/definitions/staff.ReqStaffAccessReject"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/health-accesses/{id}/transfer
+summary: 转派回退待分配
+tags: staff-健康服务
+- path id: integer (required) 接入记录ID
+- body body (required) 转派参数: {"$ref": "#/definitions/staff.ReqStaffAccessTransfer"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/health-archives/allergy
+summary: 过敏史列表
+tags: staff-健康档案
+- query member_id: integer (required) 会员ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## PUT /api/v1/staff/health-archives/allergy
+summary: 更新过敏史
+tags: staff-健康档案
+- body body (required) 过敏史（id必填）: {"$ref": "#/definitions/shared.ReqAllergy"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/health-archives/allergy
+summary: 新增过敏史
+tags: staff-健康档案
+- body body (required) 过敏史（member_id必填）: {"$ref": "#/definitions/shared.ReqAllergy"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## DELETE /api/v1/staff/health-archives/allergy
+summary: 删除过敏史
+tags: staff-健康档案
+- query id: integer (required) 记录ID
+- query member_id: integer (required) 会员ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## PUT /api/v1/staff/health-archives/basic
+summary: 新建/更新主档案
+tags: staff-健康档案
+- body body (required) 主档案（member_id必填）: {"$ref": "#/definitions/shared.ReqUpsertBasic"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/health-archives/chronic-diseases
+summary: 会员慢病专病条目列表
+tags: staff-健康档案-慢病专病
+- query member_id: integer (required) 会员ID
+- query chronic_status: integer (optional) 控制状态筛选：1控制良好 2基本控制 3控制不佳 4急性加重期 9已终止(0=全部)
+- query include_ended: boolean (optional) 是否包含已终止(默认false)
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/health-archives/chronic-diseases
+summary: 新建专病条目并录入当次评估
+tags: staff-健康档案-慢病专病
+- body body (required) 专病条目（member_id/disease_code/metrics 必填）: {"$ref": "#/definitions/shared.ReqArchiveChronicCreate"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/health-archives/chronic-diseases/dict/{code}
+summary: 专病评估指标字典（按病种编码取表单定义）
+tags: staff-健康档案-慢病专病
+- path code: string (required) 病种编码(ICD10，如 I10/E11/I25/J44.9)
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/health-archives/chronic-diseases/{id}/assessments
+summary: 专病评估记录列表（按批次倒序）
+tags: staff-健康档案-慢病专病
+- path id: integer (required) 专病条目ID(disease_history_id)
+- query member_id: integer (required) 会员ID
+- query page: integer (optional) 页码(默认1)
+- query page_size: integer (optional) 每页条数(默认5)
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/health-archives/chronic-diseases/{id}/assessments/{batch_no}
+summary: 单次评估详情（含全部指标与表单定义）
+tags: staff-健康档案-慢病专病
+- path id: integer (required) 专病条目ID(disease_history_id)
+- path batch_no: string (required) 评估批次号
+- query member_id: integer (required) 会员ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## PUT /api/v1/staff/health-archives/chronic-diseases/{id}/assessments/{batch_no}
+summary: 更新某次评估（整批覆盖，派生项自动重算）
+tags: staff-健康档案-慢病专病
+- path id: integer (required) 专病条目ID(disease_history_id)
+- path batch_no: string (required) 评估批次号
+- query member_id: integer (required) 会员ID
+- body body (required) 指标取值(metrics): {"$ref": "#/definitions/shared.ReqArchiveChronicAssessment"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## PUT /api/v1/staff/health-archives/chronic-diseases/{id}/status
+summary: 变更控制状态
+tags: staff-健康档案-慢病专病
+- path id: integer (required) 专病条目ID(disease_history_id)
+- query member_id: integer (required) 会员ID
+- body body (required) chronic_status(1~4，终止请用 terminate 接口): {"$ref": "#/definitions/shared.ReqArchiveChronicStatus"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/health-archives/chronic-diseases/{id}/terminate
+summary: 终止某专病管理
+tags: staff-健康档案-慢病专病
+- path id: integer (required) 专病条目ID(disease_history_id)
+- query member_id: integer (required) 会员ID
+- body body (optional) 终止日期(0=今天)/原因: {"$ref": "#/definitions/shared.ReqArchiveChronicTerminate"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/health-archives/disease
+summary: 既往疾病史列表
+tags: staff-健康档案
+- query member_id: integer (required) 会员ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## PUT /api/v1/staff/health-archives/disease
+summary: 更新既往疾病史
+tags: staff-健康档案
+- body body (required) 疾病史（id必填）: {"$ref": "#/definitions/shared.ReqDisease"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/health-archives/disease
+summary: 新增既往疾病史
+tags: staff-健康档案
+- body body (required) 疾病史（member_id必填）: {"$ref": "#/definitions/shared.ReqDisease"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## DELETE /api/v1/staff/health-archives/disease
+summary: 删除既往疾病史
+tags: staff-健康档案
+- query id: integer (required) 记录ID
+- query member_id: integer (required) 会员ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/health-archives/family
+summary: 家族史列表
+tags: staff-健康档案
+- query member_id: integer (required) 会员ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## PUT /api/v1/staff/health-archives/family
+summary: 更新家族史
+tags: staff-健康档案
+- body body (required) 家族史（id必填）: {"$ref": "#/definitions/shared.ReqFamily"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/health-archives/family
+summary: 新增家族史
+tags: staff-健康档案
+- body body (required) 家族史（member_id必填）: {"$ref": "#/definitions/shared.ReqFamily"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## DELETE /api/v1/staff/health-archives/family
+summary: 删除家族史
+tags: staff-健康档案
+- query id: integer (required) 记录ID
+- query member_id: integer (required) 会员ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/health-archives/lifestyle
+summary: 获取生活习惯（一人一条：每个会员只有一条，无记录返回空对象）
+tags: staff-健康档案
+- query member_id: integer (required) 会员ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/health-archives/lifestyle
+summary: 保存生活习惯（一人一条：POST 即保存，已有则整条覆盖、无则新增，不区分新增/编辑）
+tags: staff-健康档案
+- body body (required) 生活习惯（member_id必填）: {"$ref": "#/definitions/shared.ReqLifestyle"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/health-archives/operation
+summary: 手术史列表
+tags: staff-健康档案
+- query member_id: integer (required) 会员ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## PUT /api/v1/staff/health-archives/operation
+summary: 更新手术史
+tags: staff-健康档案
+- body body (required) 手术史（id必填）: {"$ref": "#/definitions/shared.ReqOperation"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/health-archives/operation
+summary: 新增手术史
+tags: staff-健康档案
+- body body (required) 手术史（member_id必填）: {"$ref": "#/definitions/shared.ReqOperation"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## DELETE /api/v1/staff/health-archives/operation
+summary: 删除手术史
+tags: staff-健康档案
+- query id: integer (required) 记录ID
+- query member_id: integer (required) 会员ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/health-archives/overview
+summary: 会员健康档案卡（主表+5子表+生活习惯）
+tags: staff-健康档案
+- query member_id: integer (required) 会员ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/institutions/current
+summary: 当前机构信息
+tags: staff-机构信息
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/leads
+summary: 线索列表（本机构）
+tags: staff-线索
+- query page: integer (optional) 页码，默认1，选填
+- query page_size: integer (optional) 每页条数，默认10，选填
+- query keyword: string (optional) 关键字(联系人/手机号)，选填
+- query source_type: integer (optional) 来源类型，选填
+- query status: integer (optional) 线索状态，选填
+response: {"type": "object", "additionalProperties": true}
+
+## POST /api/v1/staff/leads
+summary: 新增线索（本机构）
+tags: staff-线索
+- body body (required) 新增线索参数: {"$ref": "#/definitions/staff.ReqStaffCreateLead"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/leads/batch-transfer
+summary: 线索批量转派
+tags: staff-线索
+- body body (required) 批量转派参数: {"$ref": "#/definitions/staff.ReqStaffBatchTransferLeads"}
+- query remark: string (optional) 操作原因/备注，选填
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/leads/export
+summary: 导出线索CSV（本机构）
+tags: staff-线索
+- query keyword: string (optional) 联系人/电话模糊匹配
+- query source_type: integer (optional) 来源类型筛选
+- query status: integer (optional) 线索状态筛选：1待跟进 2跟进中 3已转化 4转化失败 9流失
+response: {"type": "file"}
+
+## POST /api/v1/staff/leads/import
+summary: 线索CSV导入（本机构）
+tags: staff-线索
+- formData file: file (required) CSV文件（首行表头，UTF-8，扩展名.csv）
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/leads/{id}
+summary: 线索详情
+tags: staff-线索
+- path id: integer (required) 线索ID
+response: {"type": "object", "additionalProperties": true}
+
+## PUT /api/v1/staff/leads/{id}/assign
+summary: 线索认领
+tags: staff-线索
+- path id: integer (required) 线索ID
+- body body (required) 认领参数（assignee=认领人）: {"$ref": "#/definitions/staff.ReqStaffAssignLead"}
+- query remark: string (optional) 操作原因/备注，选填
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/leads/{id}/convert
+summary: 线索转化刷新复核
+tags: staff-线索
+- path id: integer (required) 线索ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/leads/{id}/followup
+summary: 线索跟进记录
+tags: staff-线索
+- path id: integer (required) 线索ID
+- body body (required) 跟进参数: {"$ref": "#/definitions/staff.ReqStaffFollowupLead"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/leads/{id}/lost
+summary: 线索流失/无效
+tags: staff-线索
+- path id: integer (required) 线索ID
+- body body (required) 流失状态参数: {"$ref": "#/definitions/staff.ReqStaffMarkLeadLost"}
+- query remark: string (optional) 操作原因/备注，选填
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/leads/{id}/transfer
+summary: 线索转派
+tags: staff-线索
+- path id: integer (required) 线索ID
+- body body (required) 转派参数: {"$ref": "#/definitions/staff.ReqStaffTransferLead"}
+- query remark: string (optional) 操作原因/备注，选填
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/members
+summary: 会员列表（健档索引）
+tags: staff-健康评估
+- query keyword: string (optional) 关键字
+- query risk_level: integer (optional) 风险等级
+- query care_level: integer (optional) 照护等级
+- query institution_id: integer (optional) 机构ID
+- query page: integer (optional) 页码
+- query page_size: integer (optional) 每页条数
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/members
+summary: 建档
+tags: staff-健康评估
+- body body (required) 会员档案: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## PUT /api/v1/staff/members/active-status
+summary: 设置会员活跃状态
+tags: staff-健康评估
+- body body (required) 请求体: {"type": "object"}
+- body member_id (required) 会员ID: {"type": "integer"}
+- body active_status (required) 活跃状态: {"type": "integer"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/members/{id}/assessments
+summary: 评估列表
+tags: staff-健康评估
+- path id: integer (required) 会员ID
+- query page: integer (optional) 页码
+- query page_size: integer (optional) 每页条数
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/members/{id}/assessments
+summary: 发起评估
+tags: staff-健康评估
+- path id: integer (required) 会员ID
+- body body (required) 评估信息: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/members/{id}/followups
+summary: 手动创建随访
+tags: staff-随访回访
+- path id: integer (required) 会员ID
+- body body (required) 随访信息: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/members/{id}/goals
+summary: 健康目标列表
+tags: staff-健康方案
+- path id: integer (required) 会员ID
+- query page: integer (optional) 页码
+- query page_size: integer (optional) 每页条数
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/members/{id}/goals
+summary: 健康目标新增
+tags: staff-健康方案
+- path id: integer (required) 会员ID
+- body body (required) 目标信息: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/members/{id}/health-profile
+summary: 会员健康档案详情
+tags: staff-健康评估
+- path id: integer (required) 会员ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/members/{id}/metric-records
+summary: 指标记录列表
+tags: staff-健康档案-指标
+- path id: integer (required) 会员ID
+- query metric_code: string (optional) 指标编码，为空返回全部指标
+- query is_abnormal: integer (optional) 异常标记：1-异常 2-正常 不传=全部
+- query start_ts: integer (optional) 测量时间起(秒)，0=不限
+- query end_ts: integer (optional) 测量时间止(秒)，0=不限
+- query page: integer (optional) 页码，默认1
+- query page_size: integer (optional) 每页条数，默认10
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/members/{id}/metric-records
+summary: 新增指标记录
+tags: staff-健康档案-指标
+- path id: integer (required) 会员ID
+- body body (required) 指标记录: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/members/{id}/metric-records/batch
+summary: 批量新增指标记录
+tags: staff-健康档案-指标
+- path id: integer (required) 会员ID
+- body body (required) 指标记录列表: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/members/{id}/metric-records/trend
+summary: 健康指标趋势（多指标折线）
+tags: staff-健康档案-指标
+- path id: integer (required) 会员ID
+- query metric_codes: string (required) 指标编码，逗号分隔（常规如 sbp,dbp；专病专有如 lvef,cat_score）
+- query limit: integer (optional) 每个指标取最近N条(默认30,最大200)
+- query start_ts: integer (optional) 起始时间戳(秒),0=不限
+- query end_ts: integer (optional) 结束时间戳(秒),0=不限
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## PUT /api/v1/staff/members/{id}/metric-records/{rid}
+summary: 修改指标记录
+tags: staff-健康档案-指标
+- path id: integer (required) 会员ID
+- path rid: integer (required) 记录ID
+- body body (required) 待修改字段: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/members/{id}/plans
+summary: 健康方案列表
+tags: staff-健康方案
+- path id: integer (required) 会员ID
+- query page: integer (optional) 页码
+- query page_size: integer (optional) 每页条数
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/members/{id}/plans/ai-generate
+summary: AI 健康方案生成
+tags: staff-健康方案
+- path id: integer (required) 会员ID
+- body body (required) 方案信息: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/metric-categories
+summary: 监测项分类列表(树)
+tags: staff-监测项字典
+- query level: integer (optional) 层级(如1=一级)
+- query parent_id: integer (optional) 父级ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/metric-categories
+summary: 新增监测项分类
+tags: staff-监测项字典
+- body body (required) 新增分类参数: {"$ref": "#/definitions/staff.ReqStaffMetricCategoryCreate"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## PUT /api/v1/staff/metric-categories/{id}
+summary: 编辑监测项分类
+tags: staff-监测项字典
+- path id: integer (required) 分类ID
+- body body (required) 编辑分类参数: {"$ref": "#/definitions/staff.ReqStaffMetricCategoryUpdate"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## PUT /api/v1/staff/metric-categories/{id}/status
+summary: 启停监测项分类
+tags: staff-监测项字典
+- path id: integer (required) 分类ID
+- body body (required) 启停参数: {"$ref": "#/definitions/staff.ReqStaffMetricCategoryStatus"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/metrics
+summary: 监测项列表(分页)
+tags: staff-监测项字典
+- query page: integer (optional) 页码(默认1)
+- query page_size: integer (optional) 每页条数(默认10)
+- query category_id: integer (optional) 分类ID(0=全部)
+- query status: integer (optional) 状态:1启用/2停用(0=全部)
+- query keyword: string (optional) 关键字(匹配编码/中文名/英文名/缩写,模糊)
+- query metric_scope: integer (optional) 指标范围:0全部/1常规(默认)/2慢病专有/3慢病派生
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/metrics
+summary: 新增监测项
+tags: staff-监测项字典
+- body body (required) 新增监测项参数: {"$ref": "#/definitions/staff.ReqStaffMetricCreate"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/metrics/{code}
+summary: 监测项详情(含参考范围)
+tags: staff-监测项字典
+- path code: string (required) 监测项编码(metric_code)
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## PUT /api/v1/staff/metrics/{code}
+summary: 编辑监测项
+tags: staff-监测项字典
+- path code: string (required) 监测项编码(metric_code)
+- body body (required) 编辑监测项参数: {"$ref": "#/definitions/staff.ReqStaffMetricUpdate"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## DELETE /api/v1/staff/metrics/{code}
+summary: 删除监测项
+tags: staff-监测项字典
+- path code: string (required) 监测项编码(metric_code)
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/metrics/{code}/diseases
+summary: 监测项已关联慢病列表
+tags: staff-监测项字典
+- path code: string (required) 监测项编码(metric_code)
+- query disease_code: string (optional) 病种编码(ICD10,可选)
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/metrics/{code}/diseases
+summary: 新增监测项-慢病关联
+tags: staff-监测项字典
+- path code: string (required) 监测项编码(metric_code)
+- body body (required) 病种编码(ICD10): {"$ref": "#/definitions/staff.ReqStaffDiseaseCreate"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/metrics/{code}/ref-ranges
+summary: 监测项参考范围列表
+tags: staff-监测项字典
+- path code: string (required) 监测项编码(metric_code)
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/metrics/{code}/ref-ranges
+summary: 保存监测项参考范围(新增/编辑)
+tags: staff-监测项字典
+- path code: string (required) 监测项编码(metric_code)
+- body body (required) 参考范围参数: {"$ref": "#/definitions/staff.ReqStaffRefRangeCreate"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## PUT /api/v1/staff/metrics/{code}/status
+summary: 启停监测项
+tags: staff-监测项字典
+- path code: string (required) 监测项编码(metric_code)
+- body body (required) 启停参数: {"$ref": "#/definitions/staff.ReqStaffMetricStatus"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/orders/pending-confirm
+summary: 待确认订单列表
+tags: staff-订单排单
+- query page: integer (optional) 页码
+- query page_size: integer (optional) 每页条数
+- query keyword: string (optional) 关键字
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/orders/{id}
+summary: 订单详情
+tags: staff-订单排单
+- path id: integer (required) 订单ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/orders/{id}/confirm
+summary: 订单确认
+tags: staff-订单排单
+- path id: integer (required) 订单ID
+- body body (required) 确认信息: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/orders/{id}/reject
+summary: 订单关闭/拒绝
+tags: staff-订单排单
+- path id: integer (required) 订单ID
+- body body (required) 拒绝信息: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/plans/{id}
+summary: 方案详情
+tags: staff-健康方案
+- path id: integer (required) 方案ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/plans/{id}/abandon
+summary: 方案废弃
+tags: staff-健康方案
+- path id: integer (required) 方案ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/plans/{id}/confirm
+summary: 方案确认
+tags: staff-健康方案
+- path id: integer (required) 方案ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/positions
+summary: 岗位配置列表
+tags: staff-人员管理
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## DELETE /api/v1/staff/ref-ranges/{refId}
+summary: 删除参考范围
+tags: staff-监测项字典
+- path refId: integer (required) 参考范围ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## PUT /api/v1/staff/ref-ranges/{refId}/status
+summary: 设置参考范围是否默认
+tags: staff-监测项字典
+- path refId: integer (required) 参考范围ID
+- body body (required) 默认标记: {"$ref": "#/definitions/staff.ReqStaffRefRangeDefault"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/refunds
+summary: 退款单列表（本机构）
+tags: staff-订单排单
+- query page: integer (optional) 页码
+- query page_size: integer (optional) 每页条数
+- query status: integer (optional) 退款状态过滤，选填
+- query start_time: integer (optional) 开始时间(UTC秒)，选填
+- query end_time: integer (optional) 结束时间(UTC秒)，选填
+response: {"type": "object", "additionalProperties": true}
+
+## GET /api/v1/staff/refunds/{id}
+summary: 退款单详情
+tags: staff-订单排单
+- path id: integer (required) 退款单ID
+response: {"type": "object", "additionalProperties": true}
+
+## POST /api/v1/staff/refunds/{id}/approve
+summary: 退款审批（医护管理员-第1层）
+tags: staff-订单排单
+- path id: integer (required) 退款单ID
+- body body (required) 审批参数(通过/拒绝): {"$ref": "#/definitions/staff.ReqStaffApproveRefund"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/refunds/{id}/logs
+summary: 退款审批留痕
+tags: staff-订单排单
+- path id: integer (required) 退款单ID
+- query approver_type: string (optional) 审批角色过滤: staff/finance，选填
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/schedules
+summary: 机构排班表
+tags: staff-排班
+- query view: string (optional) 视图: day|week|month
+- query date: string (optional) 基准日期 YYYY-MM-DD
+- query staff_id: integer (optional) 人员ID
+- query end_date: string (optional) 结束日期 YYYY-MM-DD
+- query page: integer (optional) 页码
+- query page_size: integer (optional) 每页条数
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/schedules
+summary: 新增排班
+tags: staff-排班
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/schedules/{id}
+summary: 排班详情
+tags: staff-排班
+- path id: integer (required) 排班ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## PUT /api/v1/staff/schedules/{id}
+summary: 编辑排班
+tags: staff-排班
+- path id: integer (required) 排班ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## DELETE /api/v1/staff/schedules/{id}
+summary: 停用/删除排班
+tags: staff-排班
+- path id: integer (required) 排班ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/service-schedules/{id}/cancel
+summary: 取消排单
+tags: staff-工单
+- path id: integer (required) 排单ID
+- body body (required) 取消信息: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/service-schedules/{id}/reassign
+summary: 改派
+tags: staff-工单
+- path id: integer (required) 排单ID
+- body body (required) 改派信息: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/staffs
+summary: 人员列表
+tags: staff-人员管理
+- query staff_type: integer (optional) 人员类型
+- query status: integer (optional) 在职状态
+- query position_code: string (optional) 岗位编码(Admin/Doctor/HealthMgr/Caregiver)
+- query keyword: string (optional) 关键字
+- query page: integer (optional) 页码
+- query page_size: integer (optional) 每页条数
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/staffs
+summary: 新增人员
+tags: staff-人员管理
+- body body (required) 人员信息: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/staffs/{id}
+summary: 人员详情
+tags: staff-人员管理
+- path id: integer (required) 人员ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## PUT /api/v1/staff/staffs/{id}
+summary: 编辑人员
+tags: staff-人员管理
+- path id: integer (required) 人员ID
+- body body (required) 人员信息: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## DELETE /api/v1/staff/staffs/{id}
+summary: 删除人员
+tags: staff-人员管理
+- path id: integer (required) 人员ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/staffs/{id}/credentials
+summary: 资质列表
+tags: staff-人员管理
+- path id: integer (required) 人员ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/staffs/{id}/credentials
+summary: 资质新增
+tags: staff-人员管理
+- path id: integer (required) 人员ID
+- body body (required) 资质信息: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/upload
+summary: 上传文件到 OSS
+tags: 文件上传
+- formData file: file (required) 待上传文件
+- formData dir: string (optional) 可选业务子目录，如 avatar、report；留空用默认目录 uploads/staff
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/upload/batch
+summary: 批量上传文件到 OSS
+tags: 文件上传
+- formData files: file (required) 多个文件（multipart 字段名 files）
+- formData dir: string (optional) 可选业务子目录
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## DELETE /api/v1/staff/upload/{key}
+summary: 删除已上传文件
+tags: 文件上传
+- path key: string (required) 文件 key（形如 uploads/staff/images/202408/xxx.jpg）
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/warnings
+summary: 预警列表
+tags: staff-健康预警
+- query status: integer (optional) 预警状态
+- query severity: integer (optional) 等级
+- query warning_source: integer (optional) 来源
+- query member_id: integer (optional) 会员ID
+- query page: integer (optional) 页码
+- query page_size: integer (optional) 每页条数
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/warnings/{id}
+summary: 预警详情
+tags: staff-健康预警
+- path id: integer (required) 预警ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/warnings/{id}/handle
+summary: 预警处置
+tags: staff-健康预警
+- path id: integer (required) 预警ID
+- body body (required) 处置信息；warning_status取值: 3-ignored已忽略(继续服务) 4-handled_goon已处置-继续服务 5-handled_stop已处置-中止服务; 处置为stop(5)时sminiapp抓取会置工单中止: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/warnings/{id}/ignore
+summary: 预警忽略
+tags: staff-健康预警
+- path id: integer (required) 预警ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/work-orders
+summary: 工单列表
+tags: staff-工单
+- query wo_status: integer (optional) 工单状态
+- query staff_id: integer (optional) 服务人员ID
+- query service_date: string (optional) 服务日期
+- query member_id: integer (optional) 会员ID
+- query keyword: string (optional) 关键字
+- query work_order_no: string (optional) 工单编码
+- query page: integer (optional) 页码
+- query page_size: integer (optional) 每页条数
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/work-orders/batch-dispatch
+summary: 批量派单/改派（按工单编码）
+tags: staff-工单
+- body body (required) 批量派单信息: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/work-orders/pending-dispatch
+summary: 待排单队列
+tags: staff-工单
+- query page: integer (optional) 页码
+- query page_size: integer (optional) 每页条数
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## GET /api/v1/staff/work-orders/{id}
+summary: 工单详情
+tags: staff-工单
+- path id: integer (required) 工单ID
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/work-orders/{id}/cancel
+summary: 取消工单
+tags: staff-工单
+- path id: integer (required) 工单ID
+- body body (optional) 取消信息: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}
+
+## POST /api/v1/staff/work-orders/{id}/dispatch
+summary: 派单
+tags: staff-工单
+- path id: integer (required) 工单ID
+- body body (required) 派单信息: {"type": "object"}
+response: {"$ref": "#/definitions/pkg.Response"}

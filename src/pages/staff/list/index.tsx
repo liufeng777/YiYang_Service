@@ -154,9 +154,6 @@ export default function StaffList() {
         description="机构管理员维护当前机构普通用户、专业服务人员及账号状态"
         extra={
           <Space>
-            <Button onClick={() => navigate('/staff/credentials')}>执业资质</Button>
-            <Button onClick={() => navigate('/staff/audit')}>资质审核</Button>
-            <Button onClick={() => navigate('/staff/qualification')}>派单资格总览</Button>
             <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/staff/create')}>
               新增人员
             </Button>
