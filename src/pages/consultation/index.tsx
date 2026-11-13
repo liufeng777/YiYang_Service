@@ -5,9 +5,10 @@
  * 「登记电话咨询」已对接 POST /api/v1/staff/consultations
  */
 import { useCallback, useEffect, useState } from 'react'
-import { Button, Card, Input, Modal, Select, Table, App } from 'antd'
+import { Button, Card, Form, Input, Select, Table, App } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import PageContainer from '@/components/PageContainer'
+import FormDrawer from '@/components/FormDrawer'
 import { consultApi } from '@/api'
 import type { ConsultationItem } from '@/api/modules/consult'
 import { formatDateTime } from '@/utils'
@@ -249,26 +250,22 @@ export default function ConsultationList() {
         </Card>
       </PageContainer>
 
-      <Modal
-        title="人工回复"
-        open={!!replyTarget}
-        onOk={onReply}
-        onCancel={() => setReplyTarget(null)}
-        confirmLoading={replying}
-        okText="提交回复"
-        cancelText="取消"
+      <FormDrawer
+        title="人工回复" open={!!replyTarget} onClose={() => setReplyTarget(null)}
+        onSubmit={onReply} confirmLoading={replying} okText="提交回复"
       >
-        <div style={{ marginBottom: 12 }}>
-          <strong>咨询内容：</strong>
-          {replyTarget?.question}
-        </div>
-        <Input.TextArea
-          rows={4}
-          placeholder="请输入回复内容"
-          value={answer}
-          onChange={(e) => setAnswer(e.target.value)}
-        />
-      </Modal>
+        <Form layout="vertical">
+          <Form.Item label="咨询内容">
+            <div>{replyTarget?.question}</div>
+          </Form.Item>
+          <Form.Item label="回复内容" required>
+            <Input.TextArea
+              rows={4} placeholder="请输入回复内容" value={answer}
+              onChange={(e) => setAnswer(e.target.value)}
+            />
+          </Form.Item>
+        </Form>
+      </FormDrawer>
 
       <ConsultationRegister
         open={registerOpen}

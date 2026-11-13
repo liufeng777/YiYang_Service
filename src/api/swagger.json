@@ -1619,6 +1619,18 @@
                   },
                   {
                       "type": "integer",
+                      "description": "开始时间(UTC秒)，按计划时间plan_time过滤，不传=不限制",
+                      "name": "start_time",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "结束时间(UTC秒)，按计划时间plan_time过滤，不传=不限制",
+                      "name": "end_time",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
                       "description": "页码，默认1",
                       "name": "page",
                       "in": "query"
@@ -2476,10 +2488,10 @@
               "tags": [
                   "staff-健康档案-慢病专病"
               ],
-              "summary": "新建专病条目并录入当次评估",
+              "summary": "新建专病条目（可选录入当次评估指标）",
               "parameters": [
                   {
-                      "description": "专病条目（member_id/disease_code/metrics 必填）",
+                      "description": "专病条目（member_id/disease_code 必填，metrics 选填可后补）",
                       "name": "body",
                       "in": "body",
                       "required": true,
@@ -2929,6 +2941,34 @@
                       "required": true
                   }
               ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/health-archives/enum-options": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "返回健康档案全部枚举字段的可选项 {value,label} 字典，key 为字段名（blood_type/marital_status/disease_status/op_type/outcome/allergy_type/severity/relation/smoking_status/drink_status/exercise_freq/sleep_quality/diet_habit/mental_status/activity_level/exercise_habit/exercise_duration/eating_mode/sleep_medication/oral_status/hearing_status/vision_status/passive_smoke）。\n纯静态数据，来自 common/models 常量收口，不走子服务；前端编辑档案下拉框用。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康档案"
+              ],
+              "summary": "健康档案可选项枚举字典（血型/婚姻/病史/生活习惯等）",
               "responses": {
                   "200": {
                       "description": "OK",
@@ -4115,56 +4155,6 @@
               }
           }
       },
-      "/api/v1/staff/members/{id}/followup-template": {
-          "get": {
-              "security": [
-                  {
-                      "BearerAuth": []
-                  }
-              ],
-              "description": "按随访类型 + 会员在管慢病返回应填写的子集与子项（值为空），前端用于渲染随访表单。",
-              "consumes": [
-                  "application/json"
-              ],
-              "produces": [
-                  "application/json"
-              ],
-              "tags": [
-                  "staff-随访回访"
-              ],
-              "summary": "随访表单模板",
-              "parameters": [
-                  {
-                      "type": "integer",
-                      "description": "会员ID",
-                      "name": "id",
-                      "in": "path",
-                      "required": true
-                  },
-                  {
-                      "type": "integer",
-                      "description": "随访类型：1日常随访 2健康预警回访",
-                      "name": "followup_type",
-                      "in": "query",
-                      "required": true
-                  },
-                  {
-                      "type": "integer",
-                      "description": "预警ID（健康预警回访时传）",
-                      "name": "warning_id",
-                      "in": "query"
-                  }
-              ],
-              "responses": {
-                  "200": {
-                      "description": "OK",
-                      "schema": {
-                          "$ref": "#/definitions/pkg.Response"
-                      }
-                  }
-              }
-          }
-      },
       "/api/v1/staff/members/{id}/followups": {
           "post": {
               "security": [
@@ -4711,7 +4701,7 @@
                       "BearerAuth": []
                   }
               ],
-              "description": "按层级返回监测项分类树（一级含 children）。level/parent_id 均可选，默认返回全量树。",
+              "description": "返回全量多层级分类树（一级含 children 递归到末级）。level/parent_id 可选：不传返回全量树；传 level 按层级平铺返回；传 parent_id 返回指定父级下的直接子分类平铺列表。",
               "consumes": [
                   "application/json"
               ],
@@ -4725,13 +4715,13 @@
               "parameters": [
                   {
                       "type": "integer",
-                      "description": "层级(如1=一级)",
+                      "description": "层级(如1=一级，传则平铺返回该层)",
                       "name": "level",
                       "in": "query"
                   },
                   {
                       "type": "integer",
-                      "description": "父级ID",
+                      "description": "父级ID(传则返回该父级下直接子分类平铺列表)",
                       "name": "parent_id",
                       "in": "query"
                   }
@@ -4905,7 +4895,7 @@
                   },
                   {
                       "type": "integer",
-                      "description": "分类ID(0=全部)",
+                      "description": "分类ID(0=全部；支持父级分类递推过滤，传一级父分类可命中其下全部层级子分类的监测项)",
                       "name": "category_id",
                       "in": "query"
                   },
@@ -4923,7 +4913,7 @@
                   },
                   {
                       "type": "integer",
-                      "description": "指标范围:0全部/1常规(默认)/2慢病专有/3慢病派生",
+                      "description": "指标范围:0全部(默认)/1常规/2慢病专有/3慢病派生",
                       "name": "metric_scope",
                       "in": "query"
                   }
@@ -7157,6 +7147,7 @@
                   "type": "integer"
               },
               "metrics": {
+                  "description": "选填：建档时可传入首次评估指标；不传则仅建档",
                   "type": "object",
                   "additionalProperties": {
                       "type": "string"
@@ -7316,6 +7307,10 @@
               },
               "oral_status": {
                   "description": "口腔情况:1正常 2缺牙 3义齿",
+                  "type": "integer"
+              },
+              "passive_smoke": {
+                  "description": "二手烟暴露:1否 2是 3不清楚",
                   "type": "integer"
               },
               "sleep_hour": {

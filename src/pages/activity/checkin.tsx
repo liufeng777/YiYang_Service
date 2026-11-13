@@ -7,10 +7,11 @@
  * - POST /activities/{id}/registrations（临时到场补登记 = 代报名后再签到）
  */
 import { useCallback, useEffect, useState } from 'react'
-import { Button, Card, Input, InputNumber, Modal, Select, Table, Tag, App } from 'antd'
+import { Button, Card, Form, Input, InputNumber, Select, Table, Tag, App } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import { useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import FormDrawer from '@/components/FormDrawer'
 import { activityApi } from '@/api'
 import type { ActivityItem, RegistrationItem } from '@/api/modules/activity'
 
@@ -225,35 +226,32 @@ export default function ActivityCheckin() {
         />
       </Card>
 
-      {/* 临时到场补登记弹窗 */}
-      <Modal
-        title="临时到场补登记"
-        open={regOpen}
-        onCancel={() => setRegOpen(false)}
-        onOk={onRegister}
-        confirmLoading={regSaving}
-        okText="补登记"
+      <FormDrawer
+        title="临时到场补登记" open={regOpen} onClose={() => setRegOpen(false)}
+        onSubmit={onRegister} confirmLoading={regSaving} okText="补登记"
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <Input
-            placeholder="姓名"
-            value={regForm.contact_name}
-            onChange={(e) => setRegForm((f) => ({ ...f, contact_name: e.target.value }))}
-          />
-          <Input
-            placeholder="联系电话"
-            value={regForm.contact_phone}
-            onChange={(e) => setRegForm((f) => ({ ...f, contact_phone: e.target.value }))}
-          />
-          <InputNumber
-            style={{ width: '100%' }}
-            min={1}
-            placeholder="参与人数"
-            value={regForm.participant_count}
-            onChange={(v) => setRegForm((f) => ({ ...f, participant_count: v ?? 1 }))}
-          />
-        </div>
-      </Modal>
+        <Form layout="vertical">
+          <Form.Item label="姓名" required>
+            <Input
+              placeholder="姓名" value={regForm.contact_name}
+              onChange={(e) => setRegForm((f) => ({ ...f, contact_name: e.target.value }))}
+            />
+          </Form.Item>
+          <Form.Item label="联系电话" required>
+            <Input
+              placeholder="联系电话" value={regForm.contact_phone}
+              onChange={(e) => setRegForm((f) => ({ ...f, contact_phone: e.target.value }))}
+            />
+          </Form.Item>
+          <Form.Item label="参与人数" required>
+            <InputNumber
+              min={1} placeholder="参与人数"
+              value={regForm.participant_count}
+              onChange={(v) => setRegForm((f) => ({ ...f, participant_count: v ?? 1 }))}
+            />
+          </Form.Item>
+        </Form>
+      </FormDrawer>
     </PageContainer>
   )
 }

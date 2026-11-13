@@ -9,6 +9,7 @@ import {
 } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import PageContainer from '@/components/PageContainer'
+import FormDrawer from '@/components/FormDrawer'
 import { healthAccessApi, memberApi, staffApi } from '@/api'
 import { HEALTH_ACCESS_STATUS_MAP, type HealthAccessItem } from '@/api/modules/health-access'
 import type { MemberItem } from '@/api/modules/member'
@@ -156,6 +157,36 @@ export default function MemberList() {
     },
   ]
 
+  const actionFormContent = (
+    <Form form={actionForm} layout="vertical" initialValues={{ relation: 1 }}>
+      {action?.type === 'assign' && (
+        <Form.Item name="staff_id" label="目标健管师" rules={[{ required: true, message: '请选择健管师' }]}>
+          <Select
+            showSearch optionFilterProp="label"
+            options={staffs.map((staff) => ({ value: staff.id, label: `${staff.name} · ${staff.position_name || staff.position_code || staff.id}` }))}
+          />
+        </Form.Item>
+      )}
+      {action?.type === 'confirm' && <Form.Item name="relation" label="关系"><InputNumber min={1} precision={0} /></Form.Item>}
+      {action?.type === 'followup' && (
+        <Form.Item name="content" label="跟进内容" rules={[{ required: true, whitespace: true, message: '请输入跟进内容' }]}>
+          <Input.TextArea rows={4} maxLength={1000} />
+        </Form.Item>
+      )}
+      {(action?.type === 'reject' || action?.type === 'transfer') && (
+        <Form.Item name="reason" label={action.type === 'reject' ? '拒绝原因' : '转派原因'}>
+          <Input.TextArea rows={3} maxLength={500} />
+        </Form.Item>
+      )}
+      {action?.type === 'transfer' && (
+        <Form.Item name="institution_id" label="目标机构 ID" rules={[{ required: true, message: '请输入目标机构 ID' }]}>
+          <InputNumber min={1} precision={0} />
+        </Form.Item>
+      )}
+    </Form>
+  )
+  const actionNeedsConfirmation = action?.type === 'confirm' || action?.type === 'reject'
+
   return (
     <PageContainer
       title="健康会员管理"
@@ -199,9 +230,9 @@ export default function MemberList() {
         />
       </Card>
 
-      <Modal
-        title="新增健康会员" open={createOpen} onCancel={() => setCreateOpen(false)}
-        onOk={onCreate} confirmLoading={creating} destroyOnHidden
+      <FormDrawer
+        title="新增健康会员" open={createOpen} onClose={() => setCreateOpen(false)}
+        onSubmit={onCreate} confirmLoading={creating}
       >
         <Form form={createForm} layout="vertical" initialValues={{ source_type: 1, relation: 1 }}>
           <Form.Item name="member_id" label="会员" rules={[{ required: true, message: '请选择会员' }]}>
@@ -221,7 +252,7 @@ export default function MemberList() {
           <Form.Item name="health_intent" label="健康管理意向"><Input.TextArea rows={2} /></Form.Item>
           <Form.Item name="remark" label="备注"><Input.TextArea rows={2} /></Form.Item>
         </Form>
-      </Modal>
+      </FormDrawer>
 
       <Drawer
         title={`健康会员接入 #${detail?.id ?? ''}`} width={560} open={detail != null}
@@ -250,37 +281,21 @@ export default function MemberList() {
         )}
       </Drawer>
 
-      <Modal
-        title={action ? ACTION_TITLES[action.type] : ''} open={action != null}
-        onCancel={() => setAction(undefined)} onOk={onAction} confirmLoading={acting} destroyOnHidden
-      >
-        <Form form={actionForm} layout="vertical" initialValues={{ relation: 1 }}>
-          {action?.type === 'assign' && (
-            <Form.Item name="staff_id" label="目标健管师" rules={[{ required: true, message: '请选择健管师' }]}>
-              <Select
-                showSearch optionFilterProp="label"
-                options={staffs.map((staff) => ({ value: staff.id, label: `${staff.name} · ${staff.position_name || staff.position_code || staff.id}` }))}
-              />
-            </Form.Item>
-          )}
-          {action?.type === 'confirm' && <Form.Item name="relation" label="关系"><InputNumber min={1} precision={0} /></Form.Item>}
-          {action?.type === 'followup' && (
-            <Form.Item name="content" label="跟进内容" rules={[{ required: true, whitespace: true, message: '请输入跟进内容' }]}>
-              <Input.TextArea rows={4} maxLength={1000} />
-            </Form.Item>
-          )}
-          {(action?.type === 'reject' || action?.type === 'transfer') && (
-            <Form.Item name="reason" label={action.type === 'reject' ? '拒绝原因' : '转派原因'}>
-              <Input.TextArea rows={3} maxLength={500} />
-            </Form.Item>
-          )}
-          {action?.type === 'transfer' && (
-            <Form.Item name="institution_id" label="目标机构 ID" rules={[{ required: true, message: '请输入目标机构 ID' }]}>
-              <InputNumber min={1} precision={0} />
-            </Form.Item>
-          )}
-        </Form>
-      </Modal>
+      {actionNeedsConfirmation ? (
+        <Modal
+          title={action ? ACTION_TITLES[action.type] : ''} open={action != null}
+          onCancel={() => setAction(undefined)} onOk={onAction} confirmLoading={acting} destroyOnHidden
+        >
+          {actionFormContent}
+        </Modal>
+      ) : (
+        <FormDrawer
+          title={action ? ACTION_TITLES[action.type] : ''} open={action != null}
+          onClose={() => setAction(undefined)} onSubmit={onAction} confirmLoading={acting}
+        >
+          {actionFormContent}
+        </FormDrawer>
+      )}
     </PageContainer>
   )
 }

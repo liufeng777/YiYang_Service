@@ -1,5 +1,6 @@
 import { http } from '@/utils/request'
 import type { PageParams, PageResult } from '@/types/api'
+import type { ArchiveMetric } from './health-archive'
 
 export const RISK_LEVEL_MAP: Record<number, string> = { 1: '低风险', 2: '中风险', 3: '高风险' }
 export const MEMBER_STATUS_MAP: Record<number, string> = { 1: '待完善', 2: '待分配', 3: '管理中', 4: '已结案' }
@@ -145,7 +146,7 @@ export function getMetricRecords(id: number | string, params: PageParams & {
   start_ts?: number
   end_ts?: number
 }) {
-  return http.get<PageResult<Record<string, unknown>>>(`/v1/staff/members/${id}/metric-records`, { ...params })
+  return http.get<PageResult<ArchiveMetric>>(`/v1/staff/members/${id}/metric-records`, { ...params })
 }
 
 export function createMetricRecord(id: number | string, data: MetricRecordPayload) {
@@ -156,13 +157,32 @@ export function updateMetricRecord(id: number | string, rid: number | string, da
   return http.put<null>(`/v1/staff/members/${id}/metric-records/${rid}`, data)
 }
 
+export interface MetricTrendPoint {
+  is_abnormal: number
+  measurement_time: number
+  metric_value: string
+}
+
+export interface MetricTrendSeries {
+  metric_code: string
+  metric_name: string
+  metric_unit: string
+  ref_lower: string
+  ref_upper: string
+  points: MetricTrendPoint[]
+}
+
+export interface MetricTrendResult {
+  series: MetricTrendSeries[]
+}
+
 export function getMetricTrend(id: number | string, params: {
   metric_codes: string
   limit?: number
   start_ts?: number
   end_ts?: number
 }) {
-  return http.get<Record<string, unknown>>(`/v1/staff/members/${id}/metric-records/trend`, { ...params })
+  return http.get<MetricTrendResult>(`/v1/staff/members/${id}/metric-records/trend`, { ...params })
 }
 
 export function getHealthGoals(id: number | string, params?: PageParams) {

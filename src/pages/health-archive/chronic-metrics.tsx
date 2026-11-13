@@ -1,5 +1,5 @@
 /** 将专病字典返回的表单定义转换为 antd 表单项。 */
-import { Alert, Form, Input, InputNumber, Select } from 'antd'
+import { Alert, Form, Input, InputNumber, Select, Tag } from 'antd'
 import type { ArchiveData } from './shared'
 import { asObject, display, parseStringRecord, pick } from './shared'
 
@@ -11,6 +11,9 @@ export interface ChronicMetricDefinition {
   dataType?: number
   isMulti?: boolean
   required?: boolean
+  derived?: boolean
+  fromMetricDict?: boolean
+  refRangeText?: string
   sortOrder?: number
   group?: string
   options: ChronicMetricOption[]
@@ -56,6 +59,9 @@ function extractDefinitions(source: unknown, depth = 0): ChronicMetricDefinition
         dataType: Number(pick(raw, ['data_type', 'type']) ?? 0) || undefined,
         isMulti: Number(pick(raw, ['is_multi', 'multiple']) ?? 0) === 1,
         required: pick(raw, ['required', 'is_required']) === true || Number(pick(raw, ['is_required', 'required']) ?? 0) === 1,
+        derived: pick(raw, ['is_derived']) === true || Number(pick(raw, ['is_derived']) ?? 0) === 1,
+        fromMetricDict: pick(raw, ['is_from_metric_dict']) === true || Number(pick(raw, ['is_from_metric_dict']) ?? 0) === 1,
+        refRangeText: pick(raw, ['ref_range_text']) as string | undefined,
         sortOrder: Number(pick(raw, ['sort_order', 'sort']) ?? index),
         group: pick(raw, ['metric_group', 'group', 'group_name']) as string | undefined,
         options: parseOptions(pick(raw, ['options', 'option_json', 'optionJson', 'enum_options'])),
@@ -67,7 +73,7 @@ function extractDefinitions(source: unknown, depth = 0): ChronicMetricDefinition
 
   const object = asObject(source)
   if (isDefinition(object)) return extractDefinitions([object], depth + 1)
-  for (const key of ['metrics', 'items', 'fields', 'list', 'metric_list', 'form_items']) {
+  for (const key of ['definitions', 'metrics', 'items', 'fields', 'list', 'metric_list', 'form_items']) {
     const candidate = object[key]
     if (Array.isArray(candidate)) {
       const result = extractDefinitions(candidate, depth + 1)
@@ -92,8 +98,30 @@ export function getChronicMetricDefinitions(source: unknown) {
   return extractDefinitions(source)
 }
 
+function metricRecord(source: unknown): ArchiveData {
+  if (!Array.isArray(source)) return asObject(source)
+  return source.reduce<ArchiveData>((metrics, item) => {
+    const raw = asObject(item)
+    const code = pick(raw, ['metric_code', 'code'])
+    if (code != null && code !== '') metrics[String(code)] = pick(raw, ['metric_value', 'value'])
+    return metrics
+  }, {})
+}
+
+/** 评估详情的指标数组同时携带异常状态，按指标编码映射到动态表单。 */
+export function getMetricAbnormalities(source: unknown): Record<string, number> {
+  if (!Array.isArray(source)) return {}
+  return source.reduce<Record<string, number>>((result, item) => {
+    const raw = asObject(item)
+    const code = pick(raw, ['metric_code', 'code'])
+    const status = Number(pick(raw, ['is_abnormal']))
+    if (code != null && code !== '' && (status === 1 || status === 2)) result[String(code)] = status
+    return result
+  }, {})
+}
+
 export function metricFormValues(source: unknown, definitions: ChronicMetricDefinition[]) {
-  const metrics = asObject(source)
+  const metrics = metricRecord(source)
   if (!definitions.length) return { metrics_text: JSON.stringify(metrics, null, 2) }
   const values = Object.fromEntries(definitions.map((definition) => {
     let value = metrics[definition.code]
@@ -127,7 +155,10 @@ export function validateMetricJson(_: unknown, value: string) {
   try { parseStringRecord(value || '{}'); return Promise.resolve() } catch { return Promise.reject(new Error('请输入有效的 JSON 对象')) }
 }
 
-export function ChronicMetricFields({ definitions }: { definitions: ChronicMetricDefinition[] }) {
+export function ChronicMetricFields({ definitions, abnormalities = {} }: {
+  definitions: ChronicMetricDefinition[]
+  abnormalities?: Record<string, number>
+}) {
   if (!definitions.length) {
     return (
       <>
@@ -147,27 +178,38 @@ export function ChronicMetricFields({ definitions }: { definitions: ChronicMetri
 
   return (
     <div className="chronic-metric-grid">
-      {definitions.map((definition) => (
-        <Form.Item
-          key={definition.code}
-          name={['metrics', definition.code]}
-          label={`${definition.label}${definition.unit ? `（${definition.unit}）` : ''}`}
-          rules={definition.required ? [{ required: true, message: `请填写${definition.label}` }] : undefined}
-        >
-          {definition.options.length ? (
-            <Select
-              mode={definition.isMulti ? 'multiple' : undefined}
-              options={definition.options}
-              placeholder={`请选择${definition.label}`}
-              allowClear
-            />
-          ) : definition.dataType === 1 ? (
-            <InputNumber placeholder={`请输入${definition.label}`} />
-          ) : (
-            <Input placeholder={`请输入${definition.label}`} />
-          )}
-        </Form.Item>
-      ))}
+      {definitions.map((definition) => {
+        const status = abnormalities[definition.code]
+        return (
+          <Form.Item
+            key={definition.code}
+            name={['metrics', definition.code]}
+            label={(
+              <span className="chronic-metric-label">
+                <span>{definition.label}{definition.unit ? `（${definition.unit}）` : ''}</span>
+                {status === 1 && <Tag color="red">异常</Tag>}
+                {status === 2 && <Tag color="green">正常</Tag>}
+              </span>
+            )}
+            validateStatus={status === 1 ? 'error' : undefined}
+            extra={status === 1 ? <span className="chronic-metric-feedback">当前记录异常，请复核测量值</span> : undefined}
+            rules={definition.required ? [{ required: true, message: `请填写${definition.label}` }] : undefined}
+          >
+            {definition.options.length ? (
+              <Select
+                mode={definition.isMulti ? 'multiple' : undefined}
+                options={definition.options}
+                placeholder={`请选择${definition.label}`}
+                allowClear
+              />
+            ) : definition.dataType === 1 ? (
+              <InputNumber placeholder={`请输入${definition.label}`} />
+            ) : (
+              <Input placeholder={`请输入${definition.label}`} />
+            )}
+          </Form.Item>
+        )
+      })}
     </div>
   )
 }

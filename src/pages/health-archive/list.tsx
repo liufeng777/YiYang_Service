@@ -76,7 +76,7 @@ export default function HealthArchiveList() {
       key: 'action',
       width: 160,
       render: (_: unknown, row: ArchiveListItem) => (
-        <Button size="small" onClick={() => navigate(`/health-record/${row.member_id}`)}>维护档案</Button>
+        <Button size="small" onClick={() => navigate(`/health-record/${row.member_id}`)}>查看档案</Button>
       ),
     },
   ]
@@ -104,7 +104,7 @@ export default function HealthArchiveList() {
 
       <Card variant="borderless" className="list-card table-fill">
         <Table<ArchiveListItem>
-          rowKey="member_id" columns={columns} dataSource={list} loading={loading}
+          rowKey="member_id" size="small" columns={columns} dataSource={list} loading={loading}
           pagination={{
             current: page, pageSize, total, showSizeChanger: true,
             showTotal: (value) => `共 ${value} 条`,

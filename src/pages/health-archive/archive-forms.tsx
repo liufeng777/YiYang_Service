@@ -1,30 +1,37 @@
 /** 主档案、生活习惯与四类病史的真实 CRUD。 */
 import { useCallback, useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
 import {
-  App, Button, Card, DatePicker, Form, Input, InputNumber, Modal,
-  Popconfirm, Space, Table, Tabs,
+  App, Button, Card, DatePicker, Form, Input, InputNumber,
+  Popconfirm, Select, Space, Table, Tabs, Tag,
 } from 'antd'
 import type { Dayjs } from 'dayjs'
 import { healthArchiveApi } from '@/api'
+import FormDrawer from '@/components/FormDrawer'
+import type { ArchiveEnumOptions, HealthArchiveOverview } from '@/api/modules/health-archive'
 import type { ArchiveData } from './shared'
-import { asObject, display, formatTimestamp, pick, toDayjs } from './shared'
+import { toDayjs } from './shared'
+import { archiveEnumColor, archiveEnumLabel } from './archive-enums'
+import { formatDateTime } from '@/utils'
 
-interface BasicProps { memberId: string }
+interface BasicProps {
+  memberId: string
+  overview?: HealthArchiveOverview
+  loading?: boolean
+  enumOptions?: ArchiveEnumOptions
+}
 
-export function BasicPanel({ memberId }: BasicProps) {
+export function BasicPanel({ memberId, overview, loading = false, enumOptions = {} }: BasicProps) {
   const { message } = App.useApp()
   const [basicForm] = Form.useForm()
   const [lifestyleForm] = Form.useForm()
-  const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState<'basic' | 'lifestyle' | null>(null)
 
   useEffect(() => {
-    setLoading(true)
-    healthArchiveApi.getHealthArchiveOverview(memberId).then((res) => {
-      basicForm.setFieldsValue(asObject(pick(res, ['basic', 'archive', 'main'])))
-      lifestyleForm.setFieldsValue(asObject(pick(res, ['lifestyle', 'life_style'])))
-    }).catch(() => undefined).finally(() => setLoading(false))
-  }, [memberId, basicForm, lifestyleForm])
+    if (!overview) return
+    basicForm.setFieldsValue(overview.basic ?? overview.archive ?? overview.main ?? {})
+    lifestyleForm.setFieldsValue(overview.lifestyle ?? overview.life_style ?? {})
+  }, [overview, basicForm, lifestyleForm])
 
   const saveBasic = async () => {
     const values = await basicForm.validateFields()
@@ -44,6 +51,12 @@ export function BasicPanel({ memberId }: BasicProps) {
     } catch { /* 保留输入 */ } finally { setSaving(null) }
   }
 
+  const selectProps = {
+    allowClear: true,
+    showSearch: true,
+    optionFilterProp: 'label' as const,
+  }
+
   return (
     <div className="archive-basic-layout">
       <Card
@@ -52,13 +65,13 @@ export function BasicPanel({ memberId }: BasicProps) {
       >
         <Form form={basicForm} layout="vertical" className="archive-fields archive-fields--basic">
           <Form.Item name="archive_no" label="档案编号"><Input placeholder="请输入档案编号" /></Form.Item>
-          <Form.Item name="blood_type" label="血型编码"><InputNumber precision={0} placeholder="血型编码" /></Form.Item>
+          <Form.Item name="blood_type" label="血型"><Select {...selectProps} options={enumOptions.blood_type} placeholder="请选择血型" /></Form.Item>
           <Form.Item name="height" label="身高"><Input placeholder="请输入身高" /></Form.Item>
           <Form.Item name="weight" label="体重"><Input placeholder="请输入体重" /></Form.Item>
-          <Form.Item name="marital_status" label="婚姻状况编码"><InputNumber precision={0} placeholder="婚姻状况编码" /></Form.Item>
+          <Form.Item name="marital_status" label="婚姻状况"><Select {...selectProps} options={enumOptions.marital_status} placeholder="请选择婚姻状况" /></Form.Item>
           <Form.Item name="nation" label="民族"><Input placeholder="请输入民族" /></Form.Item>
           <Form.Item name="occupation" label="职业"><Input placeholder="请输入职业" /></Form.Item>
-          <Form.Item name="remark" label="备注" className="archive-field-wide"><Input.TextArea rows={3} placeholder="补充档案备注" /></Form.Item>
+          <Form.Item name="remark" label="备注" className="archive-field-wide"><Input.TextArea rows={2} placeholder="补充档案备注" /></Form.Item>
         </Form>
       </Card>
 
@@ -70,35 +83,35 @@ export function BasicPanel({ memberId }: BasicProps) {
           <section className="archive-form-section">
             <h4>饮食与营养</h4>
             <div className="archive-fields archive-fields--lifestyle">
-              <Form.Item name="diet_desc" label="饮食描述" className="archive-field-wide"><Input.TextArea rows={2} /></Form.Item>
               <Form.Item name="staple_food" label="主食"><Input /></Form.Item>
-              <Form.Item name="diet_habit" label="饮食习惯编码"><InputNumber precision={0} /></Form.Item>
-              <Form.Item name="eating_mode" label="进食方式编码"><InputNumber precision={0} /></Form.Item>
+              <Form.Item name="diet_habit" label="饮食习惯"><Select {...selectProps} options={enumOptions.diet_habit} placeholder="请选择饮食习惯" /></Form.Item>
+              <Form.Item name="eating_mode" label="进食方式"><Select {...selectProps} options={enumOptions.eating_mode} placeholder="请选择进食方式" /></Form.Item>
+              <Form.Item name="diet_desc" label="饮食描述" className="archive-field-wide"><Input.TextArea rows={2} /></Form.Item>
             </div>
           </section>
           <section className="archive-form-section">
             <h4>运动与活动</h4>
             <div className="archive-fields archive-fields--lifestyle">
-              <Form.Item name="activity_level" label="活动强度编码"><InputNumber precision={0} /></Form.Item>
-              <Form.Item name="exercise_habit" label="运动习惯编码"><InputNumber precision={0} /></Form.Item>
+              <Form.Item name="activity_level" label="活动强度"><Select {...selectProps} options={enumOptions.activity_level} placeholder="请选择活动强度" /></Form.Item>
+              <Form.Item name="exercise_habit" label="运动习惯"><Select {...selectProps} options={enumOptions.exercise_habit} placeholder="请选择运动习惯" /></Form.Item>
               <Form.Item name="exercise_type" label="运动方式"><Input /></Form.Item>
-              <Form.Item name="exercise_freq" label="运动频率编码"><InputNumber precision={0} /></Form.Item>
-              <Form.Item name="exercise_duration" label="运动时长编码"><InputNumber precision={0} /></Form.Item>
+              <Form.Item name="exercise_freq" label="运动频率"><Select {...selectProps} options={enumOptions.exercise_freq} placeholder="请选择运动频率" /></Form.Item>
+              <Form.Item name="exercise_duration" label="运动时长"><Select {...selectProps} options={enumOptions.exercise_duration} placeholder="请选择运动时长" /></Form.Item>
             </div>
           </section>
           <section className="archive-form-section">
             <h4>睡眠情况</h4>
             <div className="archive-fields archive-fields--lifestyle">
               <Form.Item name="sleep_hour" label="睡眠时长"><Input /></Form.Item>
-              <Form.Item name="sleep_quality" label="睡眠质量编码"><InputNumber precision={0} /></Form.Item>
-              <Form.Item name="sleep_medication" label="睡眠用药编码"><InputNumber precision={0} /></Form.Item>
+              <Form.Item name="sleep_quality" label="睡眠质量"><Select {...selectProps} options={enumOptions.sleep_quality} placeholder="请选择睡眠质量" /></Form.Item>
+              <Form.Item name="sleep_medication" label="睡眠用药"><Select {...selectProps} options={enumOptions.sleep_medication} placeholder="请选择睡眠用药情况" /></Form.Item>
             </div>
           </section>
           <div className="archive-habit-grid">
             <section className="archive-form-section">
               <h4>吸烟情况</h4>
               <div className="archive-fields archive-fields--lifestyle">
-                <Form.Item name="smoking_status" label="吸烟状态编码"><InputNumber precision={0} /></Form.Item>
+                <Form.Item name="smoking_status" label="吸烟状态"><Select {...selectProps} options={enumOptions.smoking_status} placeholder="请选择吸烟状态" /></Form.Item>
                 <Form.Item name="smoke_daily" label="每日吸烟量"><InputNumber precision={0} /></Form.Item>
                 <Form.Item name="smoke_years" label="吸烟年数"><InputNumber precision={0} /></Form.Item>
               </div>
@@ -106,7 +119,7 @@ export function BasicPanel({ memberId }: BasicProps) {
             <section className="archive-form-section">
               <h4>饮酒情况</h4>
               <div className="archive-fields archive-fields--lifestyle">
-                <Form.Item name="drink_status" label="饮酒状态编码"><InputNumber precision={0} /></Form.Item>
+                <Form.Item name="drink_status" label="饮酒状态"><Select {...selectProps} options={enumOptions.drink_status} placeholder="请选择饮酒状态" /></Form.Item>
                 <Form.Item name="drink_type" label="饮酒类型"><Input /></Form.Item>
               </div>
             </section>
@@ -114,10 +127,10 @@ export function BasicPanel({ memberId }: BasicProps) {
           <section className="archive-form-section">
             <h4>感官与精神状态</h4>
             <div className="archive-fields archive-fields--lifestyle">
-              <Form.Item name="vision_status" label="视力状况编码"><InputNumber precision={0} /></Form.Item>
-              <Form.Item name="hearing_status" label="听力状况编码"><InputNumber precision={0} /></Form.Item>
-              <Form.Item name="oral_status" label="口腔状况编码"><InputNumber precision={0} /></Form.Item>
-              <Form.Item name="mental_status" label="精神状况编码"><InputNumber precision={0} /></Form.Item>
+              <Form.Item name="vision_status" label="视力状况"><Select {...selectProps} options={enumOptions.vision_status} placeholder="请选择视力状况" /></Form.Item>
+              <Form.Item name="hearing_status" label="听力状况"><Select {...selectProps} options={enumOptions.hearing_status} placeholder="请选择听力状况" /></Form.Item>
+              <Form.Item name="oral_status" label="口腔状况"><Select {...selectProps} options={enumOptions.oral_status} placeholder="请选择口腔状况" /></Form.Item>
+              <Form.Item name="mental_status" label="精神状况"><Select {...selectProps} options={enumOptions.mental_status} placeholder="请选择精神状况" /></Form.Item>
               <Form.Item name="occupational_hazard" label="职业危害" className="archive-field-wide"><Input.TextArea rows={2} /></Form.Item>
             </div>
           </section>
@@ -129,14 +142,21 @@ export function BasicPanel({ memberId }: BasicProps) {
 
 type RecordKind = 'allergy' | 'disease' | 'family' | 'operation'
 type FieldType = 'text' | 'number' | 'date' | 'textarea'
-interface FieldConfig { name: string; label: string; type?: FieldType; required?: boolean }
+interface FieldConfig { name: string; label: string; type?: FieldType; required?: boolean; render?: (record: ArchiveData) => ReactNode }
 
 const RECORD_CONFIG: Record<RecordKind, { title: string; fields: FieldConfig[] }> = {
   allergy: {
     title: '过敏史',
     fields: [
-      { name: 'allergen_name', label: '过敏原名称', required: true },
-      { name: 'allergen_code', label: '过敏原编码' },
+      {
+        name: 'allergen_name', label: '过敏原名称', required: true,
+        render: (record) => (
+          <div className="table-cell">
+            <strong>{archiveEnumLabel({}, 'allergen_name', record.allergen_name)}</strong>
+            {record.allergen_code != null && record.allergen_code !== '' && <span>{archiveEnumLabel({}, 'allergen_code', record.allergen_code)}</span>}
+          </div>
+        ),
+      },
       { name: 'allergy_type', label: '过敏类型', type: 'number' },
       { name: 'severity', label: '严重程度', type: 'number' },
       { name: 'onset_date', label: '发生日期', type: 'date' },
@@ -147,7 +167,7 @@ const RECORD_CONFIG: Record<RecordKind, { title: string; fields: FieldConfig[] }
   disease: {
     title: '既往疾病史',
     fields: [
-      { name: 'disease_name', label: '疾病名称', required: true },
+      { name: 'disease_name', label: '疾病名称', required: true,},
       { name: 'diagnose_hospital', label: '诊断医院' },
       { name: 'disease_status', label: '疾病状态', type: 'number' },
       { name: 'onset_date', label: '发病日期', type: 'date' },
@@ -158,8 +178,12 @@ const RECORD_CONFIG: Record<RecordKind, { title: string; fields: FieldConfig[] }
   family: {
     title: '家族史',
     fields: [
-      { name: 'disease_name', label: '疾病名称', required: true },
-      { name: 'icd10_code', label: 'ICD-10 编码' },
+      { name: 'disease_name', label: '疾病名称', required: true, render: (record) => (
+        <div className="table-cell">
+          <strong>{archiveEnumLabel({}, 'disease_name', record.disease_name)}</strong>
+          {record.icd10_code != null && record.icd10_code !== '' && <span>{archiveEnumLabel({}, 'icd10_code', record.icd10_code)}</span>}
+        </div>
+      )},
       { name: 'relation', label: '亲属关系', type: 'number' },
       { name: 'onset_age', label: '发病年龄', type: 'number' },
       { name: 'is_dead', label: '是否已故', type: 'number' },
@@ -180,7 +204,7 @@ const RECORD_CONFIG: Record<RecordKind, { title: string; fields: FieldConfig[] }
   },
 }
 
-function RecordTable({ memberId, kind }: { memberId: string; kind: RecordKind }) {
+function RecordTable({ memberId, kind, enumOptions = {} }: { memberId: string; kind: RecordKind; enumOptions?: ArchiveEnumOptions }) {
   const { message } = App.useApp()
   const [form] = Form.useForm()
   const [records, setRecords] = useState<ArchiveData[]>([])
@@ -266,9 +290,16 @@ function RecordTable({ memberId, kind }: { memberId: string; kind: RecordKind })
     ...config.fields.filter((field) => field.type !== 'textarea').map((field) => ({
       title: field.label,
       key: field.name,
-      render: (_: unknown, record: ArchiveData) => field.type === 'date'
-        ? formatTimestamp(record[field.name])
-        : display(record[field.name]),
+      render: (_: unknown, record: ArchiveData) => {
+        if (field.render) return field.render(record)
+        const value = record[field.name]
+        if (field.type === 'date') return formatDateTime(Number(value) * 1000)
+        const label = archiveEnumLabel(enumOptions, field.name, value)
+        if (label !== '-' && enumOptions[field.name]?.length) {
+          return <Tag color={archiveEnumColor(field.name, value, label)}>{label}</Tag>
+        }
+        return label
+      },
     })),
     {
       title: '操作', key: 'action', width: 130,
@@ -285,18 +316,19 @@ function RecordTable({ memberId, kind }: { memberId: string; kind: RecordKind })
 
   return (
     <Card
-      title={config.title}
+      title={config.title} className="archive-table-card"
       extra={<Button type="primary" onClick={() => openEditor()}>新增记录</Button>}
     >
-      <Table<ArchiveData>
-        rowKey={(record) => String(record.id ?? JSON.stringify(record))}
-        columns={columns} dataSource={records} loading={loading} pagination={false}
-        scroll={{ x: 800 }}
-      />
-      <Modal
-        title={`${editing ? '编辑' : '新增'}${config.title}`}
-        open={open} onCancel={() => setOpen(false)} onOk={save}
-        confirmLoading={saving} destroyOnHidden
+      <div className="archive-table-scroll">
+        <Table<ArchiveData>
+          rowKey={(record) => String(record.id ?? JSON.stringify(record))} size="small"
+          columns={columns} dataSource={records} loading={loading} pagination={false}
+          scroll={{ x: 800, y: '100%' }}
+        />
+      </div>
+      <FormDrawer
+        title={`${editing ? '编辑' : '新增'}${config.title}`} width={640}
+        open={open} onClose={() => setOpen(false)} onSubmit={save} confirmLoading={saving}
       >
         <Form form={form} layout="vertical">
           {config.fields.map((field) => (
@@ -304,25 +336,32 @@ function RecordTable({ memberId, kind }: { memberId: string; kind: RecordKind })
               key={field.name} name={field.name} label={field.label}
               rules={field.required ? [{ required: true, whitespace: true, message: `请填写${field.label}` }] : undefined}
             >
-              {field.type === 'number' ? <InputNumber precision={0} />
-                : field.type === 'date' ? <DatePicker />
+              {field.type === 'number' && enumOptions[field.name]?.length ? (
+                <Select
+                  allowClear showSearch optionFilterProp="label"
+                  options={enumOptions[field.name]} placeholder={`请选择${field.label}`}
+                />
+              ) : field.type === 'number' ? <InputNumber precision={0} className="archive-full-width" />
+                : field.type === 'date' ? <DatePicker className="archive-full-width" />
                   : field.type === 'textarea' ? <Input.TextArea rows={3} />
                     : <Input />}
             </Form.Item>
           ))}
         </Form>
-      </Modal>
+      </FormDrawer>
     </Card>
   )
 }
 
-export function RecordsPanel({ memberId }: BasicProps) {
+export function RecordsPanel({ memberId, enumOptions = {} }: BasicProps) {
   return (
     <Tabs
+      size="small"
+      tabPosition="top" className="archive-secondary-tabs"
       items={(Object.keys(RECORD_CONFIG) as RecordKind[]).map((kind) => ({
         key: kind,
         label: RECORD_CONFIG[kind].title,
-        children: <RecordTable memberId={memberId} kind={kind} />,
+        children: <RecordTable memberId={memberId} kind={kind} enumOptions={enumOptions} />,
       }))}
     />
   )

@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Key } from 'react'
 import {
   App, Button, Card, Descriptions, Drawer, Dropdown, Empty, Form, Input,
-  InputNumber, Modal, Popconfirm, Select, Space, Table, Tag, Tooltip, Tree,
+  InputNumber, Popconfirm, Select, Space, Table, Tag, Tooltip, Tree,
 } from 'antd'
 import type { DataNode } from 'antd/es/tree'
 import {
@@ -12,6 +12,7 @@ import {
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import FormDrawer from '@/components/FormDrawer'
 import { chronicDiseaseApi, metricApi } from '@/api'
 import type { ChronicDiseaseDict } from '@/api/modules/chronic-disease'
 import type { MetricCategory, MetricItem, RefRange } from '@/api/modules/metric'
@@ -587,9 +588,9 @@ function MetricsPanel({ categories, selectedCategoryId }: { categories: MetricCa
         </div>
       </Drawer>
 
-      <Modal
+      <FormDrawer
         title={rangeEditing ? '编辑参考范围' : '新增参考范围'} open={rangeOpen}
-        onCancel={() => setRangeOpen(false)} onOk={saveRange} confirmLoading={saving} destroyOnHidden
+        onClose={() => setRangeOpen(false)} onSubmit={saveRange} confirmLoading={saving} width={640}
       >
         <Form form={rangeForm} layout="vertical" className="mm-form-grid">
           <Form.Item name="gender" label="适用性别"><Select options={Object.entries(GENDER_MAP).map(([value, label]) => ({ value: Number(value), label }))} /></Form.Item>
@@ -600,11 +601,11 @@ function MetricsPanel({ categories, selectedCategoryId }: { categories: MetricCa
           <Form.Item name="ref_upper" label="参考上限"><Input /></Form.Item>
           <Form.Item name="sort_order" label="排序"><InputNumber precision={0} /></Form.Item>
         </Form>
-      </Modal>
+      </FormDrawer>
 
-      <Modal
-        title="新增检测项-慢病关联" open={diseaseOpen} onCancel={() => setDiseaseOpen(false)}
-        onOk={addDisease} confirmLoading={saving} destroyOnHidden
+      <FormDrawer
+        title="新增检测项-慢病关联" open={diseaseOpen} onClose={() => setDiseaseOpen(false)}
+        onSubmit={addDisease} confirmLoading={saving}
       >
         <Form form={diseaseForm} layout="vertical">
           <Form.Item name="disease_code" label="慢病病种" rules={[{ required: true, message: '请选择慢病病种' }]}>
@@ -616,7 +617,7 @@ function MetricsPanel({ categories, selectedCategoryId }: { categories: MetricCa
           <Form.Item name="is_required" label="该病种下是否必填"><Select options={[{ value: 0, label: '否' }, { value: 1, label: '是' }]} /></Form.Item>
           <Form.Item name="sort_order" label="表单排序"><InputNumber precision={0} /></Form.Item>
         </Form>
-      </Modal>
+      </FormDrawer>
     </>
   )
 }

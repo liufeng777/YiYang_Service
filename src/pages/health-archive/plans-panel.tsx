@@ -1,11 +1,12 @@
 /** 健康目标、目标指标项、AI 方案及方案确认/放弃。 */
 import { useCallback, useEffect, useState } from 'react'
 import {
-  App, Button, Card, Drawer, Form, Input, Modal, Popconfirm, Space, Table, Tabs, Tag,
+  App, Button, Card, Drawer, Form, Input, Popconfirm, Space, Table, Tabs, Tag,
 } from 'antd'
 import { memberApi, planApi } from '@/api'
+import FormDrawer from '@/components/FormDrawer'
 import type { ArchiveData } from './shared'
-import { display, formatTimestamp, JsonView, parseObject, pick } from './shared'
+import { display, formatTimestamp, DataView, parseObject, pick } from './shared'
 
 interface ListState { list: ArchiveData[]; total: number; page: number }
 const PAGE_SIZE = 10
@@ -20,13 +21,17 @@ function rowTitle(row: ArchiveData) {
 
 function commonColumns(onItems?: (row: ArchiveData) => void) {
   return [
-    { title: 'ID', dataIndex: 'id', key: 'id', width: 90, render: display },
-    { title: '名称 / 描述', key: 'title', render: (_: unknown, row: ArchiveData) => rowTitle(row) },
     {
-      title: '状态', dataIndex: 'status', key: 'status',
+      title: '名称 / 描述', key: 'title',
+      render: (_: unknown, row: ArchiveData) => (
+        <div className="archive-primary-cell"><strong>{rowTitle(row)}</strong><span>ID：{display(row.id)}</span></div>
+      ),
+    },
+    {
+      title: '状态', dataIndex: 'status', key: 'status', width: 120,
       render: (value: unknown) => value == null ? '-' : <Tag>{display(value)}</Tag>,
     },
-    { title: '创建时间', dataIndex: 'created_at', key: 'created_at', render: formatTimestamp },
+    { title: '创建时间', dataIndex: 'created_at', key: 'created_at', width: 180, render: formatTimestamp },
     ...(onItems ? [{
       title: '操作', key: 'action', width: 130,
       render: (_: unknown, row: ArchiveData) => <Button size="small" onClick={() => onItems(row)}>维护指标项</Button>,
@@ -79,19 +84,22 @@ function GoalsPanel({ memberId }: { memberId: string }) {
   }
 
   return (
-    <Card title="健康目标" extra={<Button type="primary" onClick={() => { form.setFieldValue('payload', '{}'); setCreateOpen(true) }}>新增健康目标</Button>}>
-      <Table<ArchiveData>
-        rowKey={(row) => String(row.id ?? JSON.stringify(row))}
-        columns={commonColumns(setItemsGoal)} dataSource={state.list} loading={loading}
-        expandable={{ expandedRowRender: (row) => <JsonView value={row} /> }}
-        pagination={{
-          current: state.page, pageSize: PAGE_SIZE, total: state.total,
-          showTotal: (value) => `共 ${value} 条`, onChange: (page) => setState((prev) => ({ ...prev, page })),
-        }}
-      />
-      <Modal
-        title="新增健康目标" open={createOpen} onCancel={() => setCreateOpen(false)}
-        onOk={create} confirmLoading={saving} destroyOnHidden
+    <Card className="archive-table-card" title="健康目标" extra={<Button type="primary" onClick={() => { form.setFieldValue('payload', '{}'); setCreateOpen(true) }}>新增健康目标</Button>}>
+      <div className="archive-table-scroll">
+        <Table<ArchiveData>
+          size="small"
+          rowKey={(row) => String(row.id ?? JSON.stringify(row))}
+          columns={commonColumns(setItemsGoal)} dataSource={state.list} loading={loading} scroll={{ x: 900, y: '100%' }}
+          expandable={{ expandedRowRender: (row) => <DataView value={row} /> }}
+          pagination={{
+            current: state.page, pageSize: PAGE_SIZE, total: state.total,
+            showTotal: (value) => `共 ${value} 条`, onChange: (page) => setState((prev) => ({ ...prev, page })),
+          }}
+        />
+      </div>
+      <FormDrawer
+        title="新增健康目标" open={createOpen} onClose={() => setCreateOpen(false)}
+        onSubmit={create} confirmLoading={saving} width={640}
       >
         <Form form={form} layout="vertical">
           <Form.Item
@@ -102,10 +110,10 @@ function GoalsPanel({ memberId }: { memberId: string }) {
             <Input.TextArea rows={10} className="archive-code-input" />
           </Form.Item>
         </Form>
-      </Modal>
-      <Modal
+      </FormDrawer>
+      <FormDrawer
         title={`维护目标指标项 #${display(itemsGoal?.id)}`} open={itemsGoal != null}
-        onCancel={() => setItemsGoal(undefined)} onOk={updateItems} confirmLoading={saving} destroyOnHidden
+        onClose={() => setItemsGoal(undefined)} onSubmit={updateItems} confirmLoading={saving} width={640}
       >
         <Form form={form} layout="vertical">
           <Form.Item
@@ -116,7 +124,7 @@ function GoalsPanel({ memberId }: { memberId: string }) {
             <Input.TextArea rows={10} className="archive-code-input" />
           </Form.Item>
         </Form>
-      </Modal>
+      </FormDrawer>
     </Card>
   )
 }
@@ -175,35 +183,38 @@ function PlansPanel({ memberId }: { memberId: string }) {
   }
 
   return (
-    <Card title="健康方案" extra={<Button type="primary" onClick={() => { form.setFieldValue('payload', '{}'); setGenerateOpen(true) }}>AI 生成方案</Button>}>
-      <Table<ArchiveData>
-        rowKey={(row) => String(row.id ?? JSON.stringify(row))}
-        dataSource={state.list} loading={loading}
-        columns={[
-          ...commonColumns(),
-          {
-            title: '操作', key: 'action', width: 240, fixed: 'right' as const,
-            render: (_: unknown, row: ArchiveData) => (
-              <Space>
-                <Button size="small" onClick={() => openDetail(row)}>详情</Button>
-                <Popconfirm title="确认采用该健康方案？" onConfirm={() => act(row, 'confirm')}>
-                  <Button size="small" type="primary" loading={actingId === row.id}>确认</Button>
-                </Popconfirm>
-                <Popconfirm title="确认放弃该健康方案？" onConfirm={() => act(row, 'abandon')}>
-                  <Button size="small" danger loading={actingId === row.id}>放弃</Button>
-                </Popconfirm>
-              </Space>
-            ),
-          },
-        ]}
-        pagination={{
-          current: state.page, pageSize: PAGE_SIZE, total: state.total,
-          showTotal: (value) => `共 ${value} 条`, onChange: (page) => setState((prev) => ({ ...prev, page })),
-        }}
-      />
-      <Modal
-        title="AI 生成健康方案" open={generateOpen} onCancel={() => setGenerateOpen(false)}
-        onOk={generate} confirmLoading={saving} destroyOnHidden
+    <Card className="archive-table-card" title="健康方案" extra={<Button type="primary" onClick={() => { form.setFieldValue('payload', '{}'); setGenerateOpen(true) }}>AI 生成方案</Button>}>
+      <div className="archive-table-scroll">
+        <Table<ArchiveData>
+          size="small"
+          rowKey={(row) => String(row.id ?? JSON.stringify(row))}
+          dataSource={state.list} loading={loading} scroll={{ x: 900, y: '100%' }}
+          columns={[
+            ...commonColumns(),
+            {
+              title: '操作', key: 'action', width: 240, fixed: 'right' as const,
+              render: (_: unknown, row: ArchiveData) => (
+                <Space>
+                  <Button size="small" onClick={() => openDetail(row)}>详情</Button>
+                  <Popconfirm title="确认采用该健康方案？" onConfirm={() => act(row, 'confirm')}>
+                    <Button size="small" type="primary" loading={actingId === row.id}>确认</Button>
+                  </Popconfirm>
+                  <Popconfirm title="确认放弃该健康方案？" onConfirm={() => act(row, 'abandon')}>
+                    <Button size="small" danger loading={actingId === row.id}>放弃</Button>
+                  </Popconfirm>
+                </Space>
+              ),
+            },
+          ]}
+          pagination={{
+            current: state.page, pageSize: PAGE_SIZE, total: state.total,
+            showTotal: (value) => `共 ${value} 条`, onChange: (page) => setState((prev) => ({ ...prev, page })),
+          }}
+        />
+      </div>
+      <FormDrawer
+        title="AI 生成健康方案" open={generateOpen} onClose={() => setGenerateOpen(false)}
+        onSubmit={generate} confirmLoading={saving} width={640} okText="生成方案"
       >
         <Form form={form} layout="vertical">
           <Form.Item
@@ -214,9 +225,9 @@ function PlansPanel({ memberId }: { memberId: string }) {
             <Input.TextArea rows={10} className="archive-code-input" />
           </Form.Item>
         </Form>
-      </Modal>
+      </FormDrawer>
       <Drawer title="健康方案详情" width={680} open={detailOpen} onClose={() => setDetailOpen(false)}>
-        <JsonView value={detail} />
+        <DataView value={detail} />
       </Drawer>
     </Card>
   )
@@ -224,7 +235,7 @@ function PlansPanel({ memberId }: { memberId: string }) {
 
 export default function HealthPlansPanel({ memberId }: { memberId: string }) {
   return (
-    <Tabs items={[
+    <Tabs tabPosition="top" className="archive-secondary-tabs" items={[
       { key: 'goals', label: '健康目标', children: <GoalsPanel memberId={memberId} /> },
       { key: 'plans', label: '健康方案', children: <PlansPanel memberId={memberId} /> },
     ]} />
