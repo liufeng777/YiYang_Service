@@ -1,243 +1,300 @@
-/** 健康目标、目标指标项、AI 方案及方案确认/放弃。 */
+/** 健康方案列表、目标/干预编辑、两轮审核、中止与详情。 */
 import { useCallback, useEffect, useState } from 'react'
 import {
-  App, Button, Card, Drawer, Form, Input, Popconfirm, Space, Table, Tabs, Tag,
+  Alert, App, Button, Card, Descriptions, Drawer, Form, Input, Modal,
+  Popconfirm, Radio, Select, Space, Spin, Table, Tabs, Tag,
 } from 'antd'
-import { memberApi, planApi } from '@/api'
+import { PlusOutlined } from '@ant-design/icons'
+import dayjs from 'dayjs'
+import { planApi } from '@/api'
 import FormDrawer from '@/components/FormDrawer'
-import type { ArchiveData } from './shared'
-import { display, formatTimestamp, DataView, parseObject, pick } from './shared'
+import type {
+  HealthPlan, HealthPlanDetail, HealthPlanGoal, HealthPlanIntervention,
+  HealthPlanReview, HealthPlanStatus,
+} from '@/api/modules/plan'
+import { DataView, display, formatTimestamp, pick } from './shared'
+import PlanCheckins from './plan-checkins'
 
-interface ListState { list: ArchiveData[]; total: number; page: number }
 const PAGE_SIZE = 10
-
-const validateObject = (_: unknown, value: string) => {
-  try { parseObject(value || '{}'); return Promise.resolve() } catch { return Promise.reject(new Error('请输入有效的 JSON 对象')) }
+const STATUS_META: Record<number, { label: string; color: string }> = {
+  1: { label: '草稿', color: 'default' },
+  2: { label: '健管师通过', color: 'processing' },
+  3: { label: '医生确认', color: 'success' },
+  9: { label: '已中止', color: 'error' },
 }
 
-function rowTitle(row: ArchiveData) {
-  return display(pick(row, ['name', 'title', 'goal_name', 'plan_name', 'remark', 'description']))
+interface EditorValues { goals: string; interventions: string }
+
+function planTitle(plan?: HealthPlan) {
+  return display(pick(plan ?? {}, ['plan_name', 'name', 'title']) ?? (plan ? `方案 #${plan.id}` : '-'))
 }
 
-function commonColumns(onItems?: (row: ArchiveData) => void) {
-  return [
-    {
-      title: '名称 / 描述', key: 'title',
-      render: (_: unknown, row: ArchiveData) => (
-        <div className="archive-primary-cell"><strong>{rowTitle(row)}</strong><span>ID：{display(row.id)}</span></div>
-      ),
-    },
-    {
-      title: '状态', dataIndex: 'status', key: 'status', width: 120,
-      render: (value: unknown) => value == null ? '-' : <Tag>{display(value)}</Tag>,
-    },
-    { title: '创建时间', dataIndex: 'created_at', key: 'created_at', width: 180, render: formatTimestamp },
-    ...(onItems ? [{
-      title: '操作', key: 'action', width: 130,
-      render: (_: unknown, row: ArchiveData) => <Button size="small" onClick={() => onItems(row)}>维护指标项</Button>,
-    }] : []),
-  ]
+function planDate(value: unknown) {
+  return typeof value === 'number' && value > 0 ? dayjs(value * 1000).format('YYYY-MM-DD') : display(value)
 }
 
-function GoalsPanel({ memberId }: { memberId: string }) {
+function statusTag(status?: number) {
+  const meta = STATUS_META[status ?? 0]
+  return <Tag color={meta?.color}>{meta?.label ?? display(status)}</Tag>
+}
+
+function detailParts(detail?: HealthPlanDetail) {
+  const plan = (detail?.plan ?? detail ?? {}) as HealthPlan
+  const goals = detail?.goals ?? plan.goals ?? []
+  const interventions = detail?.interventions ?? plan.interventions ?? []
+  const reviews = detail?.reviews ?? detail?.review_history ?? detail?.review_logs
+    ?? (plan.reviews as HealthPlanReview[] | undefined) ?? []
+  return { plan, goals, interventions, reviews }
+}
+
+function parseArray(text: string): HealthPlanGoal[] | HealthPlanIntervention[] {
+  const parsed: unknown = JSON.parse(text)
+  if (!Array.isArray(parsed)) throw new Error('必须是 JSON 数组')
+  return parsed
+}
+
+const validateArray = (_: unknown, value: string) => {
+  try { parseArray(value || '[]'); return Promise.resolve() } catch { return Promise.reject(new Error('请输入有效的 JSON 数组')) }
+}
+
+export default function HealthPlansPanel({ memberId }: { memberId: string }) {
   const { message } = App.useApp()
-  const [form] = Form.useForm()
-  const [state, setState] = useState<ListState>({ list: [], total: 0, page: 1 })
+  const [editorForm] = Form.useForm<EditorValues>()
+  const [list, setList] = useState<HealthPlan[]>([])
+  const [total, setTotal] = useState(0)
+  const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(false)
-  const [createOpen, setCreateOpen] = useState(false)
-  const [itemsGoal, setItemsGoal] = useState<ArchiveData>()
+  const [filters, setFilters] = useState<{ status?: HealthPlanStatus }>({})
+  const [applied, setApplied] = useState<{ status?: HealthPlanStatus }>({})
+  const [editorOpen, setEditorOpen] = useState(false)
+  const [editorPlan, setEditorPlan] = useState<HealthPlan>()
+  const [editorLoading, setEditorLoading] = useState(false)
   const [saving, setSaving] = useState(false)
-
-  const load = useCallback(async () => {
-    setLoading(true)
-    try {
-      const res = await memberApi.getHealthGoals(memberId, { page: state.page, page_size: PAGE_SIZE })
-      setState((prev) => ({ ...prev, list: res.list ?? [], total: res.total ?? 0 }))
-    } catch { /* 拦截器统一提示 */ } finally { setLoading(false) }
-  }, [memberId, state.page])
-
-  useEffect(() => { load() }, [load])
-
-  const create = async () => {
-    const values = await form.validateFields()
-    setSaving(true)
-    try {
-      await memberApi.createHealthGoal(memberId, parseObject(values.payload))
-      message.success('健康目标已创建')
-      setCreateOpen(false)
-      form.resetFields()
-      await load()
-    } catch { /* 保留输入 */ } finally { setSaving(false) }
-  }
-
-  const updateItems = async () => {
-    if (!itemsGoal?.id) return
-    const values = await form.validateFields()
-    setSaving(true)
-    try {
-      await planApi.updateHealthGoalItems(itemsGoal.id as number, parseObject(values.payload))
-      message.success('目标指标项已更新')
-      setItemsGoal(undefined)
-      form.resetFields()
-      await load()
-    } catch { /* 保留输入 */ } finally { setSaving(false) }
-  }
-
-  return (
-    <Card className="archive-table-card" title="健康目标" extra={<Button type="primary" onClick={() => { form.setFieldValue('payload', '{}'); setCreateOpen(true) }}>新增健康目标</Button>}>
-      <div className="archive-table-scroll">
-        <Table<ArchiveData>
-          size="small"
-          rowKey={(row) => String(row.id ?? JSON.stringify(row))}
-          columns={commonColumns(setItemsGoal)} dataSource={state.list} loading={loading} scroll={{ x: 900, y: '100%' }}
-          expandable={{ expandedRowRender: (row) => <DataView value={row} /> }}
-          pagination={{
-            current: state.page, pageSize: PAGE_SIZE, total: state.total,
-            showTotal: (value) => `共 ${value} 条`, onChange: (page) => setState((prev) => ({ ...prev, page })),
-          }}
-        />
-      </div>
-      <FormDrawer
-        title="新增健康目标" open={createOpen} onClose={() => setCreateOpen(false)}
-        onSubmit={create} confirmLoading={saving} width={640}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="payload" label="目标信息（JSON 对象）"
-            extra="Swagger 未定义具体字段，请按后端目标模型填写。"
-            rules={[{ required: true }, { validator: validateObject }]}
-          >
-            <Input.TextArea rows={10} className="archive-code-input" />
-          </Form.Item>
-        </Form>
-      </FormDrawer>
-      <FormDrawer
-        title={`维护目标指标项 #${display(itemsGoal?.id)}`} open={itemsGoal != null}
-        onClose={() => setItemsGoal(undefined)} onSubmit={updateItems} confirmLoading={saving} width={640}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="payload" label="目标指标项（JSON 对象）"
-            extra="Swagger 未定义具体字段，请按后端目标指标项模型填写。"
-            rules={[{ required: true }, { validator: validateObject }]}
-          >
-            <Input.TextArea rows={10} className="archive-code-input" />
-          </Form.Item>
-        </Form>
-      </FormDrawer>
-    </Card>
-  )
-}
-
-function PlansPanel({ memberId }: { memberId: string }) {
-  const { message } = App.useApp()
-  const [form] = Form.useForm()
-  const [state, setState] = useState<ListState>({ list: [], total: 0, page: 1 })
-  const [loading, setLoading] = useState(false)
-  const [generateOpen, setGenerateOpen] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [actingId, setActingId] = useState<unknown>()
-  const [detail, setDetail] = useState<unknown>()
   const [detailOpen, setDetailOpen] = useState(false)
+  const [detailLoading, setDetailLoading] = useState(false)
+  const [detail, setDetail] = useState<HealthPlanDetail>()
+  const [reviewPlan, setReviewPlan] = useState<HealthPlan>()
+  const [reviewPass, setReviewPass] = useState(true)
+  const [reviewing, setReviewing] = useState(false)
+  const [actingId, setActingId] = useState<HealthPlan['id']>()
+  const [checkinPlan, setCheckinPlan] = useState<HealthPlan>()
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await memberApi.getHealthPlans(memberId, { page: state.page, page_size: PAGE_SIZE })
-      setState((prev) => ({ ...prev, list: res.list ?? [], total: res.total ?? 0 }))
+      const result = await planApi.getHealthPlans(memberId, {
+        page, page_size: PAGE_SIZE, status: applied.status,
+      })
+      setList(result.list ?? [])
+      setTotal(result.total ?? 0)
     } catch { /* 拦截器统一提示 */ } finally { setLoading(false) }
-  }, [memberId, state.page])
+  }, [memberId, page, applied])
 
-  useEffect(() => { load() }, [load])
+  useEffect(() => { void load() }, [load])
 
-  const generate = async () => {
-    const values = await form.validateFields()
+  const openCreate = () => {
+    setEditorPlan(undefined)
+    editorForm.setFieldsValue({ goals: '[]', interventions: '[]' })
+    setEditorOpen(true)
+  }
+
+  const openEdit = async (row: HealthPlan) => {
+    setEditorPlan(row)
+    setEditorOpen(true)
+    setEditorLoading(true)
+    try {
+      const result = await planApi.getHealthPlanDetail(row.id)
+      const parts = detailParts(result)
+      editorForm.setFieldsValue({
+        goals: JSON.stringify(parts.goals, null, 2),
+        interventions: JSON.stringify(parts.interventions, null, 2),
+      })
+    } catch { setEditorOpen(false) } finally { setEditorLoading(false) }
+  }
+
+  const save = async () => {
+    const values = await editorForm.validateFields()
+    const payload = {
+      goals: parseArray(values.goals) as HealthPlanGoal[],
+      interventions: parseArray(values.interventions) as HealthPlanIntervention[],
+    }
     setSaving(true)
     try {
-      const result = await memberApi.generateHealthPlan(memberId, parseObject(values.payload))
-      message.success('AI 健康方案草稿已生成')
-      setGenerateOpen(false)
-      form.resetFields()
-      setDetail(result)
-      setDetailOpen(true)
+      if (editorPlan) await planApi.updateHealthPlan(editorPlan.id, payload)
+      else await planApi.createHealthPlan(memberId, payload)
+      message.success(editorPlan ? '健康方案已更新' : '健康方案草稿已创建')
+      setEditorOpen(false)
+      editorForm.resetFields()
       await load()
     } catch { /* 保留输入 */ } finally { setSaving(false) }
   }
 
-  const openDetail = async (row: ArchiveData) => {
-    if (row.id == null) return
+  const openDetail = async (row: HealthPlan) => {
     setDetailOpen(true)
     setDetail(undefined)
-    try { setDetail(await planApi.getHealthPlanDetail(row.id as number)) } catch { setDetailOpen(false) }
+    setDetailLoading(true)
+    try { setDetail(await planApi.getHealthPlanDetail(row.id)) }
+    catch { setDetailOpen(false) }
+    finally { setDetailLoading(false) }
   }
 
-  const act = async (row: ArchiveData, type: 'confirm' | 'abandon') => {
-    if (row.id == null) return
+  const review = async () => {
+    if (!reviewPlan) return
+    setReviewing(true)
+    try {
+      await planApi.reviewHealthPlan(reviewPlan.id, { pass: reviewPass })
+      message.success(reviewPass ? '方案审核已通过' : '方案已驳回')
+      setReviewPlan(undefined)
+      await load()
+    } catch { /* 拦截器统一提示 */ } finally { setReviewing(false) }
+  }
+
+  const abandon = async (row: HealthPlan) => {
     setActingId(row.id)
     try {
-      if (type === 'confirm') await planApi.confirmHealthPlan(row.id as number)
-      else await planApi.abandonHealthPlan(row.id as number)
-      message.success(type === 'confirm' ? '健康方案已确认' : '健康方案已放弃')
+      await planApi.abandonHealthPlan(row.id)
+      message.success('健康方案已中止')
       await load()
     } catch { /* 拦截器统一提示 */ } finally { setActingId(undefined) }
   }
 
-  return (
-    <Card className="archive-table-card" title="健康方案" extra={<Button type="primary" onClick={() => { form.setFieldValue('payload', '{}'); setGenerateOpen(true) }}>AI 生成方案</Button>}>
-      <div className="archive-table-scroll">
-        <Table<ArchiveData>
-          size="small"
-          rowKey={(row) => String(row.id ?? JSON.stringify(row))}
-          dataSource={state.list} loading={loading} scroll={{ x: 900, y: '100%' }}
-          columns={[
-            ...commonColumns(),
-            {
-              title: '操作', key: 'action', width: 240, fixed: 'right' as const,
-              render: (_: unknown, row: ArchiveData) => (
-                <Space>
-                  <Button size="small" onClick={() => openDetail(row)}>详情</Button>
-                  <Popconfirm title="确认采用该健康方案？" onConfirm={() => act(row, 'confirm')}>
-                    <Button size="small" type="primary" loading={actingId === row.id}>确认</Button>
-                  </Popconfirm>
-                  <Popconfirm title="确认放弃该健康方案？" onConfirm={() => act(row, 'abandon')}>
-                    <Button size="small" danger loading={actingId === row.id}>放弃</Button>
-                  </Popconfirm>
-                </Space>
-              ),
-            },
-          ]}
-          pagination={{
-            current: state.page, pageSize: PAGE_SIZE, total: state.total,
-            showTotal: (value) => `共 ${value} 条`, onChange: (page) => setState((prev) => ({ ...prev, page })),
-          }}
-        />
-      </div>
-      <FormDrawer
-        title="AI 生成健康方案" open={generateOpen} onClose={() => setGenerateOpen(false)}
-        onSubmit={generate} confirmLoading={saving} width={640} okText="生成方案"
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            name="payload" label="方案信息（JSON 对象）"
-            extra="Swagger 未定义具体字段；后端将结合会员档案生成草稿。"
-            rules={[{ required: true }, { validator: validateObject }]}
-          >
-            <Input.TextArea rows={10} className="archive-code-input" />
-          </Form.Item>
-        </Form>
-      </FormDrawer>
-      <Drawer title="健康方案详情" width={680} open={detailOpen} onClose={() => setDetailOpen(false)}>
-        <DataView value={detail} />
-      </Drawer>
-    </Card>
-  )
-}
+  const parts = detailParts(detail)
+  const planInfo = Object.fromEntries(Object.entries(parts.plan).filter(([key]) => (
+    !['goals', 'interventions', 'reviews', 'review_history', 'review_logs'].includes(key)
+  )))
 
-export default function HealthPlansPanel({ memberId }: { memberId: string }) {
   return (
-    <Tabs tabPosition="top" className="archive-secondary-tabs" items={[
-      { key: 'goals', label: '健康目标', children: <GoalsPanel memberId={memberId} /> },
-      { key: 'plans', label: '健康方案', children: <PlansPanel memberId={memberId} /> },
-    ]} />
+    <>
+      <Card
+        className="archive-panel-card" title="健康方案"
+        extra={<Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>新建健康方案</Button>}
+      >
+        <div className="archive-inline-filter">
+          <Select
+            allowClear placeholder="全部方案状态" value={filters.status}
+            options={Object.entries(STATUS_META).map(([value, meta]) => ({ value: Number(value), label: meta.label }))}
+            onChange={(value) => setFilters({ status: value })}
+          />
+          <Button onClick={() => { setFilters({}); setApplied({}); setPage(1) }}>重置</Button>
+          <Button type="primary" onClick={() => { setApplied({ ...filters }); setPage(1) }}>查询</Button>
+        </div>
+        <div className="archive-table-scroll">
+          <Table<HealthPlan>
+            rowKey={(row) => String(row.id)} size="small" loading={loading}
+            dataSource={list} scroll={{ x: 1220, y: '100%' }}
+            columns={[
+              {
+                title: '方案', key: 'title', width: 220,
+                render: (_, row) => <div className="archive-primary-cell"><strong>{planTitle(row)}</strong><span>ID：{display(row.id)}</span></div>,
+              },
+              { title: '状态', dataIndex: 'status', width: 130, render: statusTag },
+              {
+                title: '目标 / 干预', key: 'counts', width: 120,
+                render: (_, row) => `${row.goal_count ?? row.goals?.length ?? '-'} / ${row.intervention_count ?? row.interventions?.length ?? '-'}`,
+              },
+              {
+                title: '方案周期', key: 'period', width: 220,
+                render: (_, row) => `${planDate(row.start_date)} 至 ${planDate(row.end_date)}`,
+              },
+              { title: '创建时间', dataIndex: 'created_at', width: 170, render: formatTimestamp },
+              {
+                title: '操作', key: 'action', width: 390, fixed: 'right',
+                render: (_, row) => (
+                  <Space size={4} wrap>
+                    <Button size="small" onClick={() => void openDetail(row)}>详情</Button>
+                    {(row.status === 1 || row.status === 2) && <Button size="small" onClick={() => void openEdit(row)}>编辑</Button>}
+                    {(row.status === 1 || row.status === 2) && <Button size="small" type="primary" onClick={() => { setReviewPass(true); setReviewPlan(row) }}>审核</Button>}
+                    <Button size="small" onClick={() => setCheckinPlan(row)}>打卡管理</Button>
+                    {row.status !== 9 && (
+                      <Popconfirm title="确认中止该健康方案？" description="中止后方案进入终态，不可继续编辑。" onConfirm={() => abandon(row)}>
+                        <Button size="small" danger loading={actingId === row.id}>中止</Button>
+                      </Popconfirm>
+                    )}
+                  </Space>
+                ),
+              },
+            ]}
+            pagination={{
+              current: page, pageSize: PAGE_SIZE, total,
+              showTotal: (value) => `共 ${value} 条`,
+              onChange: (nextPage) => setPage(nextPage),
+            }}
+          />
+        </div>
+      </Card>
+
+      <FormDrawer
+        title={editorPlan ? `编辑健康方案 · ${planTitle(editorPlan)}` : '新建健康方案'}
+        open={editorOpen} onClose={() => setEditorOpen(false)} onSubmit={save}
+        confirmLoading={saving} width={760}
+      >
+        <Spin spinning={editorLoading}>
+          <Alert
+            type="info" showIcon className="plan-editor-alert"
+            message={editorPlan ? '仅草稿、健管师通过状态可编辑；保存会覆盖目标与干预。' : '创建后生成草稿方案，等待健管师提交审核。'}
+          />
+          <Form form={editorForm} layout="vertical">
+            <Form.Item
+              name="goals" label="健康目标（goals JSON 数组）"
+              extra="接口文档仅声明目标数组，具体目标字段以后端模型为准。"
+              rules={[{ required: true }, { validator: validateArray }]}
+            >
+              <Input.TextArea rows={10} className="archive-code-input" />
+            </Form.Item>
+            <Form.Item
+              name="interventions" label="干预措施（interventions JSON 数组）"
+              extra="打卡频率使用 checkin_freq_type / checkin_freq_value 等后端字段。"
+              rules={[{ required: true }, { validator: validateArray }]}
+            >
+              <Input.TextArea rows={12} className="archive-code-input" />
+            </Form.Item>
+          </Form>
+        </Spin>
+      </FormDrawer>
+
+      <Drawer
+        title={detail ? `健康方案 · ${planTitle(parts.plan)}` : '健康方案详情'}
+        width={920} open={detailOpen} onClose={() => setDetailOpen(false)}
+        className="plan-detail-drawer" extra={detail ? statusTag(parts.plan.status) : undefined}
+      >
+        <Spin spinning={detailLoading}>
+          {detail && (
+            <>
+              <Descriptions size="small" bordered column={{ xs: 1, sm: 3 }} className="plan-detail-summary">
+                <Descriptions.Item label="方案 ID">{display(parts.plan.id)}</Descriptions.Item>
+                <Descriptions.Item label="会员 ID">{display(parts.plan.member_id)}</Descriptions.Item>
+                <Descriptions.Item label="方案周期">{planDate(parts.plan.start_date)} 至 {planDate(parts.plan.end_date)}</Descriptions.Item>
+              </Descriptions>
+              <Tabs
+                items={[
+                  { key: 'info', label: '方案信息', children: <DataView value={planInfo} /> },
+                  { key: 'goals', label: `健康目标（${parts.goals.length}）`, children: <DataView value={parts.goals} /> },
+                  { key: 'interventions', label: `干预措施（${parts.interventions.length}）`, children: <DataView value={parts.interventions} /> },
+                  { key: 'reviews', label: `审核履历（${parts.reviews.length}）`, children: <DataView value={parts.reviews} /> },
+                ]}
+              />
+            </>
+          )}
+        </Spin>
+      </Drawer>
+
+      <Modal
+        title={`方案审核 · ${reviewPlan ? planTitle(reviewPlan) : ''}`}
+        open={reviewPlan != null} onCancel={() => setReviewPlan(undefined)}
+        onOk={review} confirmLoading={reviewing} okText="提交审核" destroyOnHidden
+      >
+        <Alert
+          type="info" showIcon className="plan-review-alert"
+          message={reviewPlan?.status === 1 ? '当前为健管师审核环节，通过后进入医生确认。' : '当前为医生确认环节，通过后方案定稿。'}
+          description="审核角色由登录人自动判定；驳回后保持原审核状态。"
+        />
+        <Radio.Group value={reviewPass} onChange={(event) => setReviewPass(event.target.value as boolean)}>
+          <Radio value>通过</Radio>
+          <Radio value={false}>驳回</Radio>
+        </Radio.Group>
+      </Modal>
+
+      <PlanCheckins plan={checkinPlan} onClose={() => setCheckinPlan(undefined)} />
+    </>
   )
 }

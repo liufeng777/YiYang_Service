@@ -64,7 +64,7 @@ export default function HealthArchiveDetail() {
             { key: 'records', label: '病史记录', children: <RecordsPanel memberId={memberId} enumOptions={enumOptions} /> },
             { key: 'chronic', label: '慢病专病', children: <ChronicPanel memberId={memberId} /> },
             { key: 'metrics', label: '健康指标', children: <MetricsPanel memberId={memberId} /> },
-            { key: 'plans', label: '目标与方案', children: <HealthPlansPanel memberId={memberId} /> },
+            { key: 'plans', label: '健康方案', children: <HealthPlansPanel memberId={memberId} /> },
           ]}
         />
       </div>

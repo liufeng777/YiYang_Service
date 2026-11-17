@@ -316,7 +316,10 @@ export default function ChronicPanel({ memberId }: { memberId: string }) {
                 <div className="chronic-card__heading">
                   <div className="chronic-card__title">
                     <MedicineBoxOutlined />
-                    <div><strong>{display(row.disease_name)}</strong><span>{row.disease_code}</span></div>
+                    <div>
+                      <strong>{display(row.disease_name)}</strong>
+                      <span>{row.disease_code}</span>
+                    </div>
                   </div>
                   <div className="chronic-card__status">
                     {row.last_risk_level_label && <Tag color="orange">{row.last_risk_level_label}</Tag>}

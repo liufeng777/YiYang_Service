@@ -17,6 +17,10 @@ const FIELD_LABELS: Record<string, string> = {
   metric_count: '指标数', summary_label: '评估摘要', assessment_count: '评估次数',
   last_assess_date: '最近评估时间', last_risk_level_label: '最近风险摘要',
   treatment_desc: '治疗情况', disease_history_id: '专病条目 ID',
+  goals: '健康目标', interventions: '干预措施', reviews: '审核履历',
+  checkin_freq_type: '打卡频率类型', checkin_freq_value: '打卡频率值',
+  intervention_id: '干预 ID', plan_id: '方案 ID', checkin_time: '打卡时间',
+  completion_rate: '完成率', pass: '是否通过', reviewer_name: '审核人',
 }
 
 export function asObject(value: unknown): ArchiveData {

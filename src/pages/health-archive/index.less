@@ -736,7 +736,7 @@
   flex: 1;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   align-content: start;
-  gap: @spacing-sm;
+  gap: @spacing-md;
   padding: @spacing-2xs;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -749,12 +749,13 @@
 
 .chronic-card {
   border: 1px solid @color-border;
+  background-color: #f8f8f8;
 
   > .ant-card-body {
     display: flex;
     flex-direction: column;
     gap: @spacing-xs;
-    padding: @spacing-sm;
+    padding: @spacing-sm !important;
   }
 
   .ant-descriptions-item {
@@ -793,9 +794,9 @@
 
   > div {
     display: flex;
+    align-items: center;
     min-width: 0;
-    flex-direction: column;
-    gap: @spacing-2xs;
+    gap: @spacing-xs;
   }
 
   strong {
@@ -954,6 +955,33 @@
   margin-top: @spacing-md;
   overflow: auto;
   overscroll-behavior: contain;
+}
+
+.plan-editor-alert,
+.plan-review-alert,
+.plan-detail-summary {
+  margin-bottom: @spacing-lg;
+}
+
+.plan-checkin-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: @spacing-sm;
+  margin-bottom: @spacing-md;
+
+  > span {
+    .text-auxiliary();
+    color: @color-text-secondary;
+  }
+}
+
+.plan-checkin-drawer {
+  .ant-drawer-body,
+  .ant-tabs-content-holder {
+    min-height: 0;
+  }
 }
 
 @media (max-width: 1400px) {

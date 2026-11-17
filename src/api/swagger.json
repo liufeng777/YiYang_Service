@@ -1781,51 +1781,6 @@
               }
           }
       },
-      "/api/v1/staff/goals/{id}/items": {
-          "post": {
-              "security": [
-                  {
-                      "BearerAuth": []
-                  }
-              ],
-              "consumes": [
-                  "application/json"
-              ],
-              "produces": [
-                  "application/json"
-              ],
-              "tags": [
-                  "staff-健康方案"
-              ],
-              "summary": "健康目标指标项更新",
-              "parameters": [
-                  {
-                      "type": "integer",
-                      "description": "目标ID",
-                      "name": "id",
-                      "in": "path",
-                      "required": true
-                  },
-                  {
-                      "description": "指标项达成",
-                      "name": "body",
-                      "in": "body",
-                      "required": true,
-                      "schema": {
-                          "type": "object"
-                      }
-                  }
-              ],
-              "responses": {
-                  "200": {
-                      "description": "OK",
-                      "schema": {
-                          "$ref": "#/definitions/pkg.Response"
-                      }
-                  }
-              }
-          }
-      },
       "/api/v1/staff/health-accesses": {
           "get": {
               "security": [
@@ -4201,97 +4156,6 @@
               }
           }
       },
-      "/api/v1/staff/members/{id}/goals": {
-          "get": {
-              "security": [
-                  {
-                      "BearerAuth": []
-                  }
-              ],
-              "consumes": [
-                  "application/json"
-              ],
-              "produces": [
-                  "application/json"
-              ],
-              "tags": [
-                  "staff-健康方案"
-              ],
-              "summary": "健康目标列表",
-              "parameters": [
-                  {
-                      "type": "integer",
-                      "description": "会员ID",
-                      "name": "id",
-                      "in": "path",
-                      "required": true
-                  },
-                  {
-                      "type": "integer",
-                      "description": "页码",
-                      "name": "page",
-                      "in": "query"
-                  },
-                  {
-                      "type": "integer",
-                      "description": "每页条数",
-                      "name": "page_size",
-                      "in": "query"
-                  }
-              ],
-              "responses": {
-                  "200": {
-                      "description": "OK",
-                      "schema": {
-                          "$ref": "#/definitions/pkg.Response"
-                      }
-                  }
-              }
-          },
-          "post": {
-              "security": [
-                  {
-                      "BearerAuth": []
-                  }
-              ],
-              "consumes": [
-                  "application/json"
-              ],
-              "produces": [
-                  "application/json"
-              ],
-              "tags": [
-                  "staff-健康方案"
-              ],
-              "summary": "健康目标新增",
-              "parameters": [
-                  {
-                      "type": "integer",
-                      "description": "会员ID",
-                      "name": "id",
-                      "in": "path",
-                      "required": true
-                  },
-                  {
-                      "description": "目标信息",
-                      "name": "body",
-                      "in": "body",
-                      "required": true,
-                      "schema": {
-                          "type": "object"
-                      }
-                  }
-              ],
-              "responses": {
-                  "200": {
-                      "description": "OK",
-                      "schema": {
-                          "$ref": "#/definitions/pkg.Response"
-                      }
-                  }
-              }
-          }
-      },
       "/api/v1/staff/members/{id}/health-profile": {
           "get": {
               "security": [
@@ -4607,6 +4471,7 @@
                       "BearerAuth": []
                   }
               ],
+              "description": "按会员返回方案列表，可用 status 过滤（1草稿/2健管师通过/3医生确认/9中止）。",
               "consumes": [
                   "application/json"
               ],
@@ -4636,6 +4501,12 @@
                       "description": "每页条数",
                       "name": "page_size",
                       "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "方案状态过滤",
+                      "name": "status",
+                      "in": "query"
                   }
               ],
               "responses": {
@@ -4646,16 +4517,14 @@
                       }
                   }
               }
-          }
-      },
-      "/api/v1/staff/members/{id}/plans/ai-generate": {
+          },
           "post": {
               "security": [
                   {
                       "BearerAuth": []
                   }
               ],
-              "description": "以会员档案为输入调用 AI，生成方案草稿（status=1-created）。",
+              "description": "AI 生成草稿与健管师手工创建走同一接口：内容只体现在 goals/interventions 上，\n不落方案正文/AI 状态；每次保存生成一条方案记录（初始状态草稿 1，等待健管师提交审核）。",
               "consumes": [
                   "application/json"
               ],
@@ -4665,7 +4534,7 @@
               "tags": [
                   "staff-健康方案"
               ],
-              "summary": "AI 健康方案生成",
+              "summary": "创建健康方案（含目标/干预）",
               "parameters": [
                   {
                       "type": "integer",
@@ -4675,7 +4544,7 @@
                       "required": true
                   },
                   {
-                      "description": "方案信息",
+                      "description": "方案信息（含 goals/interventions）",
                       "name": "body",
                       "in": "body",
                       "required": true,
@@ -5481,7 +5350,7 @@
               "tags": [
                   "staff-健康方案"
               ],
-              "summary": "方案详情",
+              "summary": "方案详情（含目标/干预/审核履历）",
               "parameters": [
                   {
                       "type": "integer",
@@ -5489,6 +5358,50 @@
                       "name": "id",
                       "in": "path",
                       "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "仅处审核期的方案（草稿/健管师通过）可编辑内容、目标与干预。定稿(3)/中止(9)不可编辑。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康方案"
+              ],
+              "summary": "审核期编辑方案",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "方案ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "方案编辑字段（覆盖 goals/interventions）",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
                   }
               ],
               "responses": {
@@ -5508,6 +5421,7 @@
                       "BearerAuth": []
                   }
               ],
+              "description": "将方案置为中止(9，终态)。执行态方案或草稿均可中止。",
               "consumes": [
                   "application/json"
               ],
@@ -5517,7 +5431,7 @@
               "tags": [
                   "staff-健康方案"
               ],
-              "summary": "方案废弃",
+              "summary": "中止方案",
               "parameters": [
                   {
                       "type": "integer",
@@ -5537,13 +5451,14 @@
               }
           }
       },
-      "/api/v1/staff/plans/{id}/confirm": {
+      "/api/v1/staff/plans/{id}/checkin": {
           "post": {
               "security": [
                   {
                       "BearerAuth": []
                   }
               ],
+              "description": "为方案下某会员追加一次打卡（单表追加）。items 为一次打卡各干预字段。",
               "consumes": [
                   "application/json"
               ],
@@ -5553,7 +5468,218 @@
               "tags": [
                   "staff-健康方案"
               ],
-              "summary": "方案确认",
+              "summary": "健管师代录打卡",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "方案ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "打卡内容（plan_id 走路径，items 为干预字段）",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/plans/{id}/checkin-dued": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "按日期区间计算每个干预的应打卡次数（依据 checkin_freq_type/value）。start_date/end_date 缺省取方案起止。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康方案"
+              ],
+              "summary": "应打卡清单",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "方案ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "type": "string",
+                      "description": "起始日期 YYYY-MM-DD",
+                      "name": "start_date",
+                      "in": "query"
+                  },
+                  {
+                      "type": "string",
+                      "description": "结束日期 YYYY-MM-DD",
+                      "name": "end_date",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/plans/{id}/checkin-stats": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "缺失判定：应打卡日期集合 - 实打卡日期集合。返回完成率/连续达标/按目标拆解。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康方案"
+              ],
+              "summary": "打卡统计",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "方案ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "type": "string",
+                      "description": "起始日期 YYYY-MM-DD",
+                      "name": "start_date",
+                      "in": "query"
+                  },
+                  {
+                      "type": "string",
+                      "description": "结束日期 YYYY-MM-DD",
+                      "name": "end_date",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/plans/{id}/checkins": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "分页查询方案打卡记录，可按干预、时间区间过滤。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康方案"
+              ],
+              "summary": "打卡历史",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "方案ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "页码",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数",
+                      "name": "page_size",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "干预ID过滤",
+                      "name": "intervention_id",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "起始时间(UTC秒)",
+                      "name": "start_time",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "结束时间(UTC秒)",
+                      "name": "end_time",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/plans/{id}/review": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "pass=true 通过推进到下一审核态（健管师通过→2、医生确认→3）；pass=false 驳回保持原审核态。角色按登录人自动判定。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康方案"
+              ],
+              "summary": "方案审核（健管师/医生两轮）",
               "parameters": [
                   {
                       "type": "integer",

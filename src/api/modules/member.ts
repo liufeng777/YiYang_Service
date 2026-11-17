@@ -184,19 +184,3 @@ export function getMetricTrend(id: number | string, params: {
 }) {
   return http.get<MetricTrendResult>(`/v1/staff/members/${id}/metric-records/trend`, { ...params })
 }
-
-export function getHealthGoals(id: number | string, params?: PageParams) {
-  return http.get<PageResult<Record<string, unknown>>>(`/v1/staff/members/${id}/goals`, { ...params })
-}
-
-export function createHealthGoal(id: number | string, data: Record<string, unknown>) {
-  return http.post<{ id: number }>(`/v1/staff/members/${id}/goals`, data)
-}
-
-export function getHealthPlans(id: number | string, params?: PageParams) {
-  return http.get<PageResult<Record<string, unknown>>>(`/v1/staff/members/${id}/plans`, { ...params })
-}
-
-export function generateHealthPlan(id: number | string, data: Record<string, unknown>) {
-  return http.post<Record<string, unknown>>(`/v1/staff/members/${id}/plans/ai-generate`, data)
-}

@@ -122,10 +122,12 @@ function CategoryPanel({ categories, loading, selectedId, onSelect, reload }: Ca
     return (
       <div className="mm-tree-node">
         <span className="mm-tree-node__name" title={row.category_name}>{row.category_name}</span>
-        <span className="mm-tree-node__code" title={row.category_code || '未设置编码'}>{row.category_code || '无编码'}</span>
+        <span className="mm-tree-node__code" title={row.category_code || ''}>{row.category_code || ''}</span>
         {row.status !== 1 && <Tag className="mm-tree-node__status">停用</Tag>}
         <Dropdown
           trigger={['hover']}
+          placement="bottomRight"
+          autoAdjustOverflow
           disabled={actingId === row.id}
           menu={{
             items: [
@@ -424,12 +426,6 @@ function MetricsPanel({ categories, selectedCategoryId }: { categories: MetricCa
         title="检测项列表"
         extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => openEditor()}>新增检测项</Button>}
       >
-        <div className="mm-list-context">
-          <FolderOutlined />
-          <span>当前分类</span>
-          <strong>{selectedCategory?.category_name ?? '全部分类'}</strong>
-          {selectedCategory?.category_code && <code>{selectedCategory.category_code}</code>}
-        </div>
         <Card variant="borderless" className="filter-bar">
           <Input
             placeholder="编码 / 中文名 / 英文名 / 缩写" value={filters.keyword} allowClear
@@ -449,39 +445,41 @@ function MetricsPanel({ categories, selectedCategoryId }: { categories: MetricCa
           <Button onClick={() => { const empty = { keyword: '' }; setFilters(empty); setApplied(empty); setPage(1) }}>重置</Button>
           <Button type="primary" onClick={() => { setApplied({ ...filters }); setPage(1) }}>查询</Button>
         </Card>
-        <Table<MetricItem>
-          rowKey="metric_code" dataSource={list} loading={loading} scroll={{ x: 1250 }}
-          columns={[
-            { title: '检测项编码', dataIndex: 'metric_code', fixed: 'left' },
-            { title: '中文名称', dataIndex: 'metric_name_cn' },
-            { title: '分类', dataIndex: 'category_id', render: (value: number) => categoryNames.get(value) ?? value },
-            { title: '范围', dataIndex: 'metric_scope', render: (value?: number) => value ? SCOPE_MAP[value] ?? value : '常规' },
-            { title: '数据类型', dataIndex: 'data_type', render: (value?: number) => value === 2 ? '枚举' : '数值' },
-            { title: '单位', key: 'unit', render: (_: unknown, row: MetricItem) => text(row.metric_unit ?? row.unit_symbol) },
-            {
-              title: '状态', dataIndex: 'status',
-              render: (value?: number) => <Tag color={value === 1 ? 'green' : 'default'}>{value === 1 ? '启用' : '停用'}</Tag>,
-            },
-            {
-              title: '操作', key: 'action', width: 300, fixed: 'right',
-              render: (_: unknown, row: MetricItem) => (
-                <Space>
-                  <Button size="small" type="primary" onClick={() => openConfig(row)}>配置</Button>
-                  <Button size="small" onClick={() => openEditor(row)}>编辑</Button>
-                  <Button size="small" loading={actingCode === row.metric_code} onClick={() => toggleStatus(row)}>{row.status === 1 ? '停用' : '启用'}</Button>
-                  <Popconfirm title="确认删除该检测项？" onConfirm={() => removeMetric(row)}>
-                    <Button size="small" danger>删除</Button>
-                  </Popconfirm>
-                </Space>
-              ),
-            },
-          ]}
-          pagination={{
-            current: page, pageSize, total, showSizeChanger: true,
-            showTotal: (value) => `共 ${value} 条`,
-            onChange: (nextPage, nextSize) => { setPage(nextPage); setPageSize(nextSize) },
-          }}
-        />
+        <div className="mm-table-scroll">
+          <Table<MetricItem>
+            rowKey="metric_code" dataSource={list} loading={loading} scroll={{ x: 1250, y: '100%' }}
+            columns={[
+              { title: '检测项编码', dataIndex: 'metric_code', fixed: 'left' },
+              { title: '中文名称', dataIndex: 'metric_name_cn' },
+              { title: '分类', dataIndex: 'category_id', render: (value: number) => categoryNames.get(value) ?? value },
+              { title: '范围', dataIndex: 'metric_scope', render: (value?: number) => value ? SCOPE_MAP[value] ?? value : '常规' },
+              { title: '数据类型', dataIndex: 'data_type', render: (value?: number) => value === 2 ? '枚举' : '数值' },
+              { title: '单位', key: 'unit', render: (_: unknown, row: MetricItem) => text(row.metric_unit ?? row.unit_symbol) },
+              {
+                title: '状态', dataIndex: 'status',
+                render: (value?: number) => <Tag color={value === 1 ? 'green' : 'default'}>{value === 1 ? '启用' : '停用'}</Tag>,
+              },
+              {
+                title: '操作', key: 'action', width: 240, fixed: 'right',
+                render: (_: unknown, row: MetricItem) => (
+                  <Space>
+                    <Button size="small" type="primary" onClick={() => openConfig(row)}>配置</Button>
+                    <Button size="small" onClick={() => openEditor(row)}>编辑</Button>
+                    <Button size="small" loading={actingCode === row.metric_code} onClick={() => toggleStatus(row)}>{row.status === 1 ? '停用' : '启用'}</Button>
+                    <Popconfirm title="确认删除该检测项？" onConfirm={() => removeMetric(row)}>
+                      <Button size="small" danger>删除</Button>
+                    </Popconfirm>
+                  </Space>
+                ),
+              },
+            ]}
+            pagination={{
+              current: page, pageSize, total, showSizeChanger: true,
+              showTotal: (value) => `共 ${value} 条`,
+              onChange: (nextPage, nextSize) => { setPage(nextPage); setPageSize(nextSize) },
+            }}
+          />
+        </div>
       </Card>
 
       <Drawer
