@@ -252,11 +252,7 @@ function MetricsPanel({ categories, selectedCategoryId }: { categories: MetricCa
     value: item.id, label: `${'　'.repeat(depth)}${item.category_name}`,
   })), [categories])
   const categoryNames = useMemo(() => new Map(flattenCategories(categories).map(({ item }) => [item.id, item.category_name])), [categories])
-  const selectedCategory = useMemo(
-    () => flattenCategories(categories).find(({ item }) => item.id === selectedCategoryId)?.item,
-    [categories, selectedCategoryId],
-  )
-
+  
   const load = useCallback(async () => {
     setLoading(true)
     try {

@@ -1,13 +1,15 @@
 /**
  * 基础布局：侧边栏 + 顶部导航 + 内容区
  */
-import { Layout } from 'antd'
+import { Layout, Tooltip } from 'antd'
 import { Outlet, useLocation } from 'react-router-dom'
 import SiderMenu from './SiderMenu'
 import HeaderBar from './HeaderBar'
 import NoApiNotice from '@/components/NoApiNotice'
 import { useAppStore } from '@/store/modules/app'
-import './layout.less'
+import './layout.less';
+import logoImg from '@/assets/logo/logo.png'
+import logoTxtImg from '@/assets/logo/logo_txt.png'
 
 const { Sider, Content } = Layout
 
@@ -62,14 +64,17 @@ export default function BasicLayout() {
         trigger={null}
         className="basic-layout__sider"
       >
-        <div className="basic-layout__logo">
+        <div className={collapsed ? "basic-layout__logo__collapsed" : "basic-layout__logo"}>
           {collapsed ? (
-            <span className="basic-layout__logo-title">颐养</span>
+            <Tooltip title="幸福颐养 · 运营管理平台" placement="right">
+              <span className="basic-layout__logo-icon">
+                <img src={logoImg} alt="幸福颐养" />
+              </span>
+            </Tooltip>
           ) : (
-            <>
-              <span className="basic-layout__logo-title">幸福颐养</span>
-              <span className="basic-layout__logo-sub">医养服务工作台</span>
-            </>
+            <span className="basic-layout__logo-icon">
+              <img src={logoTxtImg} alt="幸福颐养 · 运营管理平台" />
+            </span>
           )}
         </div>
         <SiderMenu />
