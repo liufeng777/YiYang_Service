@@ -1,0 +1,27 @@
+.sensitive-text {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  gap: @spacing-2xs;
+  vertical-align: middle;
+
+  &__value {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  &__toggle.ant-btn {
+    width: @line-height-body;
+    min-width: @line-height-body;
+    height: @line-height-body;
+    flex: 0 0 @line-height-body;
+    padding: 0;
+    color: @color-text-secondary;
+    font-size: @font-size-auxiliary;
+  }
+
+  &__toggle.ant-btn:hover {
+    color: @color-primary;
+    background: @color-primary-light;
+  }
+}

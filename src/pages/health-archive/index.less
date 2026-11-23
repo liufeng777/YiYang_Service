@@ -984,6 +984,80 @@
   }
 }
 
+.plan-editor-section {
+  margin-bottom: @spacing-lg;
+}
+
+.plan-editor-item {
+  padding: @spacing-md;
+  margin-bottom: @spacing-md;
+  background: @color-bg-active;
+  border: 1px solid @color-border;
+  border-radius: @radius-sm;
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+}
+
+.plan-editor-item__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: @spacing-sm;
+
+  strong {
+    color: @color-text-primary;
+    font-weight: @font-weight-body-medium;
+  }
+}
+
+.plan-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 @spacing-md;
+}
+
+.plan-field-wide {
+  grid-column: 1 / -1;
+}
+
+.plan-draft-task {
+  margin: @spacing-md 0;
+  .text-auxiliary();
+  color: @color-text-secondary;
+  overflow-wrap: anywhere;
+}
+
+.plan-review-timeline {
+  padding-top: @spacing-md;
+}
+
+.plan-review-item {
+  padding-bottom: @spacing-sm;
+
+  > div {
+    margin-top: @spacing-xs;
+    color: @color-text-secondary;
+  }
+
+  > p {
+    margin: @spacing-xs 0 0;
+    color: @color-text-primary;
+    white-space: pre-wrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .plan-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .plan-field-wide {
+    grid-column: auto;
+  }
+}
+
 @media (max-width: 1400px) {
   .archive-fields--basic,
   .archive-fields--lifestyle {

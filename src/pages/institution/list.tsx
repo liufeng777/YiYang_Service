@@ -8,6 +8,7 @@
 import { useEffect, useState } from 'react'
 import { Table, Tag } from 'antd'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText from '@/components/SensitiveText'
 import { institutionApi } from '@/api'
 import type { CurrentInstitution, InstitutionService } from '@/api/modules/institution'
 import './index.less'
@@ -88,7 +89,9 @@ export default function InstitutionInfo() {
             </div>
             <div>
               <div className="org-kv__label">联系人</div>
-              <div className="org-info-grid__value">{institution.manager_name || '-'} ({institution.manager_phone})</div>
+              <div className="org-info-grid__value">
+                <SensitiveText type="name" value={institution.manager_name} />（<SensitiveText type="phone" value={institution.manager_phone} />）
+              </div>
             </div>
             <div>
               <div className="org-kv__label">联系电话</div>

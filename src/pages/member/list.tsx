@@ -10,6 +10,7 @@ import {
 import { PlusOutlined } from '@ant-design/icons'
 import PageContainer from '@/components/PageContainer'
 import FormDrawer from '@/components/FormDrawer'
+import SensitiveText, { maskName, maskPhone } from '@/components/SensitiveText'
 import { healthAccessApi, memberApi, staffApi } from '@/api'
 import { HEALTH_ACCESS_STATUS_MAP, type HealthAccessItem } from '@/api/modules/health-access'
 import type { MemberItem } from '@/api/modules/member'
@@ -30,6 +31,21 @@ const ACTION_TITLES: Record<ActionType, string> = {
 function display(value: unknown) {
   if (value == null || value === '') return '-'
   return typeof value === 'object' ? JSON.stringify(value) : String(value)
+}
+
+function displayDetailField(key: string, value: unknown) {
+  const raw = typeof value === 'string' || typeof value === 'number' ? value : undefined
+  if (['member_name', 'contact_name', 'staff_name'].includes(key)) {
+    return <SensitiveText type="name" value={raw} />
+  }
+  if (['member_phone', 'contact_phone', 'phone'].includes(key)) {
+    return <SensitiveText type="phone" value={raw} />
+  }
+  if (key === 'id_card') return <SensitiveText type="idCard" value={raw} />
+  if (key === 'address_detail' || key === 'service_address') return <SensitiveText type="address" value={raw} />
+  if (key === 'created_at' && typeof value === 'number') return formatDateTime(value * 1000)
+  if (key === 'status' && typeof value === 'number') return HEALTH_ACCESS_STATUS_MAP[value] ?? value
+  return display(value)
 }
 
 export default function MemberList() {
@@ -135,13 +151,13 @@ export default function MemberList() {
       title: '健康会员', key: 'member',
       render: (_: unknown, row: HealthAccessItem) => (
         <div className="mb-access-member">
-          <strong>{row.member_name || `会员 #${row.member_id}`}</strong>
-          <span>{row.member_phone || '-'}</span>
+          <strong><SensitiveText type="name" value={row.member_name || `会员 #${row.member_id}`} /></strong>
+          <SensitiveText type="phone" value={row.member_phone} />
         </div>
       ),
     },
     { title: '服务需求', key: 'demand', render: (_: unknown, row: HealthAccessItem) => row.demand_desc || row.health_intent || '-' },
-    { title: '健管师', dataIndex: 'staff_name', key: 'staff_name', render: (value?: string) => value || '-' },
+    { title: '健管师', dataIndex: 'staff_name', key: 'staff_name', render: (value?: string) => <SensitiveText type="name" value={value} /> },
     {
       title: '来源', dataIndex: 'source_type', key: 'source_type',
       render: (value?: number) => value === 1 ? '线下登记' : value != null ? `来源 ${value}` : '-',
@@ -163,7 +179,7 @@ export default function MemberList() {
         <Form.Item name="staff_id" label="目标健管师" rules={[{ required: true, message: '请选择健管师' }]}>
           <Select
             showSearch optionFilterProp="label"
-            options={staffs.map((staff) => ({ value: staff.id, label: `${staff.name} · ${staff.position_name || staff.position_code || staff.id}` }))}
+            options={staffs.map((staff) => ({ value: staff.id, label: `${maskName(staff.name)} · ${staff.position_name || staff.position_code || staff.id}` }))}
           />
         </Form.Item>
       )}
@@ -238,7 +254,10 @@ export default function MemberList() {
           <Form.Item name="member_id" label="会员" rules={[{ required: true, message: '请选择会员' }]}>
             <Select
               showSearch optionFilterProp="label" placeholder="选择既有会员"
-              options={members.map((member) => ({ value: member.id, label: `${member.name} · ${member.phone || member.id}` }))}
+              options={members.map((member) => ({
+                value: member.id,
+                label: `${maskName(member.name)} · ${member.phone ? maskPhone(member.phone) : member.id}`,
+              }))}
             />
           </Form.Item>
           <Form.Item name="source_type" label="来源" rules={[{ required: true }]}>
@@ -271,10 +290,7 @@ export default function MemberList() {
           <Descriptions bordered column={1} size="small">
             {Object.entries(detail).map(([key, value]) => (
               <Descriptions.Item key={key} label={key}>
-                {key === 'created_at' && typeof value === 'number'
-                  ? formatDateTime(value * 1000)
-                  : key === 'status' && typeof value === 'number'
-                    ? HEALTH_ACCESS_STATUS_MAP[value] ?? value : display(value)}
+                {displayDetailField(key, value)}
               </Descriptions.Item>
             ))}
           </Descriptions>

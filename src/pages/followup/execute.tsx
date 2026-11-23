@@ -8,6 +8,7 @@ import { ArrowLeftOutlined, CheckOutlined, SaveOutlined } from '@ant-design/icon
 import dayjs, { type Dayjs } from 'dayjs'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText from '@/components/SensitiveText'
 import { followupApi } from '@/api'
 import {
   FOLLOWUP_RESULT_MAP, FOLLOWUP_STATUS_MAP, FOLLOWUP_TYPE_MAP, type FollowupItem,
@@ -192,7 +193,7 @@ export default function FollowupExecute() {
           <Card variant="borderless" className="fu-card">
             <Descriptions title="随访任务" column={{ xs: 1, sm: 2, lg: 3 }} bordered>
               <Descriptions.Item label="任务 ID">{id ?? '-'}</Descriptions.Item>
-              <Descriptions.Item label="服务对象">{display(followup.member_name)}</Descriptions.Item>
+              <Descriptions.Item label="服务对象"><SensitiveText type="name" value={display(followup.member_name)} /></Descriptions.Item>
               <Descriptions.Item label="会员 ID">{display(followup.member_id)}</Descriptions.Item>
               <Descriptions.Item label="随访类型">{FOLLOWUP_TYPE_MAP[Number(followup.followup_type)] ?? display(followup.followup_type)}</Descriptions.Item>
               <Descriptions.Item label="计划日期">{display(followup.next_followup_date ?? followup.plan_time)}</Descriptions.Item>

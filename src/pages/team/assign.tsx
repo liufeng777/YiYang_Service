@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { Button, Select, message } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText, { maskName } from '@/components/SensitiveText'
 import { mockAssign as a } from './mock'
 import './index.less'
 
@@ -42,7 +43,7 @@ export default function TeamAssign() {
             <div className="team-section__title">已选择服务对象（{patients.length}人）</div>
             {patients.map((p) => (
               <div key={p.id} className="team-assign__patient">
-                <span className="team-row__name">{p.name}</span>
+                <span className="team-row__name"><SensitiveText type="name" value={p.name} /></span>
                 <span className="team-text--muted">{p.risk}</span>
                 <span
                   className="team-text--link"
@@ -73,7 +74,7 @@ export default function TeamAssign() {
                 {a.members.map((m) => (
                   <div key={m.role} className="team-assign__load">
                     <span className="team-text--muted">{m.role}</span>
-                    <span>{m.name}</span>
+                    <SensitiveText type="name" value={m.name} />
                     <span className="team-text--muted">{m.load}</span>
                   </div>
                 ))}
@@ -86,7 +87,7 @@ export default function TeamAssign() {
               <Select
                 value={manager}
                 onChange={setManager}
-                options={a.managers.map((v) => ({ value: v, label: v }))}
+                options={a.managers.map((v) => ({ value: v, label: maskName(v) }))}
               />
             </div>
             <div className="team-assign__suggest">

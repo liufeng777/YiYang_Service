@@ -7,6 +7,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Button, Card, Input, Table } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText from '@/components/SensitiveText'
 import { orderApi } from '@/api'
 import { ORDER_STATUS_MAP, type OrderItem } from '@/api/modules/order'
 import { formatDateTime } from '@/utils'
@@ -69,8 +70,8 @@ export default function OrderAuditList() {
     {
       title: '服务对象',
       key: 'member_name',
-      dataIndex: 'member_name'
-      
+      dataIndex: 'member_name',
+      render: (value?: string) => <SensitiveText type="name" value={value} />,
     },
     { 
       title: '服务项目',

@@ -15,6 +15,7 @@ import { CheckOutlined, PictureOutlined, ArrowLeftOutlined } from '@ant-design/i
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText, { maskName } from '@/components/SensitiveText'
 import { orderApi, scheduleApi, warningApi, workOrderApi } from '@/api'
 import {
   WO_STATUS_MAP,
@@ -123,7 +124,7 @@ export default function WorkOrderDetail() {
     const at = detail?.audit_at
     if (!name && status == null) return '-'
     const parts = [
-      name,
+      maskName(name),
       status != null ? (AUDIT_STATUS_MAP[status] ?? (order?.order_status === 3 ? '已通过' : '')) : '',
     ].filter(Boolean)
     return `${parts.join(' · ') || '-'}${at ? ` ${fmt(at)}` : ''}`
@@ -205,7 +206,7 @@ export default function WorkOrderDetail() {
                   </div>
                   <div className="wo-kv">
                     <span className="wo-kv__label">服务对象</span>
-                    <span className="wo-kv__value">{detail.member_name || '-'}</span>
+                    <span className="wo-kv__value"><SensitiveText type="name" value={detail.member_name} /></span>
                   </div>
                   <div className="wo-kv">
                     <span className="wo-kv__label">所属机构</span>
@@ -247,7 +248,7 @@ export default function WorkOrderDetail() {
                   </div>
                   <div className="wo-kv">
                     <span className="wo-kv__label">服务地址</span>
-                    <span className="wo-kv__value">{detail.service_address || '-'}</span>
+                    <span className="wo-kv__value"><SensitiveText type="address" value={detail.service_address} /></span>
                   </div>
                 </div>
 
@@ -257,13 +258,13 @@ export default function WorkOrderDetail() {
                     <div className="wo-kv">
                       <span className="wo-kv__label">服务人员</span>
                       <span className="wo-kv__value">
-                        {staffName}
+                        <SensitiveText type="name" value={staffName} />
                         {staffTitle ? ` · ${staffTitle}` : ''}
                       </span>
                     </div>
                     <div className="wo-kv">
                       <span className="wo-kv__label">派单人</span>
-                      <span className="wo-kv__value">{assignedBy || '-'}</span>
+                      <span className="wo-kv__value"><SensitiveText type="name" value={assignedBy} /></span>
                     </div>
                     <div className="wo-kv">
                       <span className="wo-kv__label">派单时间</span>
@@ -286,8 +287,8 @@ export default function WorkOrderDetail() {
                     <div className="wo-reassign__title">改派记录</div>
                     {reassignLogs.map((log, i) => (
                       <div key={i} className="wo-reassign__row">
-                        {fmt(log.time, 'MM-DD HH:mm')}　{log.from_staff_name || '-'} →{' '}
-                        {log.to_staff_name || '-'}；原因：{log.reason || '-'}
+                        {fmt(log.time, 'MM-DD HH:mm')}　<SensitiveText type="name" value={log.from_staff_name} /> →{' '}
+                        <SensitiveText type="name" value={log.to_staff_name} />；原因：{log.reason || '-'}
                       </div>
                     ))}
                   </div>

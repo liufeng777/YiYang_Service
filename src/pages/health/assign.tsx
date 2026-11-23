@@ -8,6 +8,7 @@ import { Button, Select } from 'antd'
 import { ArrowLeftOutlined, CheckOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText, { maskName } from '@/components/SensitiveText'
 import { mockAssign, mockCreateSuccess } from './mock'
 import './index.less'
 
@@ -28,7 +29,7 @@ function AssignSuccess({ id }: { id: string }) {
           <div className="hr-success__avatar">{s.name.slice(0, 1)}</div>
           <div>
             <div className="hr-success__name">
-              {s.name} · {s.gender} · {s.age}岁
+              <SensitiveText type="name" value={s.name} /> · {s.gender} · {s.age}岁
             </div>
             <div className="hr-success__meta">
               {s.org} · {s.identity} · 建档来源：{s.source}
@@ -92,7 +93,7 @@ export default function HealthAssign() {
     )
   }
 
-  const toOptions = (list: string[]) => list.map((v) => ({ value: v, label: v }))
+  const toOptions = (list: string[], sensitive = false) => list.map((v) => ({ value: v, label: sensitive ? maskName(v) : v }))
   const ready = team && doctor && nurse && manager
 
   return (
@@ -107,7 +108,7 @@ export default function HealthAssign() {
             <div className="hr-card__title">当前服务对象</div>
             <div className="hr-assign__member-row">
               <span className="hr-assign__member-name">
-                {m.name} · {m.gender} · {m.age}岁
+                <SensitiveText type="name" value={m.name} /> · {m.gender} · {m.age}岁
               </span>
               <span className="hr-assign__member-info">
                 {m.risk}｜{m.diseases}
@@ -130,17 +131,17 @@ export default function HealthAssign() {
                 <div className="hr-create__field-label">
                   责任医生 <span className="hr-required">*</span>
                 </div>
-                <Select placeholder="请选择" value={doctor} onChange={setDoctor} options={toOptions(mockAssign.doctors)} />
+                <Select placeholder="请选择" value={doctor} onChange={setDoctor} options={toOptions(mockAssign.doctors, true)} />
               </div>
               <div className="hr-assign__field">
                 <div className="hr-create__field-label">
                   责任护士 <span className="hr-required">*</span>
                 </div>
-                <Select placeholder="请选择" value={nurse} onChange={setNurse} options={toOptions(mockAssign.nurses)} />
+                <Select placeholder="请选择" value={nurse} onChange={setNurse} options={toOptions(mockAssign.nurses, true)} />
               </div>
               <div className="hr-assign__field">
                 <div className="hr-create__field-label">责任健康管理师 <span className="hr-required">*</span></div>
-                <Select placeholder="请选择" value={manager} onChange={setManager} options={toOptions(mockAssign.managers)} />
+                <Select placeholder="请选择" value={manager} onChange={setManager} options={toOptions(mockAssign.managers, true)} />
               </div>
             </div>
 

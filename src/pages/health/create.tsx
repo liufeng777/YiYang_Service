@@ -11,6 +11,7 @@ import { CheckCircleFilled, CheckOutlined, ArrowLeftOutlined, PlusOutlined, Sear
 import { useNavigate } from 'react-router-dom'
 import dayjs, { type Dayjs } from 'dayjs'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText from '@/components/SensitiveText'
 import { memberApi } from '@/api'
 import type { MemberItem } from '@/api/modules/member'
 import './index.less'
@@ -41,7 +42,7 @@ function CreateSuccess({ info, onAgain }: { info: CreatedInfo; onAgain: () => vo
           <div className="hr-success__avatar">{info.name.slice(0, 1)}</div>
           <div>
             <div className="hr-success__name">
-              {info.name} · {info.gender === 1 ? '男' : '女'} · {age}岁
+              <SensitiveText type="name" value={info.name} /> · {info.gender === 1 ? '男' : '女'} · {age}岁
             </div>
             <div className="hr-success__meta">建档来源：机构手动建档</div>
           </div>
@@ -196,7 +197,7 @@ export default function HealthRecordCreate() {
             {matched && (
               <div className="hr-create__verified">
                 <div>
-                  <CheckCircleFilled /> 已存在会员档案：{matched.name} · 会员ID {matched.id}
+                  <CheckCircleFilled /> 已存在会员档案：<SensitiveText type="name" value={matched.name} /> · 会员ID {matched.id}
                 </div>
                 <div className="hr-create__verified-sub">
                   重复建档可能被服务端拒绝，建议直接前往档案详情完善
@@ -327,7 +328,7 @@ export default function HealthRecordCreate() {
                 <div className="hr-summary__row">
                   <span className="hr-summary__label">服务对象</span>
                   <span className="hr-summary__value">
-                    {name ? `${name}${birthday ? ` · ${dayjs().diff(birthday, 'year')}岁` : ''}` : '—'}
+                    {name ? <><SensitiveText type="name" value={name} />{birthday ? ` · ${dayjs().diff(birthday, 'year')}岁` : ''}</> : '—'}
                   </span>
                 </div>
                 <div className="hr-summary__row">
@@ -338,7 +339,7 @@ export default function HealthRecordCreate() {
                 </div>
                 <div className="hr-summary__row">
                   <span className="hr-summary__label">紧急联系人</span>
-                  <span className="hr-summary__value">{emergencyContact || '—'}</span>
+                  <span className="hr-summary__value"><SensitiveText type="name" value={emergencyContact} /></span>
                 </div>
               </div>
               <div className="hr-create__flow">

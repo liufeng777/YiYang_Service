@@ -9,6 +9,7 @@ import { Button, Card, Form, Input, Select, Table, App } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import PageContainer from '@/components/PageContainer'
 import FormDrawer from '@/components/FormDrawer'
+import SensitiveText from '@/components/SensitiveText'
 import { consultApi } from '@/api'
 import type { ConsultationItem } from '@/api/modules/consult'
 import { formatDateTime } from '@/utils'
@@ -81,15 +82,15 @@ export default function ConsultationList() {
       title: '咨询人',
       key: 'member_name',
       dataIndex: 'member_name',
-      render: (v: string) => v || '-'
+      render: (v: string) => <SensitiveText type="name" value={v} />
     },
     {
       title: '联系人',
       key: 'contact',
       render: (_: unknown, row: ConsultationItem) => (
         <div className='table-cell'>
-          <strong>{row.contact_name || '-'}</strong>
-          <span>{row.contact_phone || ''}</span>
+          <strong><SensitiveText type="name" value={row.contact_name} /></strong>
+          <SensitiveText type="phone" value={row.contact_phone} />
         </div>
       ),
     },
@@ -116,7 +117,7 @@ export default function ConsultationList() {
         row.answer ? (
           <span>
             {row.answer}
-            {row.responder_name ? <span className="cs-row__sub">（{row.responder_name}）</span> : null}
+            {row.responder_name ? <span className="cs-row__sub">（<SensitiveText type="name" value={row.responder_name} />）</span> : null}
           </span>
         ) : (
           <span className="cs-row__sub">-</span>

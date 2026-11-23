@@ -8,6 +8,7 @@ import { Avatar, Button, Card, Dropdown, Input, Select, Table } from 'antd'
 import { MoreOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText from '@/components/SensitiveText'
 import { memberApi } from '@/api'
 import { MEMBER_STATUS_MAP, RISK_LEVEL_MAP, type MemberItem } from '@/api/modules/member'
 import './index.less'
@@ -80,10 +81,10 @@ export default function HealthRecordList() {
               {(row.name || '-').slice(0, 1)}
             </Avatar>
             <div>
-              <div className="hr-row__name">{row.name || '-'}</div>
+              <div className="hr-row__name"><SensitiveText type="name" value={row.name} /></div>
               <div className="hr-row__sub">
                 {row.gender === 1 ? '男' : row.gender === 2 ? '女' : '-'}
-                {age !== null ? ` · ${age}岁` : ''}&nbsp;&nbsp;{row.phone || '-'}
+                {age !== null ? ` · ${age}岁` : ''}&nbsp;&nbsp;<SensitiveText type="phone" value={row.phone} />
               </div>
             </div>
           </div>

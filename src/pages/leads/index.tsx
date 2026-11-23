@@ -10,6 +10,7 @@ import { PlusOutlined, DownloadOutlined } from '@ant-design/icons'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText from '@/components/SensitiveText'
 import { leadApi } from '@/api'
 import {
   LEAD_SOURCE_MAP,
@@ -100,7 +101,8 @@ export default function LeadList() {
       key: 'contact',
       render: (_: unknown, record: LeadItem) => (
         <span className="lead-table__contact">
-          {record.contact_name || record.name || '-'} {record.contact_phone || record.phone || ''}
+          <SensitiveText type="name" value={record.contact_name || record.name} />{' '}
+          <SensitiveText type="phone" value={record.contact_phone || record.phone} />
         </span>
       ),
     },
@@ -133,7 +135,7 @@ export default function LeadList() {
       title: '负责人',
       dataIndex: 'owner_staff_name',
       key: 'owner_staff_name',
-      render: (v: string | undefined, record: LeadItem) => v || record.assignee_name || '-',
+      render: (v: string | undefined, record: LeadItem) => <SensitiveText type="name" value={v || record.assignee_name} />,
     },
     {
       title: '登记时间',

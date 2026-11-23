@@ -19,6 +19,7 @@ import { Button, DatePicker, Drawer, Spin, Tooltip, App } from 'antd'
 import { CheckCircleFilled, WarningFilled, CloseOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { scheduleApi, staffApi, workOrderApi } from '@/api'
+import { maskName } from '@/components/SensitiveText'
 import type { WorkOrderItem } from '@/api/modules/work-order'
 import {
   BOARD_END,
@@ -238,7 +239,7 @@ export default function DispatchBoard({
     const busy = findConflicts(schedules.get(staffId) ?? [], startMin, startMin + dur)
     if (busy.length > 0) {
       message.warning(
-        `${o.member_name}：该时段与「${busy[0].title} ${fmtMin(busy[0].startMin)}~${fmtMin(busy[0].endMin)}」冲突，请拖到空档`,
+        `${maskName(o.member_name)}：该时段与「${busy[0].title} ${fmtMin(busy[0].startMin)}~${fmtMin(busy[0].endMin)}」冲突，请拖到空档`,
       )
       return
     }
@@ -248,7 +249,7 @@ export default function DispatchBoard({
       return q?.staffId === staffId && overlaps(q.startMin, q.startMin + durationOf(x), startMin, startMin + dur)
     })
     if (others.length > 0) {
-      message.warning(`${o.member_name}：该时段已排「${others[0].member_name}」的工单，请错开`)
+      message.warning(`${maskName(o.member_name)}：该时段已排「${maskName(others[0].member_name)}」的工单，请错开`)
       return
     }
     setPlans((prev) => ({ ...prev, [orderId]: { staffId, startMin } }))
@@ -358,11 +359,11 @@ export default function DispatchBoard({
           e.stopPropagation()
           setSelectedId(o.id)
         }}
-        title={`${o.work_order_no} · ${o.member_name} · ${o.service_name}　期望：${o.expect_staff_name || '无'} ${fmtMin(expectedMinOf(o))}~${fmtMin(expectedMinOf(o) + durationOf(o))}　拖动或点选后点击空档调整`}
+        title={`${o.work_order_no} · ${maskName(o.member_name)} · ${o.service_name}　期望：${maskName(o.expect_staff_name) || '无'} ${fmtMin(expectedMinOf(o))}~${fmtMin(expectedMinOf(o) + durationOf(o))}　拖动或点选后点击空档调整`}
       >
         <span className="wo-board__plan-text">
           <span className="wo-board__plan-no">{o.work_order_no}</span>
-          <span className="wo-board__plan-name">{o.member_name}</span>
+          <span className="wo-board__plan-name">{maskName(o.member_name)}</span>
         </span>
       </div>
     )
@@ -409,9 +410,9 @@ export default function DispatchBoard({
                     : 'wo-board__chip--adjusted'
               } ${o.id === selectedId ? 'wo-board__chip--selected' : ''}`}
               onClick={() => setSelectedId(o.id)}
-              title={`${o.work_order_no} · ${o.service_name} · 期望 ${o.expect_staff_name || '无'} ${fmtMin(expectedMinOf(o))}~${fmtMin(expectedMinOf(o) + durationOf(o))}`}
+              title={`${o.work_order_no} · ${o.service_name} · 期望 ${maskName(o.expect_staff_name) || '无'} ${fmtMin(expectedMinOf(o))}~${fmtMin(expectedMinOf(o) + durationOf(o))}`}
             >
-              {woShort(o)} {o.member_name}
+              {woShort(o)} {maskName(o.member_name)}
             </span>
           ))}
         </div>
@@ -501,14 +502,14 @@ export default function DispatchBoard({
               <div key={c.id} className="wo-board__row">
                 <div className="wo-board__staff">
                   <div className="wo-board__staff-name">
-                    {c.name}
+                    {maskName(c.name)}
                     {expAll.length > 0 && (
                       <Tooltip
                         title={
                           <div>
                             {expAll.map((o) => (
                               <div key={o.id}>
-                                {o.member_name} · {fmtMin(expectedMinOf(o))}~
+                                {maskName(o.member_name)} · {fmtMin(expectedMinOf(o))}~
                                 {fmtMin(expectedMinOf(o) + durationOf(o))}
                               </div>
                             ))}
@@ -570,10 +571,10 @@ export default function DispatchBoard({
                           top: 52 + lane * 18,
                           height: 16,
                         }}
-                        title={`${o.member_name} 的客户期望：${c.name} ${fmtMin(em)}~${fmtMin(em + durationOf(o))}`}
+                        title={`${maskName(o.member_name)} 的客户期望：${maskName(c.name)} ${fmtMin(em)}~${fmtMin(em + durationOf(o))}`}
                         onClick={(e) => e.stopPropagation()}
                       >
-                        期望·{o.member_name}
+                        期望·{maskName(o.member_name)}
                       </div>
                     )
                   })}
@@ -583,7 +584,7 @@ export default function DispatchBoard({
                         <div>
                           {hiddenGhosts.map((o) => (
                             <div key={o.id}>
-                              {o.member_name} · 期望 {fmtMin(expectedMinOf(o))}~
+                              {maskName(o.member_name)} · 期望 {fmtMin(expectedMinOf(o))}~
                               {fmtMin(expectedMinOf(o) + durationOf(o))}
                             </div>
                           ))}

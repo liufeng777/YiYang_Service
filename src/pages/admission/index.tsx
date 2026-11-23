@@ -10,6 +10,7 @@ import { Button, Card, DatePicker, Drawer, Input, Popconfirm, Select, Table, Tag
 import { PlusOutlined } from '@ant-design/icons'
 import type { Dayjs } from 'dayjs'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText from '@/components/SensitiveText'
 import { appointmentApi } from '@/api'
 import type { AppointmentItem } from '@/api/modules/appointment'
 
@@ -230,18 +231,18 @@ export default function AdmissionList() {
       title: '会员',
       key: 'member',
       render: (_: unknown, row: AppointmentItem) => (
-        <span>{row.member_name || row.contact_name || '-'}</span>
+        <SensitiveText type="name" value={row.member_name || row.contact_name} />
       ),
     },
     { 
       title: '联系人',
       dataIndex: 'contact_phone',
       key: 'contact_phone',
-      width: 120,
+      width: 160,
       render: (v: string, r: any) => (
         <div className='table-cell'>
-          <strong>{r.contact_name}</strong>
-          <span>{v}</span>
+          <strong><SensitiveText type="name" value={r.contact_name} /></strong>
+          <SensitiveText type="phone" value={v} />
         </div>
       )
     },
@@ -274,7 +275,7 @@ export default function AdmissionList() {
       title: '接待人员',
       dataIndex: 'assigned_staff_name',
       key: 'assigned_staff_name',
-      render: (v: string) => v || '-',
+      render: (v: string) => <SensitiveText type="name" value={v} />,
     },
     {
       title: '预约状态',
@@ -450,9 +451,9 @@ export default function AdmissionList() {
             <div className="ad-follow__member">
               <div className="ad-follow__member-main">
                 <span className="ad-follow__member-name">
-                  {followDetail.member_name || followDetail.contact_name || '-'}
+                  <SensitiveText type="name" value={followDetail.member_name || followDetail.contact_name} />
                 </span>
-                <span>{followDetail.contact_phone || '-'}</span>
+                <SensitiveText type="phone" value={followDetail.contact_phone} />
               </div>
               <div className="ad-follow__member-sub">
                 预约到访：{formatAppointmentDate(followDetail.appointment_date)}

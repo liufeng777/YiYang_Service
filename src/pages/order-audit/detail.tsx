@@ -19,6 +19,7 @@ import {
 import { useNavigate, useParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText from '@/components/SensitiveText'
 import { orderApi } from '@/api'
 import { ORDER_STATUS_MAP, type OrderDetail } from '@/api/modules/order'
 import './index.less'
@@ -215,7 +216,7 @@ export default function OrderAuditDetail() {
                     <div className="oa-member">
                       <div className="oa-member__avatar"><UserOutlined /></div>
                       <div className="oa-member__identity">
-                        <strong>{textOrDash(order.member_name)}</strong>
+                        <strong><SensitiveText type="name" value={order.member_name} /></strong>
                         <span>{genderText(order.member_gender)}</span>
                         <span>{order.member_age != null ? `${order.member_age} 岁` : '年龄未提供'}</span>
                       </div>
@@ -283,15 +284,15 @@ export default function OrderAuditDetail() {
                     <div className="oa-section__heading"><PhoneOutlined /><h3>联系与服务地址</h3></div>
                     <div className="oa-contact">
                       <div className="oa-contact__person">
-                        <strong>{textOrDash(order.contact_name)}</strong>
+                        <strong><SensitiveText type="name" value={order.contact_name} /></strong>
                         <span>联系人</span>
                       </div>
-                      <a href={order.contact_phone ? `tel:${order.contact_phone}` : undefined}>
-                        <PhoneOutlined />{textOrDash(order.contact_phone)}
-                      </a>
+                      <div className="oa-contact__phone">
+                        <PhoneOutlined /><SensitiveText type="phone" value={order.contact_phone} />
+                      </div>
                       <div className="oa-contact__address">
                         <EnvironmentOutlined />
-                        <span>{address || '-'}</span>
+                        <SensitiveText type="address" value={address} />
                       </div>
                     </div>
                   </section>

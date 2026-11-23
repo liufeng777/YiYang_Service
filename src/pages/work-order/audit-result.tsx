@@ -6,6 +6,7 @@ import { Button } from 'antd'
 import { ArrowLeftOutlined, CheckCircleFilled } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText from '@/components/SensitiveText'
 import { mockWoAuditResult } from './mock'
 import './index.less'
 
@@ -29,7 +30,7 @@ export default function WorkOrderAuditResult() {
 
           <div className="wo-result__member">
             <div className="wo-result__member-name">
-              {r.member.name}
+              <SensitiveText type="name" value={r.member.name} />
               <span className="wo-result__member-meta">{r.member.meta}</span>
             </div>
             <div className="wo-result__member-org">{r.member.org}</div>

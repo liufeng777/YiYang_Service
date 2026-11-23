@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { Drawer, Empty, Table, Tag } from 'antd'
 import { healthArchiveApi } from '@/api'
 import type { ChronicArchive } from '@/api/modules/health-archive'
-import { display } from './shared'
+import { display } from './Plan/shared'
 import { getChronicMetricDefinitions, type ChronicMetricDefinition } from './chronic-metrics'
 
 export default function ChronicMetricDrawer({ archive, onClose }: {

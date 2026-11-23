@@ -8,6 +8,7 @@ import { Avatar, Button, Table, Tabs } from 'antd'
 import { ArrowRightOutlined, PlusOutlined } from '@ant-design/icons'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText, { maskName } from '@/components/SensitiveText'
 import {
   mockMedications,
   mockMedicationSummary,
@@ -127,7 +128,7 @@ function OverviewTab() {
                   </div>
                   <div className="hr-timeline__summary">{r.summary}</div>
                 </div>
-                <span className="hr-timeline__operator">{r.operator}</span>
+                <span className="hr-timeline__operator"><SensitiveText type="name" value={r.operator} /></span>
               </div>
             ))}
           </div>
@@ -356,7 +357,7 @@ function MedicationTab() {
               </div>
             </div>
             <div className="hr-med-summary__foot">
-              最近核对：{s.lastCheck} · {s.checker}
+              最近核对：{s.lastCheck} · <SensitiveText type="name" value={s.checker.replace(/^健管师/, '')} />
             </div>
           </div>
 
@@ -397,7 +398,7 @@ export default function HealthProfile() {
   return (
     <div className="hr-page">
       <PageContainer
-        title={`${p.name}的健康档案`}
+        title={`${maskName(p.name)}的健康档案`}
         description="集中查看基础资料、专病档案、健康数据与健康管理进展"
         extra={<Button type="primary">疾病与专病档案</Button>}
       >
@@ -409,7 +410,7 @@ export default function HealthProfile() {
             </Avatar>
             <div>
               <div className="hr-member__head">
-                <span className="hr-member__name">{p.name}</span>
+                <span className="hr-member__name"><SensitiveText type="name" value={p.name} /></span>
                 {p.diseases.map((d, i) => (
                   <span key={d} className={i === 0 ? 'hr-tag hr-tag--risk-low' : 'hr-tag hr-tag--disease'}>
                     {d}
@@ -425,11 +426,11 @@ export default function HealthProfile() {
           <div className="hr-member__meta">
             <div className="hr-member__meta-item">
               <div className="hr-member__meta-label">责任医生</div>
-              <div className="hr-member__meta-value">{p.doctor}</div>
+              <div className="hr-member__meta-value"><SensitiveText type="name" value={p.doctor} /></div>
             </div>
             <div className="hr-member__meta-item">
               <div className="hr-member__meta-label">健康管理师</div>
-              <div className="hr-member__meta-value">{p.manager}</div>
+              <div className="hr-member__meta-value"><SensitiveText type="name" value={p.manager} /></div>
             </div>
             <div className="hr-member__meta-item">
               <div className="hr-member__meta-label">当前机构</div>

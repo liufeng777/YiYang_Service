@@ -9,6 +9,7 @@ import { Button, Form, Input, App } from 'antd'
 import { CheckOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import { maskName, maskPhone } from '@/components/SensitiveText'
 import { useUserStore } from '@/store/modules/user'
 import {
   CONTACT_IDENTITY_MAP,
@@ -77,7 +78,7 @@ export default function LeadVerify() {
                 <Input
                   readOnly
                   variant="filled"
-                  value={`${lead.contact_name} ${lead.contact_phone}（${lead.contact_identity ? CONTACT_IDENTITY_MAP[lead.contact_identity] : '-'}）`}
+                  value={`${maskName(lead.contact_name)} ${maskPhone(lead.contact_phone)}（${lead.contact_identity ? CONTACT_IDENTITY_MAP[lead.contact_identity] : '-'}）`}
                 />
               </Form.Item>
               <Form.Item label="线索来源">
@@ -101,7 +102,7 @@ export default function LeadVerify() {
                 <Input placeholder="请输入本人身份证件号码" maxLength={18} />
               </Form.Item>
               <Form.Item label="本人手机号" required>
-                <Input readOnly value={lead.contact_phone} />
+                <Input readOnly value={maskPhone(lead.contact_phone)} />
               </Form.Item>
             </Form>
 

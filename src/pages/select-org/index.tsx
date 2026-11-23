@@ -9,12 +9,12 @@ import { PlusOutlined, SearchOutlined, RightOutlined, CheckOutlined } from '@ant
 import { useNavigate } from 'react-router-dom'
 import {
   useUserStore,
-  maskPhone,
   resolvePositionCode,
   staffInstitutionToOrg,
   type OrgInfo,
 } from '@/store/modules/user'
 import { authApi } from '@/api'
+import SensitiveText from '@/components/SensitiveText'
 import './index.less'
 
 export default function SelectOrg() {
@@ -105,9 +105,9 @@ export default function SelectOrg() {
         <div className="select-org__user">
           <span className="select-org__avatar">{(userInfo?.nickname ?? '用')[0]}</span>
           <div className="select-org__user-info">
-            <div className="select-org__user-name">{userInfo?.nickname ?? '用户'}</div>
+            <div className="select-org__user-name"><SensitiveText type="name" value={userInfo?.nickname ?? '用户'} /></div>
             <div className="select-org__user-account">
-              账号 {userInfo ? maskPhone(userInfo.phone) : ''}
+              账号 <SensitiveText type="phone" value={userInfo?.phone} />
             </div>
           </div>
           <Button type="link" className="select-org__logout" onClick={onLogout}>

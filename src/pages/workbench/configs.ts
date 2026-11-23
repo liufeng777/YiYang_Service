@@ -24,10 +24,10 @@ const healthManager: WorkbenchConfig = {
     path: '/warning',
   },
   metrics: [
-    { label: '待完善档案', value: 8, linkText: '查看', path: '/member' },
-    { label: '待回复咨询', value: 6, linkText: '查看', path: '/consultation' },
-    { label: '今日随访', value: 12, linkText: '查看', path: '/followup' },
-    { label: '医生意见待跟进', value: 4, linkText: '查看', path: '/warning' },
+    { label: '待完善档案', value: 8, linkText: '进入处理', path: '/member' },
+    { label: '待回复咨询', value: 6, linkText: '进入处理', path: '/consultation' },
+    { label: '今日随访', value: 12, linkText: '进入处理', path: '/followup' },
+    { label: '医生意见待跟进', value: 4, linkText: '进入处理', path: '/warning' },
   ],
   main: {
     title: '今日核心任务',
@@ -52,11 +52,10 @@ const healthManager: WorkbenchConfig = {
   },
   quickLinksTitle: '快捷入口',
   quickLinks: [
-    { label: '新建健康档案', path: '/member', permissions: [PERMISSIONS.HEALTH_VIEW] },
-    { label: '随访记录', path: '/followup', permissions: [PERMISSIONS.FOLLOWUP] },
-    { label: '健康指标', path: '/member', permissions: [PERMISSIONS.HEALTH_VIEW] },
-    { label: '用药记录', path: '/member', permissions: [PERMISSIONS.HEALTH_VIEW] },
-    { label: '检查检验', path: '/member', permissions: [PERMISSIONS.HEALTH_VIEW] },
+    { label: '健康档案', path: '/health-record', permissions: [PERMISSIONS.HEALTH_VIEW] },
+    { label: '健康会员', path: '/member', permissions: [PERMISSIONS.HEALTH_VIEW] },
+    { label: '随访管理', path: '/followup', permissions: [PERMISSIONS.FOLLOWUP] },
+    { label: '健康预警', path: '/warning', permissions: [PERMISSIONS.WARN_VIEW] },
   ],
 }
 
@@ -68,14 +67,14 @@ const orgAdmin: WorkbenchConfig = {
     title: '运营异常待监督',
     count: 7,
     desc: '工单异常5条、人员资质即将到期1人、团队缺员1组',
-    actionText: '查看负责人进度',
+    actionText: '进入处理',
     path: '/exception',
   },
   metrics: [
-    { label: '今日订单', value: 86, linkText: '查看详情', path: '/work-order' },
-    { label: '完成率', value: '94.2%', linkText: '查看详情', path: '/work-order' },
-    { label: '超负荷人员', value: 4, danger: true, linkText: '查看详情', path: '/staff' },
-    { label: '未来30日活动', value: 8, suffix: '场', linkText: '查看详情', path: '/health-activity' },
+    { label: '今日订单', value: 86, linkText: '进入处理', path: '/work-order' },
+    { label: '完成率', value: '94.2%', linkText: '进入处理', path: '/work-order' },
+    { label: '超负荷人员', value: 4, danger: true, linkText: '进入处理', path: '/staff' },
+    { label: '未来30日活动', value: 8, suffix: '场', linkText: '进入处理', path: '/health-activity' },
   ],
   main: {
     title: '人员负荷',
@@ -102,11 +101,10 @@ const orgAdmin: WorkbenchConfig = {
   },
   quickLinksTitle: '管理快捷入口',
   quickLinks: [
-    { label: '新增人员', path: '/staff', permissions: [PERMISSIONS.STAFFMGR_VIEW] },
-    { label: '团队管理', path: '/team', permissions: [PERMISSIONS.TEAM_VIEW] },
-    { label: '角色分配', path: '/role', permissions: [PERMISSIONS.ROLE_VIEW] },
     { label: '人员管理', path: '/staff', permissions: [PERMISSIONS.STAFFMGR_VIEW] },
-    { label: '异常监督', path: '/exception', tone: 'warn', permissions: [PERMISSIONS.WO_DISPATCH] },
+    { label: '机构信息', path: '/organization', permissions: [PERMISSIONS.ORG_VIEW] },
+    { label: '入住协同', path: '/admission', permissions: [PERMISSIONS.APPT_VIEW] },
+    { label: '健康活动', path: '/health-activity', permissions: [PERMISSIONS.ACTIVITY_VIEW] },
   ],
 }
 
@@ -122,7 +120,7 @@ const reviewDoctor: WorkbenchConfig = {
     path: '/warning',
   },
   metrics: [
-    { label: '待审核服务订单', value: 7, linkText: '进入处理', path: '/work-order' },
+    { label: '待审核服务订单', value: 7, linkText: '进入处理', path: '/order-audit' },
     { label: '待确认健康评估', value: 9, linkText: '进入处理', path: '/assessment' },
     { label: '待回复咨询', value: 6, linkText: '进入处理', path: '/consultation' },
     { label: '待处理预警', value: 5, danger: true, linkText: '进入处理', path: '/warning' },
@@ -169,10 +167,10 @@ const caregiver: WorkbenchConfig = {
     path: '/exception',
   },
   metrics: [
-    { label: '今日工单', value: 6, linkText: '查看详情', path: '/work-order' },
-    { label: '待上门服务', value: 3, linkText: '查看详情', path: '/work-order' },
-    { label: '本周完成', value: 18, linkText: '查看详情', path: '/work-order' },
-    { label: '异常上报', value: 1, danger: true, linkText: '查看详情', path: '/exception' },
+    { label: '今日工单', value: 6, linkText: '进入处理', path: '/work-order' },
+    { label: '待上门服务', value: 3, linkText: '进入处理', path: '/work-order' },
+    { label: '本周完成', value: 18, linkText: '进入处理', path: '/work-order' },
+    { label: '异常上报', value: 1, danger: true, linkText: '进入处理', path: '/exception' },
   ],
   main: {
     title: '今日服务安排',

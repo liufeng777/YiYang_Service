@@ -2150,7 +2150,7 @@
                       "BearerAuth": []
                   }
               ],
-              "description": "返回 health_access.institution_id=当前机构 的全部会员（含状态1-5）中「已建档」的会员档案摘要；\n未建档会员不返回；手机号脱敏（131****1234）。",
+              "description": "返回 health_access.institution_id=当前机构 的全部会员（含状态1-5）中「已建档」的会员档案摘要；\n未建档会员不返回；手机号是否脱敏由配置 privacy.mask_phone 控制（默认明文返回，开启后 131****1234）。",
               "consumes": [
                   "application/json"
               ],
@@ -4464,6 +4464,64 @@
               }
           }
       },
+      "/api/v1/staff/members/{id}/plan-drafts": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "立刻返回 task_no，后台异步调用 AI 生成「目标 + 干预」草稿存入缓存（TTL 2 小时）；\n前端用 GET /api/v1/staff/plan-drafts/{task_no} 轮询结果，编辑后走 POST /members/{id}/plans 保存。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康方案-AI草稿"
+              ],
+              "summary": "AI 生成方案草稿（异步，返回任务号）",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "生成需求（requirement 必填；plan_type/duration_days/use_health_record 可选）",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "返回 task_no 与轮询地址",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  },
+                  "400": {
+                      "description": "参数错误",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  },
+                  "503": {
+                      "description": "AI 生成或草稿缓存不可用",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
       "/api/v1/staff/members/{id}/plans": {
           "get": {
               "security": [
@@ -4551,6 +4609,196 @@
                       "schema": {
                           "type": "object"
                       }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/messages": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-消息"
+              ],
+              "summary": "消息列表（本账号，按机构过滤）",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "消息类型 1-系统 2-订单 3-工单 4-活动 5-随访 6-健康方案 7-健康预警 8-退款 9-预约到院 10-咨询 11-排班 12-资质 13-账号",
+                      "name": "message_type",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "1-未读 2-已读(不传=全部)",
+                      "name": "is_read",
+                      "in": "query"
+                  },
+                  {
+                      "type": "string",
+                      "description": "业务对象类型过滤(空=全部) e.g. WO",
+                      "name": "entity_type",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "页码",
+                      "name": "page",
+                      "in": "query",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数",
+                      "name": "page_size",
+                      "in": "query",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/messages/mark-read": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-消息"
+              ],
+              "summary": "批量标记消息已读",
+              "parameters": [
+                  {
+                      "description": "消息ID列表",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffMarkRead"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/messages/read-all": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-消息"
+              ],
+              "summary": "全部消息标记已读(可按分类限定)",
+              "parameters": [
+                  {
+                      "description": "message_type 可选(不传=全部)",
+                      "name": "body",
+                      "in": "body",
+                      "schema": {
+                          "$ref": "#/definitions/system.MarkAllReadRequest"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/messages/unread-count": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-消息"
+              ],
+              "summary": "未读消息数(总数+按分类分布)",
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/messages/{id}": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-消息"
+              ],
+              "summary": "消息详情(读取自动置已读)",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "消息ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
                   }
               ],
               "responses": {
@@ -5158,6 +5406,135 @@
               }
           }
       },
+      "/api/v1/staff/notify-prefs": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-消息"
+              ],
+              "summary": "读取触达偏好",
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-消息"
+              ],
+              "summary": "保存触达偏好",
+              "parameters": [
+                  {
+                      "description": "触达偏好",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffSaveNotifyPref"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/notify-subscriptions": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-消息"
+              ],
+              "summary": "查询微信订阅模板状态",
+              "parameters": [
+                  {
+                      "type": "string",
+                      "description": "微信订阅模板码 e.g. WO_ASSIGNED",
+                      "name": "tpl_code",
+                      "in": "query",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-消息"
+              ],
+              "summary": "保存微信订阅模板状态",
+              "parameters": [
+                  {
+                      "description": "订阅状态",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffSaveSubscription"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
       "/api/v1/staff/orders/pending-confirm": {
           "get": {
               "security": [
@@ -5327,6 +5704,55 @@
               "responses": {
                   "200": {
                       "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/plan-drafts/{task_no}": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "返回草稿状态：1生成中 / 2成功（含 goals/interventions，可直接回填表单）/ 3失败（error_msg 为原因）。\n草稿有效期 2 小时，过期或不存在返回 404，前端需提示重新生成。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康方案-AI草稿"
+              ],
+              "summary": "查询 AI 方案草稿（轮询）",
+              "parameters": [
+                  {
+                      "type": "string",
+                      "description": "草稿任务号",
+                      "name": "task_no",
+                      "in": "path",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  },
+                  "403": {
+                      "description": "无权查看该草稿",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  },
+                  "404": {
+                      "description": "草稿不存在或已过期",
                       "schema": {
                           "$ref": "#/definitions/pkg.Response"
                       }
@@ -5524,14 +5950,16 @@
                       "required": true
                   },
                   {
-                      "type": "string",
-                      "description": "起始日期 YYYY-MM-DD",
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "起始 UTC 秒（缺省取方案开始日）",
                       "name": "start_date",
                       "in": "query"
                   },
                   {
-                      "type": "string",
-                      "description": "结束日期 YYYY-MM-DD",
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "结束 UTC 秒（缺省取方案结束日 23:59:59）",
                       "name": "end_date",
                       "in": "query"
                   }
@@ -5573,14 +6001,16 @@
                       "required": true
                   },
                   {
-                      "type": "string",
-                      "description": "起始日期 YYYY-MM-DD",
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "起始 UTC 秒（缺省取方案开始日）",
                       "name": "start_date",
                       "in": "query"
                   },
                   {
-                      "type": "string",
-                      "description": "结束日期 YYYY-MM-DD",
+                      "type": "integer",
+                      "format": "int64",
+                      "description": "结束 UTC 秒（缺省取方案结束日 23:59:59）",
                       "name": "end_date",
                       "in": "query"
                   }
@@ -5650,6 +6080,98 @@
                       "description": "结束时间(UTC秒)",
                       "name": "end_time",
                       "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/plans/{id}/checkins/{checkin_id}": {
+          "put": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "健管师代录的打卡记录修改。若该打卡为数值型干预且同步写入过 health 监测记录，则一并同步更新。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康方案"
+              ],
+              "summary": "修改某项打卡",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "方案ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "打卡记录ID",
+                      "name": "checkin_id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "description": "新的打卡值",
+                      "name": "item",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/health.HealthPlanCheckinItem"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          },
+          "delete": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "删除打卡记录（软删）。若该打卡同步写入过 health 监测记录则一并软删。",
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康方案"
+              ],
+              "summary": "删除某项打卡",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "方案ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "type": "integer",
+                      "description": "打卡记录ID",
+                      "name": "checkin_id",
+                      "in": "path",
+                      "required": true
                   }
               ],
               "responses": {
@@ -7172,6 +7694,23 @@
       }
   },
   "definitions": {
+      "health.HealthPlanCheckinItem": {
+          "type": "object",
+          "properties": {
+              "field_value": {
+                  "type": "integer"
+              },
+              "intervention_id": {
+                  "type": "integer"
+              },
+              "is_abnormal": {
+                  "type": "integer"
+              },
+              "value_text": {
+                  "type": "string"
+              }
+          }
+      },
       "pkg.Meta": {
           "type": "object",
           "properties": {
@@ -7852,6 +8391,21 @@
               }
           }
       },
+      "staff.ReqStaffMarkRead": {
+          "type": "object",
+          "required": [
+              "ids"
+          ],
+          "properties": {
+              "ids": {
+                  "description": "消息ID列表",
+                  "type": "array",
+                  "items": {
+                      "type": "integer"
+                  }
+              }
+          }
+      },
       "staff.ReqStaffMetricCategoryCreate": {
           "type": "object",
           "required": [
@@ -8076,6 +8630,54 @@
               }
           }
       },
+      "staff.ReqStaffSaveNotifyPref": {
+          "type": "object",
+          "properties": {
+              "category_off": {
+                  "description": "关闭分类列表（message_type 数组）",
+                  "type": "array",
+                  "items": {
+                      "type": "integer"
+                  }
+              },
+              "night_silent": {
+                  "description": "夜间免打扰 1开/0关（nil=不修改）",
+                  "type": "integer"
+              },
+              "sms_enabled": {
+                  "description": "短信触达 1开/0关（nil=不修改）",
+                  "type": "integer"
+              },
+              "wechat_enabled": {
+                  "description": "微信触达 1开/0关（nil=不修改）",
+                  "type": "integer"
+              }
+          }
+      },
+      "staff.ReqStaffSaveSubscription": {
+          "type": "object",
+          "required": [
+              "tpl_code"
+          ],
+          "properties": {
+              "expire_at": {
+                  "description": "长期订阅有效期(UTC秒, 0=不限)",
+                  "type": "integer"
+              },
+              "remain_count": {
+                  "description": "一次性剩余次数",
+                  "type": "integer"
+              },
+              "subscribe_type": {
+                  "description": "0-未订阅 1-一次性 2-长期",
+                  "type": "integer"
+              },
+              "tpl_code": {
+                  "description": "微信订阅模板码",
+                  "type": "string"
+              }
+          }
+      },
       "staff.ReqStaffTransferLead": {
           "type": "object",
           "required": [
@@ -8233,6 +8835,20 @@
                   "type": "string"
               },
               "satisfaction_score": {
+                  "type": "integer"
+              }
+          }
+      },
+      "system.MarkAllReadRequest": {
+          "type": "object",
+          "properties": {
+              "message_type": {
+                  "type": "integer"
+              },
+              "receiver_id": {
+                  "type": "integer"
+              },
+              "receiver_type": {
                   "type": "integer"
               }
           }

@@ -8,6 +8,7 @@ import { Button, Input, message } from 'antd'
 import { ArrowLeftOutlined, CheckCircleFilled } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText from '@/components/SensitiveText'
 import { mockAuditDetail as d } from './mock'
 import './index.less'
 
@@ -49,7 +50,7 @@ export default function StaffAuditDetail() {
           <div className="staff-profile__main">
             <div className="staff-profile__avatar">{d.name[0]}</div>
             <div>
-              <div className="staff-profile__name">{d.name}</div>
+              <div className="staff-profile__name"><SensitiveText type="name" value={d.name} /></div>
               <div className="staff-profile__meta">{d.roleOrg}</div>
             </div>
           </div>

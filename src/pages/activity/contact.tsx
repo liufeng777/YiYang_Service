@@ -4,6 +4,7 @@ import { App, Button, Empty, Popconfirm, Spin, Tag } from 'antd'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText from '@/components/SensitiveText'
 import { activityApi } from '@/api'
 import type { ActivityItem, RegistrationItem } from '@/api/modules/activity'
 import './index.less'
@@ -90,15 +91,15 @@ export default function ActivityContact() {
                 <div className="ac-contact__grid">
                   <div className="ac-field">
                     <div className="ac-field__label">报名人 / 会员</div>
-                    <div>{registration.member_name || registration.contact_name}</div>
+                    <SensitiveText type="name" value={registration.member_name || registration.contact_name} />
                   </div>
                   <div className="ac-field">
                     <div className="ac-field__label">联系人</div>
-                    <div>{registration.contact_name}</div>
+                    <SensitiveText type="name" value={registration.contact_name} />
                   </div>
                   <div className="ac-field">
                     <div className="ac-field__label">联系电话</div>
-                    <div>{registration.contact_phone}</div>
+                    <SensitiveText type="phone" value={registration.contact_phone} />
                   </div>
                   <div className="ac-field">
                     <div className="ac-field__label">参与人数</div>

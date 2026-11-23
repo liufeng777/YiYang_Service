@@ -7,6 +7,7 @@
  */
 import { useEffect, useMemo, useState } from 'react'
 import PageContainer from '@/components/PageContainer'
+import { maskName } from '@/components/SensitiveText'
 import { useUserStore } from '@/store/modules/user'
 import { workbenchApi } from '@/api'
 import type { DashboardOverview, DashboardWarningItem } from '@/api/modules/workbench'
@@ -42,7 +43,7 @@ function metricRealValue(label: string, o?: DashboardOverview): number | string 
 function warningToListItem(w: DashboardWarningItem): ListItem {
   return {
     title: w.title || '健康预警',
-    info: w.member_name || `会员 #${w.member_id}`,
+    info: w.member_name ? maskName(w.member_name) : `会员 #${w.member_id}`,
     tag: SEVERITY_TEXT[w.severity] ?? '待核实',
     tone: w.severity >= 2 ? 'danger' : 'muted',
   }
@@ -125,7 +126,7 @@ export default function Workbench() {
   }, [userInfo?.positionCode, overview, warnings])
 
   const title = config.greeting
-    ? `${greetingWord()}，${userInfo?.nickname ?? ''}`
+    ? `${greetingWord()}，${maskName(userInfo?.nickname)}`
     : (config.title ?? '工作台')
 
   return (

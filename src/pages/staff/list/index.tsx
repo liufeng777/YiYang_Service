@@ -9,6 +9,7 @@ import { Button, Card, Input, Select, Space, Table } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText from '@/components/SensitiveText'
 import { staffApi } from '@/api'
 import type { PositionItem, StaffItem } from '@/api/modules/staff'
 import '../index.less'
@@ -92,8 +93,8 @@ export default function StaffList() {
       key: 'name',
       render: (_: unknown, row: StaffItem) => (
         <div className='table-cell'>
-          <strong>{row.name || '-'}</strong>
-          <span>{row.phone || '-'}</span>
+          <strong><SensitiveText type="name" value={row.name} /></strong>
+          <SensitiveText type="phone" value={row.phone} />
         </div>
       ),
     },

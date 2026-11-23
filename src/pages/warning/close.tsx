@@ -4,6 +4,7 @@ import { App, Button, Input, Radio, Spin } from 'antd'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText from '@/components/SensitiveText'
 import { warningApi } from '@/api'
 import { WARNING_STATUS_MAP, type WarningItem } from '@/api/modules/warning'
 import './index.less'
@@ -69,7 +70,7 @@ export default function WarningClose() {
             <div className="wn-card">
               <div className="wn-card__header"><span className="wn-card__title">预警信息</span></div>
               <div className="wn-field"><div className="wn-field__label">预警内容</div><div>{detail?.title}</div></div>
-              <div className="wn-field"><div className="wn-field__label">服务对象</div><div>{detail?.member_name}</div></div>
+              <div className="wn-field"><div className="wn-field__label">服务对象</div><div><SensitiveText type="name" value={detail?.member_name} /></div></div>
               {/* <div className="wn-field"><div className="wn-field__label">指标快照</div><div>{detail?.metric_values}</div></div> */}
               <div className="wn-field"><div className="wn-field__label">当前状态</div><div>{detail ? WARNING_STATUS_MAP[detail.warning_status] : undefined}</div></div>
               <div className="wn-field"><div className="wn-field__label">已有处置意见</div><div>{detail?.handled_reason}</div></div>

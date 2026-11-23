@@ -6,12 +6,13 @@ import {
 } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText from '@/components/SensitiveText'
 import { healthArchiveApi } from '@/api'
 import type { ArchiveEnumOptions, HealthArchiveOverview } from '@/api/modules/health-archive'
 import { BasicPanel, RecordsPanel } from './archive-forms'
 import ChronicPanel from './chronic-panel'
 import MetricsPanel from './metrics-panel'
-import HealthPlansPanel from './plans-panel'
+import HealthPlansPanel from './Plan/plans-panel'
 import './index.less'
 
 export default function HealthArchiveDetail() {
@@ -52,7 +53,9 @@ export default function HealthArchiveDetail() {
               {member?.gender === 1 ? <Tag color="blue">男</Tag> : member?.gender === 2 ? <Tag color="magenta">女</Tag> : '-'}
             </Descriptions.Item>
             <Descriptions.Item label={<><CalendarOutlined /> 出生日期</>}>{member?.birthday || '-'}</Descriptions.Item>
-            <Descriptions.Item label={<><PhoneOutlined /> 联系电话</>}>{member?.phone || '-'}</Descriptions.Item>
+            <Descriptions.Item label={<><PhoneOutlined /> 联系电话</>}>
+              <SensitiveText type="phone" value={member?.phone} />
+            </Descriptions.Item>
           </Descriptions>
         </Card>
         <Tabs

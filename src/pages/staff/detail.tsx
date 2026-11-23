@@ -10,6 +10,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Button, Segmented, Spin } from 'antd'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText from '@/components/SensitiveText'
 import { staffApi } from '@/api'
 import type { CredentialItem, StaffDetail as StaffDetailData } from '@/api/modules/staff'
 import './index.less'
@@ -63,9 +64,9 @@ export default function StaffDetail() {
 
   const baseFields = detail
     ? [
-        { label: '姓名', value: detail.name || '-' },
-        { label: '手机号', value: detail.phone || '-' },
-        { label: '身份证号', value: detail.id_card || '-' },
+        { label: '姓名', value: <SensitiveText type="name" value={detail.name} /> },
+        { label: '手机号', value: <SensitiveText type="phone" value={detail.phone} /> },
+        { label: '身份证号', value: <SensitiveText type="idCard" value={detail.id_card} /> },
         { label: '岗位', value: positionName || detail.title || '-' },
         { label: '人员类型', value: STAFF_TYPE_MAP[detail.staff_type] ?? '-' },
         { label: '排班次数', value: detail.schedule_count != null ? String(detail.schedule_count) : '-' },
@@ -97,7 +98,7 @@ export default function StaffDetail() {
                 <div className="staff-profile__avatar">{(detail.name || '-')[0]}</div>
                 <div>
                   <div className="staff-profile__name">
-                    {detail.name || '-'}
+                    <SensitiveText type="name" value={detail.name} />
                     {positionName && (
                       <span className="status-tag status-tag--blue">{positionName}</span>
                     )}
@@ -106,7 +107,7 @@ export default function StaffDetail() {
                     </span>
                   </div>
                   <div className="staff-profile__meta">
-                    {detail.phone || '-'} · 机构 #{detail.institution_id}
+                    <SensitiveText type="phone" value={detail.phone} /> · 机构 #{detail.institution_id}
                   </div>
                 </div>
               </div>

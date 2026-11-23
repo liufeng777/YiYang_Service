@@ -1,19 +1,24 @@
 /**
  * 顶部导航栏：折叠按钮 + 面包屑 + 当前机构 + 搜索 + 用户信息
  */
-import { useMemo } from 'react'
-import { Breadcrumb, Dropdown, Layout, Avatar, Space, Button } from 'antd'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Breadcrumb, Dropdown, Layout, Avatar, Badge, Space, Button } from 'antd'
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   LogoutOutlined,
   UserOutlined,
   SwapOutlined,
+  BellOutlined,
 } from '@ant-design/icons'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { messageApi } from '@/api'
+import { unreadTotal } from '@/api/modules/message'
 import { findBreadcrumb } from '@/router/menu'
 import { useAppStore } from '@/store/modules/app'
 import { useUserStore } from '@/store/modules/user'
+import MessageCenter from '@/pages/message/message-center'
+import SensitiveText from '@/components/SensitiveText'
 
 export default function HeaderBar() {
   const location = useLocation()
@@ -23,6 +28,20 @@ export default function HeaderBar() {
   const userInfo = useUserStore((state) => state.userInfo)
   const currentOrg = useUserStore((state) => state.currentOrg)
   const logout = useUserStore((state) => state.logout)
+  const [messageOpen, setMessageOpen] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
+
+  const refreshUnread = useCallback(async () => {
+    try {
+      const result = await messageApi.getUnreadMessageCount()
+      setUnreadCount(unreadTotal(result))
+    } catch { /* 拦截器统一提示 */ }
+  }, [])
+
+  useEffect(() => {
+    setUnreadCount(0)
+    void refreshUnread()
+  }, [currentOrg?.id, refreshUnread])
 
   const breadcrumbItems = useMemo(
     () =>
@@ -76,15 +95,15 @@ export default function HeaderBar() {
             }
           />
         </div> */}
+        <Badge count={unreadCount} size="small" overflowCount={99}>
+          <Button
+            type="text" icon={<BellOutlined />} aria-label="消息中心"
+            className="layout-header__message" onClick={() => setMessageOpen(true)}
+          />
+        </Badge>
         <Dropdown
           menu={{
             items: [
-              {
-                key: 'profile',
-                icon: <UserOutlined />,
-                label: '个人中心',
-              },
-              { type: 'divider' },
               {
                 key: 'logout',
                 icon: <LogoutOutlined />,
@@ -99,9 +118,10 @@ export default function HeaderBar() {
         >
           <Space className="layout-header__user" size={8}>
             <Avatar size={28} icon={<UserOutlined />} style={{ background: '#27866B' }} />
-            <span>{userInfo?.nickname || '管理员'}</span>
+            <SensitiveText type="name" value={userInfo?.nickname || '管理员'} />
           </Space>
         </Dropdown>
+        <MessageCenter open={messageOpen} onClose={() => setMessageOpen(false)} onUnreadChange={setUnreadCount} />
       </div>
     </Layout.Header>
   )

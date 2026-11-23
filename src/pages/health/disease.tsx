@@ -9,6 +9,7 @@ import { ArrowRightOutlined, CheckOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText from '@/components/SensitiveText'
 import { mockDiseaseDetails, mockProfile, type DiseaseChipGroup } from './mock'
 import './index.less'
 
@@ -34,7 +35,7 @@ function MemberCard() {
         </Avatar>
         <div>
           <div className="hr-member__head">
-            <span className="hr-member__name">{p.name}</span>
+            <span className="hr-member__name"><SensitiveText type="name" value={p.name} /></span>
             {p.diseases.map((d, i) => (
               <span key={d} className={i === 0 ? 'hr-tag hr-tag--risk-low' : 'hr-tag hr-tag--disease'}>
                 {d}
@@ -50,11 +51,11 @@ function MemberCard() {
       <div className="hr-member__meta">
         <div className="hr-member__meta-item">
           <div className="hr-member__meta-label">责任医生</div>
-          <div className="hr-member__meta-value">{p.doctor}</div>
+          <div className="hr-member__meta-value"><SensitiveText type="name" value={p.doctor} /></div>
         </div>
         <div className="hr-member__meta-item">
           <div className="hr-member__meta-label">健康管理师</div>
-          <div className="hr-member__meta-value">{p.manager}</div>
+          <div className="hr-member__meta-value"><SensitiveText type="name" value={p.manager} /></div>
         </div>
         <div className="hr-member__meta-item">
           <div className="hr-member__meta-label">当前机构</div>
@@ -248,7 +249,9 @@ export default function DiseaseProfile() {
                       </div>
                       <div className="hr-timeline__summary">{r.summary}</div>
                     </div>
-                    <span className="hr-timeline__operator">{r.source}</span>
+                    <span className="hr-timeline__operator">
+                      {/医生|医师|健管师|护士/.test(r.source) ? <SensitiveText type="name" value={r.source} /> : r.source}
+                    </span>
                   </div>
                 ))}
               </div>

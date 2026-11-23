@@ -10,6 +10,7 @@ import { Button, Input, message } from 'antd'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText from '@/components/SensitiveText'
 import { orderApi } from '@/api'
 import type { OrderDetail } from '@/api/modules/order'
 import { mockWoAudit } from './mock'
@@ -82,7 +83,7 @@ export default function WorkOrderAudit() {
         <div className="wo-member">
           <div className="wo-member__main">
             <div>
-              <div className="wo-member__name">{order?.member_name || m.name}</div>
+              <div className="wo-member__name"><SensitiveText type="name" value={order?.member_name || m.name} /></div>
               <div className="wo-member__meta">
                 {order ? `会员 #${order.member_id ?? '-'}` : `${m.gender} · ${m.age}岁 · ${m.diseases.join(' / ')}`}
               </div>

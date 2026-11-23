@@ -5,6 +5,7 @@ import { ArrowLeftOutlined } from '@ant-design/icons'
 import type { Dayjs } from 'dayjs'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import { maskName, maskPhone } from '@/components/SensitiveText'
 import { followupApi, memberApi } from '@/api'
 import type { MemberItem } from '@/api/modules/member'
 import './index.less'
@@ -64,7 +65,10 @@ export default function FollowupCreate() {
               <Select
                 showSearch optionFilterProp="label" loading={loading} onSearch={loadMembers}
                 placeholder="搜索并选择会员"
-                options={members.map((member) => ({ value: member.id, label: `${member.name} · ${member.phone || member.id}` }))}
+                options={members.map((member) => ({
+                  value: member.id,
+                  label: `${maskName(member.name)} · ${member.phone ? maskPhone(member.phone) : member.id}`,
+                }))}
               />
             </Form.Item>
             <Form.Item name="warning_id" label="关联预警 ID" rules={[{ required: true, message: '请输入关联预警 ID' }]}>

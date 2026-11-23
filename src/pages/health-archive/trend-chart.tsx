@@ -3,8 +3,8 @@ import { useId } from 'react'
 import { Card, Empty, Tag, Tooltip } from 'antd'
 import dayjs from 'dayjs'
 import type { MetricItem } from '@/api/modules/metric'
-import type { ArchiveData } from './shared'
-import { asObject, formatTimestamp, pick } from './shared'
+import type { ArchiveData } from './Plan/shared'
+import { asObject, formatTimestamp, pick } from './Plan/shared'
 
 type TrendPointStatus = 'normal' | 'high' | 'low' | 'abnormal' | 'unknown'
 

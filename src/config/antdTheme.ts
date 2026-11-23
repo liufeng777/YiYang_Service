@@ -73,6 +73,17 @@ const antdTheme: ThemeConfig = {
       headerColor: '#66736F',
       headerSplitColor: 'transparent',
     },
+    Button: {
+      defaultColor: brandPrimary,
+      defaultBorderColor: brandPrimary,
+      defaultBg: '#FFFFFF',
+      defaultHoverColor: brandPrimaryDark,
+      defaultHoverBorderColor: brandPrimaryDark,
+      defaultHoverBg: '#E8F4F0',
+      defaultActiveColor: brandPrimaryDark,
+      defaultActiveBorderColor: brandPrimaryDark,
+      dangerColor: '#F45B4F',
+    },
   },
 }
 

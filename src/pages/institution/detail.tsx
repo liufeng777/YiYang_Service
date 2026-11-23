@@ -7,6 +7,7 @@ import { Button, message } from 'antd'
 import { EnvironmentFilled } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText from '@/components/SensitiveText'
 import { mockOrgDetail } from './mock'
 import './index.less'
 
@@ -41,7 +42,7 @@ export default function InstitutionDetail() {
             </div>
             <div className="org-detail__meta">统一社会信用代码：{d.creditCode}</div>
             <div className="org-detail__meta">
-              {d.address} · 负责人：{d.principal} · {d.phone}
+              {d.address} · 负责人：<SensitiveText type="name" value={d.principal} /> · <SensitiveText type="phone" value={d.phone} />
             </div>
           </div>
           <div className="org-detail__sync">

@@ -82,7 +82,7 @@ export interface FamilyRecord extends ApiData {
   member_id: number
   disease_name?: string
   icd10_code?: string
-  is_dead?: number
+  is_dead?: 0 | 1 // 是否已故：0否 1是
   onset_age?: number
   relation?: number
   remark?: string

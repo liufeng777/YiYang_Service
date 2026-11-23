@@ -117,6 +117,46 @@ body {
 }
 
 
+/* ===== 全站按钮：主操作实心绿、次操作绿框白底、否定操作红框白底 ===== */
+.ant-btn.ant-btn-primary:not(.ant-btn-dangerous):not(:disabled) {
+  color: @color-bg-card;
+  background: @color-primary;
+  border-color: @color-primary;
+
+  &:hover,
+  &:focus-visible {
+    color: @color-bg-card;
+    background: @color-primary-dark;
+    border-color: @color-primary-dark;
+  }
+}
+
+.ant-btn.ant-btn-default:not(.ant-btn-dangerous):not(:disabled) {
+  color: @color-primary;
+  background: @color-bg-card;
+  border-color: @color-primary;
+
+  &:hover,
+  &:focus-visible {
+    color: @color-primary-dark;
+    background: @color-primary-light;
+    border-color: @color-primary-dark;
+  }
+}
+
+.ant-btn.ant-btn-dangerous:not(.ant-btn-text):not(.ant-btn-link):not(:disabled) {
+  color: @color-danger;
+  background: @color-bg-card;
+  border-color: @color-danger;
+
+  &:hover,
+  &:focus-visible {
+    color: @color-risk-high;
+    background: @color-risk-high-bg;
+    border-color: @color-risk-high;
+  }
+}
+
 .table-cell {
   display: flex;
   flex-direction: column;

@@ -10,6 +10,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Button, Checkbox, Input, Radio, App } from 'antd'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText from '@/components/SensitiveText'
 import { warningApi } from '@/api'
 import { WARNING_SEVERITY_MAP, type WarningItem } from '@/api/modules/warning'
 import './index.less'
@@ -112,7 +113,7 @@ export default function WarningHandle() {
                 {detail ? WARNING_SEVERITY_MAP[detail.severity] : undefined}
               </span>
               <div className="wn-handle__metric-meta">
-                {detail?.member_name}
+                <SensitiveText type="name" value={detail?.member_name} />
               </div>
             </div>
 

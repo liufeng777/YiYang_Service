@@ -12,8 +12,8 @@ import { chronicDiseaseApi, healthArchiveApi } from '@/api'
 import FormDrawer from '@/components/FormDrawer'
 import type { ChronicDiseaseDict } from '@/api/modules/chronic-disease'
 import type { ChronicArchive, ChronicAssessment } from '@/api/modules/health-archive'
-import type { ArchiveData } from './shared'
-import { asObject, display, formatTimestamp, toDayjs } from './shared'
+import type { ArchiveData } from './Plan/shared'
+import { asObject, display, formatTimestamp, toDayjs } from './Plan/shared'
 import {
   ChronicMetricFields, getChronicMetricDefinitions, getMetricAbnormalities,
   metricFormValues, serializeMetricValues,

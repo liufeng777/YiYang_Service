@@ -17,10 +17,18 @@ const FIELD_LABELS: Record<string, string> = {
   metric_count: '指标数', summary_label: '评估摘要', assessment_count: '评估次数',
   last_assess_date: '最近评估时间', last_risk_level_label: '最近风险摘要',
   treatment_desc: '治疗情况', disease_history_id: '专病条目 ID',
-  goals: '健康目标', interventions: '干预措施', reviews: '审核履历',
+  goals: '健康目标', interventions: '干预措施', audit_reviews: '审核履历',
   checkin_freq_type: '打卡频率类型', checkin_freq_value: '打卡频率值',
   intervention_id: '干预 ID', plan_id: '方案 ID', checkin_time: '打卡时间',
   completion_rate: '完成率', pass: '是否通过', reviewer_name: '审核人',
+  plan_type: '方案类型', health_intent: '健康管理意向', duration_days: '执行周期（天）',
+  review_remark: '最近审批意见', goal_code: '目标编码', goal_label: '目标名称',
+  goal_basis: '目标依据', interv_code: '干预编码', interv_name: '干预名称',
+  action_desc: '干预说明', interv_basis: '干预依据', field_type: '字段类型',
+  field_unit: '数值单位', field_value: '打卡数值', value_text: '打卡内容',
+  expected_count: '应打卡次数', actual_count: '实打卡次数', missing_count: '缺失次数',
+  consecutive_days: '连续打卡天数', interv_stats: '按干预统计', operated_at: '操作时间',
+  operator_name: '操作人', role: '角色', result: '审核结果', error_msg: '失败原因',
 }
 
 export function asObject(value: unknown): ArchiveData {

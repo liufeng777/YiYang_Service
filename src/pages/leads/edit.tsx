@@ -10,6 +10,7 @@ import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import dayjs from 'dayjs'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText from '@/components/SensitiveText'
 import { useUserStore } from '@/store/modules/user'
 import {
   CONTACT_IDENTITY_MAP,
@@ -178,7 +179,7 @@ export default function LeadEdit() {
 
             {isEdit && editing && (
               <div className="lead-edit__meta">
-                登记人：{editing.owner_staff_name ?? userInfo?.nickname ?? '-'}
+                登记人：<SensitiveText type="name" value={editing.owner_staff_name ?? userInfo?.nickname} />
                 &nbsp;&nbsp;登记时间：{dayjs(editing.created_at * 1000).format('YYYY-MM-DD HH:mm')}
                 &nbsp;&nbsp;来源会话：C{editing.lead_no.slice(-9)}
               </div>

@@ -7,6 +7,7 @@ import { Alert, Button, Card, Descriptions, Empty, List, Spin, Tag } from 'antd'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText from '@/components/SensitiveText'
 import { healthArchiveApi, memberApi } from '@/api'
 import { MEMBER_STATUS_MAP, RISK_LEVEL_MAP, type HealthProfile } from '@/api/modules/member'
 import { formatDateTime } from '@/utils'
@@ -32,6 +33,21 @@ function display(value: unknown): string {
   return JSON.stringify(value)
 }
 
+function displayArchiveField(key: string, value: unknown) {
+  const raw = typeof value === 'string' || typeof value === 'number' ? value : undefined
+  if (['name', 'member_name', 'contact_name', 'emergency_contact'].includes(key)) {
+    return <SensitiveText type="name" value={raw} />
+  }
+  if (['phone', 'member_phone', 'contact_phone', 'emergency_phone'].includes(key)) {
+    return <SensitiveText type="phone" value={raw} />
+  }
+  if (key === 'id_card') return <SensitiveText type="idCard" value={raw} />
+  if (key === 'address' || key === 'address_detail' || key === 'service_address') {
+    return <SensitiveText type="address" value={raw} />
+  }
+  return display(value)
+}
+
 function ArchiveData({ value }: { value: unknown }) {
   const items = Array.isArray(value) ? value : [value]
   const meaningful = items.filter((item) => item != null && (!Array.isArray(item) || item.length > 0))
@@ -48,7 +64,7 @@ function ArchiveData({ value }: { value: unknown }) {
             {object ? (
               <Descriptions size="small" column={{ xs: 1, md: 2, xl: 3 }}>
                 {Object.entries(object).map(([key, fieldValue]) => (
-                  <Descriptions.Item key={key} label={key}>{display(fieldValue)}</Descriptions.Item>
+                  <Descriptions.Item key={key} label={key}>{displayArchiveField(key, fieldValue)}</Descriptions.Item>
                 ))}
               </Descriptions>
             ) : display(item)}
@@ -114,15 +130,19 @@ export default function MemberDetail() {
       <Spin spinning={loading}>
         <Card variant="borderless" className="mb-card">
           <Descriptions title="基本信息" bordered column={{ xs: 1, md: 2, xl: 3 }}>
-            <Descriptions.Item label="姓名">{m?.name || '-'}</Descriptions.Item>
-            <Descriptions.Item label="联系电话">{m?.phone || '-'}</Descriptions.Item>
+            <Descriptions.Item label="姓名"><SensitiveText type="name" value={m?.name} /></Descriptions.Item>
+            <Descriptions.Item label="联系电话"><SensitiveText type="phone" value={m?.phone} /></Descriptions.Item>
             <Descriptions.Item label="性别">{m?.gender === 1 ? '男' : m?.gender === 2 ? '女' : '未知'}</Descriptions.Item>
             <Descriptions.Item label="生日">{m?.birthday || '-'}</Descriptions.Item>
             <Descriptions.Item label="档案状态">{m?.status != null ? MEMBER_STATUS_MAP[m.status] ?? `状态 ${m.status}` : '-'}</Descriptions.Item>
             <Descriptions.Item label="风险分层">{riskText}</Descriptions.Item>
             <Descriptions.Item label="照护等级">{careText}</Descriptions.Item>
-            <Descriptions.Item label="紧急联系人">{m?.emergency_contact || profile?.contact?.emergency_contact || '-'}</Descriptions.Item>
-            <Descriptions.Item label="紧急联系电话">{m?.emergency_phone || profile?.contact?.emergency_phone || '-'}</Descriptions.Item>
+            <Descriptions.Item label="紧急联系人">
+              <SensitiveText type="name" value={m?.emergency_contact || profile?.contact?.emergency_contact} />
+            </Descriptions.Item>
+            <Descriptions.Item label="紧急联系电话">
+              <SensitiveText type="phone" value={m?.emergency_phone || profile?.contact?.emergency_phone} />
+            </Descriptions.Item>
           </Descriptions>
         </Card>
 

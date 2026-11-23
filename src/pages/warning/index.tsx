@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Button, Card, Select, Table } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText from '@/components/SensitiveText'
 import { warningApi } from '@/api'
 import {
   WARNING_SEVERITY_MAP,
@@ -80,6 +81,7 @@ export default function WarningList() {
       title: '服务对象',
       key: 'member_name',
       dataIndex: 'member_name',
+      render: (value?: string) => <SensitiveText type="name" value={value} />,
     },
     {
       title: '预警等级',

@@ -7,6 +7,7 @@ import { Button, Card, Input, Select, Space, Table, Tag } from 'antd'
 import { PlusOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import { maskName, maskPhone } from '@/components/SensitiveText'
 import { memberApi } from '@/api'
 import type { AssessmentItem, MemberItem } from '@/api/modules/member'
 import { formatDateTime } from '@/utils'
@@ -118,7 +119,10 @@ export default function AssessList() {
           placeholder="请选择测评会员"
           value={memberId}
           onChange={(value) => { setMemberId(value); setPage(1) }}
-          options={members.map((member) => ({ value: member.id, label: `${member.name} · ${member.phone || member.id}` }))}
+          options={members.map((member) => ({
+            value: member.id,
+            label: `${maskName(member.name)} · ${member.phone ? maskPhone(member.phone) : member.id}`,
+          }))}
         />
         <Button onClick={() => { setKeyword(''); setMemberId(undefined); setPage(1); searchMembers() }}>重置</Button>
         <Button type="primary" onClick={() => searchMembers(keyword)}>查询</Button>

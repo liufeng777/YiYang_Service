@@ -12,6 +12,7 @@ import { PlusOutlined } from '@ant-design/icons'
 import { useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import FormDrawer from '@/components/FormDrawer'
+import SensitiveText from '@/components/SensitiveText'
 import { activityApi } from '@/api'
 import type { ActivityItem, RegistrationItem } from '@/api/modules/activity'
 
@@ -121,10 +122,14 @@ export default function ActivityCheckin() {
     {
       title: '会员 / 联系人',
       key: 'name',
-      render: (_: unknown, row: RegistrationItem) =>
-        row.member_name || row.contact_name || '-',
+      render: (_: unknown, row: RegistrationItem) => (
+        <SensitiveText type="name" value={row.member_name || row.contact_name} />
+      ),
     },
-    { title: '联系电话', dataIndex: 'contact_phone', key: 'contact_phone', width: 140 },
+    {
+      title: '联系电话', dataIndex: 'contact_phone', key: 'contact_phone', width: 160,
+      render: (value?: string) => <SensitiveText type="phone" value={value} />,
+    },
     {
       title: '参与人数',
       dataIndex: 'participant_count',

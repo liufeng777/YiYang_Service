@@ -11,6 +11,7 @@ import {
   PlusOutlined,
   SearchOutlined,
 } from '@ant-design/icons'
+import SensitiveText from '@/components/SensitiveText'
 import {
   mockBasicInfo,
   mockExamReport,
@@ -25,6 +26,16 @@ import {
 import './index.less'
 
 /* ================= 基础信息 ================= */
+
+function BasicSensitiveField({ label, value }: { label: string; value: string }) {
+  if (label === '居住地址') return <SensitiveText type="address" value={value} />
+  if (label === '身份证件') return <SensitiveText type="idCard" value={value} />
+  if (label === '手机号' || label === '联系电话') return <SensitiveText type="phone" value={value} />
+  if (['姓名', '姓名 / 关系', '责任医生', '健康管理师'].includes(label)) {
+    return <SensitiveText type="name" value={value} />
+  }
+  return <>{value}</>
+}
 
 export function BasicInfoTab() {
   const b = mockBasicInfo
@@ -54,7 +65,7 @@ export function BasicInfoTab() {
                   className={f.span ? 'hr-basic__item hr-basic__item--span' : 'hr-basic__item'}
                 >
                   <div className="hr-overview-item__label">{f.label}</div>
-                  <div className="hr-overview-item__value">{f.value}</div>
+                  <div className="hr-overview-item__value"><BasicSensitiveField label={f.label} value={f.value} /></div>
                 </div>
               ))}
             </div>
@@ -68,7 +79,7 @@ export function BasicInfoTab() {
               {b.emergency.map((f) => (
                 <div key={f.label} className="hr-basic__item">
                   <div className="hr-overview-item__label">{f.label}</div>
-                  <div className="hr-overview-item__value">{f.value}</div>
+                  <div className="hr-overview-item__value"><BasicSensitiveField label={f.label} value={f.value} /></div>
                 </div>
               ))}
             </div>
@@ -83,11 +94,11 @@ export function BasicInfoTab() {
             <div className="hr-basic__hint">区分“谁在使用账号”和“谁接受服务”</div>
             <div className="hr-basic__item">
               <div className="hr-overview-item__label">健康服务对象</div>
-              <div className="hr-overview-item__value">{b.relation.target}</div>
+              <div className="hr-overview-item__value"><SensitiveText type="name" value={b.relation.target} /></div>
             </div>
             <div className="hr-basic__item hr-basic__item--gap">
               <div className="hr-overview-item__label">账号操作人</div>
-              <div className="hr-overview-item__value">{b.relation.operator}</div>
+              <div className="hr-overview-item__value"><SensitiveText type="name" value={b.relation.operator} /></div>
               {b.relation.authorized && <span className="hr-tag hr-tag--risk-low">已获档案授权</span>}
             </div>
           </div>
@@ -100,7 +111,7 @@ export function BasicInfoTab() {
               {b.belonging.map((f) => (
                 <div key={f.label} className="hr-basic__item">
                   <div className="hr-overview-item__label">{f.label}</div>
-                  <div className="hr-overview-item__value">{f.value}</div>
+                  <div className="hr-overview-item__value"><BasicSensitiveField label={f.label} value={f.value} /></div>
                 </div>
               ))}
             </div>

@@ -8,6 +8,7 @@ import { Button, Drawer, Input, Switch, message } from 'antd'
 import { CheckOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText, { maskName } from '@/components/SensitiveText'
 import {
   TEAM_ROLE_TEXT,
   mockTeamCreate as c,
@@ -99,7 +100,7 @@ export default function TeamCreate() {
               </div>
               <div className="team-role__selected">
                 <div className="team-role__selected-label">已选成员</div>
-                <div className="team-role__selected-names">{r.selected.join('、')}</div>
+                <div className="team-role__selected-names">{r.selected.map(maskName).join('、')}</div>
               </div>
               <span className={`team-tag team-tag--${r.tagTone}`}>{r.tag}</span>
               <Button onClick={() => openDrawer(r.key)}>选择人员</Button>
@@ -182,9 +183,9 @@ export default function TeamCreate() {
             >
               <div className="team-candidate__avatar">{m.name[0]}</div>
               <div className="team-candidate__info">
-                <div className="team-candidate__name">{m.name}</div>
+                <div className="team-candidate__name"><SensitiveText type="name" value={m.name} /></div>
                 <div className="team-candidate__meta">
-                  {TEAM_ROLE_TEXT[m.role]} · {m.phone}
+                  {TEAM_ROLE_TEXT[m.role]} · <SensitiveText type="phone" value={m.phone} />
                 </div>
               </div>
               <span className={`team-tag team-tag--${m.teamState === 'in' ? 'green' : m.teamState === 'other' ? 'orange' : 'blue'}`}>

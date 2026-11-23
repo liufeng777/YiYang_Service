@@ -1,5 +1,5 @@
 import type { ArchiveEnumOptions } from '@/api/modules/health-archive'
-import { display } from './shared'
+import { display } from './Plan/shared'
 
 export function archiveEnumLabel(options: ArchiveEnumOptions | undefined, field: string, value: unknown) {
   if (value == null || value === '') return '-'

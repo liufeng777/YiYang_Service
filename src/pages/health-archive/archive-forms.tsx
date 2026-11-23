@@ -3,14 +3,14 @@ import { useCallback, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import {
   App, Button, Card, DatePicker, Form, Input, InputNumber,
-  Popconfirm, Select, Space, Table, Tabs, Tag,
+  Popconfirm, Radio, Select, Space, Table, Tabs, Tag,
 } from 'antd'
 import type { Dayjs } from 'dayjs'
 import { healthArchiveApi } from '@/api'
 import FormDrawer from '@/components/FormDrawer'
 import type { ArchiveEnumOptions, HealthArchiveOverview } from '@/api/modules/health-archive'
-import type { ArchiveData } from './shared'
-import { toDayjs } from './shared'
+import type { ArchiveData } from './Plan/shared'
+import { toDayjs } from './Plan/shared'
 import { archiveEnumColor, archiveEnumLabel } from './archive-enums'
 import { formatDateTime } from '@/utils'
 
@@ -141,7 +141,7 @@ export function BasicPanel({ memberId, overview, loading = false, enumOptions = 
 }
 
 type RecordKind = 'allergy' | 'disease' | 'family' | 'operation'
-type FieldType = 'text' | 'number' | 'date' | 'textarea'
+type FieldType = 'text' | 'number' | 'date' | 'textarea' | 'radio'
 interface FieldConfig { name: string; label: string; type?: FieldType; required?: boolean; render?: (record: ArchiveData) => ReactNode }
 
 const RECORD_CONFIG: Record<RecordKind, { title: string; fields: FieldConfig[] }> = {
@@ -186,7 +186,10 @@ const RECORD_CONFIG: Record<RecordKind, { title: string; fields: FieldConfig[] }
       )},
       { name: 'relation', label: '亲属关系', type: 'number' },
       { name: 'onset_age', label: '发病年龄', type: 'number' },
-      { name: 'is_dead', label: '是否已故', type: 'number' },
+      {
+        name: 'is_dead', label: '是否已故', type: 'radio',
+        render: (record) => record.is_dead == null ? '-' : Number(record.is_dead) === 1 ? '是' : '否',
+      },
       { name: 'remark', label: '备注', type: 'textarea' },
     ],
   },
@@ -232,7 +235,9 @@ function RecordTable({ memberId, kind, enumOptions = {} }: { memberId: string; k
     const value = record ?? {}
     const initial = Object.fromEntries(config.fields.map((field) => [
       field.name,
-      field.type === 'date' ? toDayjs(value[field.name]) : value[field.name],
+      field.type === 'date'
+        ? toDayjs(value[field.name])
+        : field.type === 'radio' ? value[field.name] ?? 0 : value[field.name],
     ]))
     setEditing(record ?? null)
     form.setFieldsValue(initial)
@@ -336,7 +341,9 @@ function RecordTable({ memberId, kind, enumOptions = {} }: { memberId: string; k
               key={field.name} name={field.name} label={field.label}
               rules={field.required ? [{ required: true, whitespace: true, message: `请填写${field.label}` }] : undefined}
             >
-              {field.type === 'number' && enumOptions[field.name]?.length ? (
+              {field.type === 'radio' ? (
+                <Radio.Group options={[{ value: 0, label: '否' }, { value: 1, label: '是' }]} />
+              ) : field.type === 'number' && enumOptions[field.name]?.length ? (
                 <Select
                   allowClear showSearch optionFilterProp="label"
                   options={enumOptions[field.name]} placeholder={`请选择${field.label}`}

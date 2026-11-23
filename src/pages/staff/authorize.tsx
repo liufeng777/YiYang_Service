@@ -8,6 +8,7 @@ import { Button, Input, message } from 'antd'
 import { ArrowLeftOutlined, CheckSquareFilled } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText, { maskName } from '@/components/SensitiveText'
 import { mockAuthorize as a } from './mock'
 import './index.less'
 
@@ -54,7 +55,7 @@ export default function StaffAuthorize() {
     <div className="staff-page">
       <PageContainer
         title="配置服务授权"
-        description={`选择${a.staff.name}可以承接的服务项目，保存后提交审核`}
+        description={`选择${maskName(a.staff.name)}可以承接的服务项目，保存后提交审核`}
         extra={<Button icon={<ArrowLeftOutlined />} color="primary" variant="outlined" onClick={() => navigate(`/staff/${id}`)}>返回服务授权</Button>}
       >
         {/* 人员头卡 */}
@@ -62,7 +63,7 @@ export default function StaffAuthorize() {
           <div className="staff-profile__main">
             <div className="staff-profile__avatar">{a.staff.name[0]}</div>
             <div>
-              <div className="staff-profile__name">{a.staff.name}</div>
+              <div className="staff-profile__name"><SensitiveText type="name" value={a.staff.name} /></div>
               <div className="staff-profile__meta">{a.staff.roleOrg}</div>
             </div>
             <span className="status-tag status-tag--orange">{a.staff.tag}</span>

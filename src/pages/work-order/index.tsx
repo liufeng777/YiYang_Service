@@ -7,6 +7,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Button, Card, DatePicker, Input, Select, Table } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText from '@/components/SensitiveText'
 import { workOrderApi } from '@/api'
 import DispatchBoard from './DispatchBoard'
 import { WO_STATUS_MAP, type WorkOrderItem } from '@/api/modules/work-order';
@@ -129,8 +130,8 @@ export default function WorkOrderList() {
       key: 'member',
       render: (_: unknown, row: WorkOrderItem) => (
         <div className='table-cell'>
-          <strong>{row.member_name || '-'}</strong>
-          <span>{row.member_phone || row.contact_phone || '-'}</span>
+          <strong><SensitiveText type="name" value={row.member_name} /></strong>
+          <SensitiveText type="phone" value={row.member_phone || row.contact_phone} />
         </div>
       ),
     },
@@ -139,8 +140,8 @@ export default function WorkOrderList() {
       key: 'contact_name',
       render: (_: unknown, row: WorkOrderItem) => (
         <div className='table-cell'>
-          <strong>{row.contact_name || '-'}</strong>
-          <span>{row.member_phone || row.contact_phone || '-'}</span>
+          <strong><SensitiveText type="name" value={row.contact_name} /></strong>
+          <SensitiveText type="phone" value={row.member_phone || row.contact_phone} />
         </div>
       ),
     },
@@ -161,14 +162,14 @@ export default function WorkOrderList() {
       render: (_: unknown, row: WorkOrderItem) => <div className='table-cell'>
         {row.wo_status === 1 ? (
           <>
-            <strong>{row.expect_staff_name || '-'}</strong>
+            <strong><SensitiveText type="name" value={row.expect_staff_name} /></strong>
             <span>
               {row.expected_start_at ? formatDateTime(row.expected_start_at * 1000) : '-'}
             </span>
           </>
         ) :(
           <>
-            <strong>{row.assigned_staff_name || '-'}</strong>
+            <strong><SensitiveText type="name" value={row.assigned_staff_name} /></strong>
             <span>
               {row.assigned_at ? formatDateTime(row.assigned_at * 1000) : '-'}
             </span>

@@ -4,6 +4,7 @@ import { Button, Card, Select, Table, Tabs } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 import PageContainer from '@/components/PageContainer'
+import SensitiveText from '@/components/SensitiveText'
 import { followupApi } from '@/api'
 import { FOLLOWUP_TYPE_MAP, type FollowupItem } from '@/api/modules/followup'
 import './index.less'
@@ -51,7 +52,7 @@ export default function FollowupList() {
     title: '服务对象', key: 'member',
     render: (_: unknown, row: FollowupItem) => (
       <div className="table-cell">
-        <strong>{row.member_name || '-'} <span className="fu-row__sub">#{row.member_id}</span></strong>
+        <strong><SensitiveText type="name" value={row.member_name} /> <span className="fu-row__sub">#{row.member_id}</span></strong>
         <span>{row.member_gender === 1 ? '男' : row.member_gender === 2 ? '女' : '性别未知'}{row.member_age != null ? ` · ${row.member_age} 岁` : ''}</span>
       </div>
     ),

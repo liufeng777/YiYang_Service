@@ -2,8 +2,10 @@
  * 登录页左侧品牌面板
  * 设计稿：深绿渐变底 + 品牌标识 + 口号 + 特性卡片 + 装饰圆
  */
-import { PlusOutlined, ApartmentOutlined, RetweetOutlined, SafetyCertificateOutlined } from '@ant-design/icons'
-import type { ReactNode } from 'react'
+import { ApartmentOutlined, RetweetOutlined, SafetyCertificateOutlined } from '@ant-design/icons'
+import type { ReactNode } from 'react';
+import loginBg from '@/assets/login_bg.png';
+import logoImg from '@/assets/logo/logo_txt_white.svg';
 
 interface Feature {
   icon: ReactNode
@@ -19,18 +21,14 @@ const features: Feature[] = [
 
 export default function BrandPanel() {
   return (
-    <div className="login-brand">
+    <div className="login-brand" style={{background: `url(${loginBg})`}}>
       <div className="login-brand__deco login-brand__deco--tr" />
       <div className="login-brand__deco login-brand__deco--bl" />
 
       <div className="login-brand__header">
         <span className="login-brand__logo">
-          <PlusOutlined />
+          <img src={logoImg} />
         </span>
-        <div className="login-brand__name-wrap">
-          <div className="login-brand__name">幸福颐养</div>
-          <div className="login-brand__slogan">AI数字化医养服务平台</div>
-        </div>
       </div>
 
       <h1 className="login-brand__headline">
