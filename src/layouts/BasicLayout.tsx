@@ -9,7 +9,7 @@ import NoApiNotice from '@/components/NoApiNotice'
 import { useAppStore } from '@/store/modules/app'
 import './layout.less';
 import logoImg from '@/assets/logo/logo.png'
-import logoTxtImg from '@/assets/logo/logo_txt.png'
+import logoTxtImg from '@/assets/logo/logo_txt_white.svg'
 
 const { Sider, Content } = Layout
 
