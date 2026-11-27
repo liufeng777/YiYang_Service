@@ -3,7 +3,8 @@
  * 聚合会员健康档案与健康档案卡；Swagger 未建模的响应对字段做安全兼容展示。
  */
 import { useEffect, useState } from 'react'
-import { Alert, Button, Card, Descriptions, Empty, List, Spin, Tag } from 'antd'
+import { Alert, Button, Card, Descriptions, Empty, List, Spin } from 'antd'
+import Tag from '@/components/StatusTag'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'

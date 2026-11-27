@@ -8,7 +8,8 @@
  * - POST /activities/{id}/registrations/{rid}/cancel（取消报名）
  */
 import { useCallback, useEffect, useState } from 'react'
-import { Button, Card, Form, Input, InputNumber, Popconfirm, Select, Table, Tag, App } from 'antd'
+import { Button, Card, Form, Input, InputNumber, Popconfirm, Select, Table, App } from 'antd'
+import Tag from '@/components/StatusTag'
 import { PlusOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'

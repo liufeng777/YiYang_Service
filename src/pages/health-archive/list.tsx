@@ -3,7 +3,8 @@
  * 使用 GET /api/v1/staff/health-archives，以 member_id 进入档案工作台。
  */
 import { useCallback, useEffect, useState } from 'react'
-import { Button, Card, Input, Select, Table, Tag } from 'antd'
+import { Button, Card, Input, Select, Table } from 'antd'
+import Tag from '@/components/StatusTag'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import SensitiveText from '@/components/SensitiveText'
@@ -87,7 +88,7 @@ export default function HealthArchiveList() {
     <PageContainer
       title="健康档案"
       description="查看本机构已建档会员，维护病史、指标、慢病、目标与方案"
-      extra={<Button type="primary" onClick={() => navigate('/health-record/metric-management')}>检测项管理</Button>}
+      extra={<Button onClick={() => navigate('/health-record/metric-management')}>检测项管理</Button>}
     >
       <Card variant="borderless" className="filter-bar">
         <Input

@@ -231,37 +231,37 @@ export const routes: RouteConfig[] = [
   //     },
   //   ],
   // },
-  {
-    path: '/assessment',
-    meta: { title: '健康力测评', icon: <ExperimentOutlined />, group: '健康管理', permissions: [PERMISSIONS.HEALTH_ASSESS] },
-    children: [
-      {
-        path: '',
-        meta: { title: '测评列表' },
-        component: lazy(() => import('@/pages/assess/list')),
-      },
-      {
-        path: 'create',
-        meta: { title: '新建健康力测评', hideInMenu: true },
-        component: lazy(() => import('@/pages/assess/create')),
-      },
-      {
-        path: ':id',
-        meta: { title: '健康力测评详情', hideInMenu: true },
-        component: lazy(() => import('@/pages/assess/detail')),
-      },
-      {
-        path: ':id/entry',
-        meta: { title: '健康力测评原始数据', hideInMenu: true },
-        component: lazy(() => import('@/pages/assess/entry')),
-      },
-      {
-        path: ':id/analysis',
-        meta: { title: '健康力测评专业确认', hideInMenu: true },
-        component: lazy(() => import('@/pages/assess/analysis')),
-      },
-    ],
-  },
+  // {
+  //   path: '/assessment',
+  //   meta: { title: '健康力测评', icon: <ExperimentOutlined />, group: '健康管理', permissions: [PERMISSIONS.HEALTH_ASSESS] },
+  //   children: [
+  //     {
+  //       path: '',
+  //       meta: { title: '测评列表' },
+  //       component: lazy(() => import('@/pages/assess/list')),
+  //     },
+  //     {
+  //       path: 'create',
+  //       meta: { title: '新建健康力测评', hideInMenu: true },
+  //       component: lazy(() => import('@/pages/assess/create')),
+  //     },
+  //     {
+  //       path: ':id',
+  //       meta: { title: '健康力测评详情', hideInMenu: true },
+  //       component: lazy(() => import('@/pages/assess/detail')),
+  //     },
+  //     {
+  //       path: ':id/entry',
+  //       meta: { title: '健康力测评原始数据', hideInMenu: true },
+  //       component: lazy(() => import('@/pages/assess/entry')),
+  //     },
+  //     {
+  //       path: ':id/analysis',
+  //       meta: { title: '健康力测评专业确认', hideInMenu: true },
+  //       component: lazy(() => import('@/pages/assess/analysis')),
+  //     },
+  //   ],
+  // },
   {
     path: '/followup',
     meta: { title: '随访管理', icon: <ScheduleOutlined />, group: '健康管理', permissions: [PERMISSIONS.FOLLOWUP] },

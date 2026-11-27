@@ -3,8 +3,9 @@ import { useCallback, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import {
   App, Button, Card, DatePicker, Form, Input, InputNumber,
-  Popconfirm, Radio, Select, Space, Table, Tabs, Tag,
+  Popconfirm, Radio, Select, Space, Table, Tabs,
 } from 'antd'
+import Tag from '@/components/StatusTag'
 import type { Dayjs } from 'dayjs'
 import { healthArchiveApi } from '@/api'
 import FormDrawer from '@/components/FormDrawer'

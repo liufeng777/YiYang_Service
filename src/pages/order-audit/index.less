@@ -121,41 +121,6 @@
   }
 }
 
-.oa-status {
-  display: inline-flex;
-  align-items: center;
-  gap: @spacing-2xs;
-  padding: @spacing-2xs @spacing-xs;
-  border-radius: @radius-full;
-  font-size: @font-size-auxiliary;
-  line-height: @line-height-auxiliary;
-  font-weight: @font-weight-body-medium;
-  white-space: nowrap;
-
-  &::before {
-    content: '';
-    width: @spacing-xs;
-    height: @spacing-xs;
-    border-radius: @radius-full;
-    background: currentColor;
-  }
-
-  &--pending {
-    color: @color-risk-mid;
-    background: @color-risk-mid-bg;
-  }
-
-  &--approved {
-    color: @color-primary;
-    background: @color-primary-light;
-  }
-
-  &--rejected {
-    color: @color-risk-high;
-    background: @color-risk-high-bg;
-  }
-}
-
 /* 内容区块 */
 .oa-section {
   &__header {

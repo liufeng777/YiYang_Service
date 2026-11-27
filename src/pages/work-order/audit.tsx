@@ -77,7 +77,7 @@ export default function WorkOrderAudit() {
           </span>
         }
         description="审核服务适用性、患者风险、医嘱依据与上门实施条件"
-        extra={<span className="wo-tag wo-tag--blue">待医生审核</span>}
+        extra={<span className="status-tag status-tag--blue">待医生审核</span>}
       >
         {/* 会员条 */}
         <div className="wo-member">

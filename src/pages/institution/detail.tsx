@@ -37,8 +37,8 @@ export default function InstitutionDetail() {
           <div>
             <div className="org-detail__name">
               {d.name}
-              <span className="org-tag org-tag--green">{d.status}</span>
-              <span className="org-tag org-tag--blue">{d.type}</span>
+              <span className="status-tag status-tag--green">{d.status}</span>
+              <span className="status-tag status-tag--blue">{d.type}</span>
             </div>
             <div className="org-detail__meta">统一社会信用代码：{d.creditCode}</div>
             <div className="org-detail__meta">
@@ -70,14 +70,14 @@ export default function InstitutionDetail() {
               <div className="org-field__label org-rail__gap">服务能力</div>
               <div className="org-detail__services">
                 {d.services.map((s) => (
-                  <span key={s} className="org-service-tag">
+                  <span key={s} className="status-tag status-tag--teal">
                     {s}
                   </span>
                 ))}
                 <div className="org-license org-license--inline">
                   <div>
                     <div className="org-license__name">
-                      机构资质 <span className="org-tag org-tag--green">{d.license.status}</span>
+                      机构资质 <span className="status-tag status-tag--green">{d.license.status}</span>
                     </div>
                     <div className="org-license__meta">
                       {d.license.name}

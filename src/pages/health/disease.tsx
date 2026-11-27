@@ -37,11 +37,11 @@ function MemberCard() {
           <div className="hr-member__head">
             <span className="hr-member__name"><SensitiveText type="name" value={p.name} /></span>
             {p.diseases.map((d, i) => (
-              <span key={d} className={i === 0 ? 'hr-tag hr-tag--risk-low' : 'hr-tag hr-tag--disease'}>
+              <span key={d} className={i === 0 ? 'status-tag status-tag--green' : 'status-tag status-tag--blue'}>
                 {d}
               </span>
             ))}
-            <span className={`hr-tag hr-tag--risk-${p.risk}`}>高风险</span>
+            <span className={`status-tag status-tag--${p.risk === 'high' ? 'red' : p.risk === 'mid' ? 'orange' : 'green'}`}>高风险</span>
           </div>
           <div className="hr-member__sub">
             {p.gender} · {p.age}岁 · 档案编号 {p.profileNo}
@@ -224,7 +224,7 @@ export default function DiseaseProfile() {
                       {m.value} <span className="hr-metric-card__unit">{m.unit}</span>
                     </div>
                     <div className="hr-metric-card__target">{m.target}</div>
-                    <span className={`hr-tag hr-tag--risk-${m.level}`}>{m.status}</span>
+                    <span className={`status-tag status-tag--${m.level === 'high' ? 'red' : m.level === 'mid' ? 'orange' : 'green'}`}>{m.status}</span>
                   </div>
                 ))}
               </div>
@@ -264,7 +264,7 @@ export default function DiseaseProfile() {
             <div className="hr-card">
               <div className="hr-card__header">
                 <span className="hr-card__title">管理目标摘要</span>
-                <span className="hr-tag hr-tag--risk-low">{d.goal.planTag}</span>
+                <span className="status-tag status-tag--green">{d.goal.planTag}</span>
               </div>
               <div className="hr-disease-goal">
                 <div className="hr-disease-goal__label">管理周期</div>
@@ -286,7 +286,7 @@ export default function DiseaseProfile() {
                   <div className="hr-disease-comp__label">{g.groupLabel}</div>
                   <div className="hr-disease-comp__tags">
                     {g.tags.map((t) => (
-                      <span key={t.text} className={`hr-tag hr-tag--risk-${t.level}`}>
+                      <span key={t.text} className={`status-tag status-tag--${t.level === 'high' ? 'red' : t.level === 'mid' ? 'orange' : 'green'}`}>
                         {t.text}
                       </span>
                     ))}

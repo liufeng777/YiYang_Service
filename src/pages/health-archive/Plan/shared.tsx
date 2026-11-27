@@ -1,4 +1,5 @@
-import { Card, Descriptions, Empty, Tag } from 'antd'
+import { Card, Descriptions, Empty } from 'antd'
+import Tag from '@/components/StatusTag'
 import dayjs, { type Dayjs } from 'dayjs'
 import type { ApiData } from '@/api/modules/common'
 

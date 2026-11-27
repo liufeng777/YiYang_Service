@@ -6,7 +6,8 @@
  * 逐条跟进记录暂无独立接口，跟进内容写入预约备注
  */
 import { useCallback, useEffect, useState } from 'react'
-import { Button, Card, DatePicker, Drawer, Input, Popconfirm, Select, Table, Tag, App } from 'antd'
+import { Button, Card, DatePicker, Drawer, Input, Popconfirm, Select, Table, App } from 'antd'
+import Tag from '@/components/StatusTag'
 import { PlusOutlined } from '@ant-design/icons'
 import type { Dayjs } from 'dayjs'
 import PageContainer from '@/components/PageContainer'

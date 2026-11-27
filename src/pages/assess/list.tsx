@@ -3,7 +3,8 @@
  * Swagger 按会员查询评估，因此先选择会员，再调用会员评估列表接口。
  */
 import { useCallback, useEffect, useState } from 'react'
-import { Button, Card, Input, Select, Space, Table, Tag } from 'antd'
+import { Button, Card, Input, Select, Space, Table } from 'antd'
+import Tag from '@/components/StatusTag'
 import { PlusOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'

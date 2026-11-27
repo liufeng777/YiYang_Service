@@ -30,9 +30,9 @@ export interface AssessRecord {
 }
 
 export const ASSESS_STATUS: Record<AssessStatus, { text: string; cls: string }> = {
-  pending: { text: '待确认', cls: 'as-tag--pending' },
-  'in-progress': { text: '评测中', cls: 'as-tag--doing' },
-  done: { text: '已完成', cls: 'as-tag--done' },
+  pending: { text: '待确认', cls: 'status-tag--orange' },
+  'in-progress': { text: '评测中', cls: 'status-tag--teal' },
+  done: { text: '已完成', cls: 'status-tag--green' },
 }
 
 export const RISK_LEVEL: Record<RiskLevel, { text: string; cls: string }> = {

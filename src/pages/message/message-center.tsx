@@ -2,8 +2,9 @@ import { useCallback, useEffect, useState } from 'react'
 import type { Key } from 'react'
 import {
   App, Button, Card, DatePicker, Drawer, Form, Input, InputNumber,
-  Popconfirm, Select, Space, Spin, Switch, Table, Tabs, Tag,
+  Popconfirm, Select, Space, Spin, Switch, Table, Tabs,
 } from 'antd'
+import Tag from '@/components/StatusTag'
 import { CheckOutlined, ReloadOutlined } from '@ant-design/icons'
 import dayjs, { type Dayjs } from 'dayjs'
 import { messageApi } from '@/api'

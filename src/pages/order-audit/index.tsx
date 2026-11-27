@@ -13,7 +13,7 @@ import { ORDER_STATUS_MAP, type OrderItem } from '@/api/modules/order'
 import { formatDateTime } from '@/utils'
 import './index.less'
 
-/** 审核状态标签配色（oa-tag--*） */
+/** 审核状态 → 全局状态标签配色 */
 const STATUS_TONE: Record<number, string> = {
   1: 'orange',
   2: 'orange',

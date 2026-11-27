@@ -99,14 +99,14 @@ export default function HealthRecordList() {
         const riskText =
           row.risk_level?.level_name || (riskValue ? RISK_LEVEL_MAP[riskValue] : '')
         const riskCls =
-          riskValue === 3 ? 'high' : riskValue === 2 ? 'mid' : riskValue === 1 ? 'low' : ''
+          riskValue === 3 ? 'red' : riskValue === 2 ? 'orange' : riskValue === 1 ? 'green' : 'gray'
         return (
           <div className="hr-row__tags">
             {row.chronic_disease_count > 0 && (
-              <span className="hr-tag hr-tag--disease">慢病 {row.chronic_disease_count} 项</span>
+              <span className="status-tag status-tag--blue">慢病 {row.chronic_disease_count} 项</span>
             )}
             {riskText ? (
-              <span className={`hr-tag hr-tag--risk-${riskCls}`}>{riskText}</span>
+              <span className={`status-tag status-tag--${riskCls}`}>{riskText}</span>
             ) : (
               <span className="hr-row__sub">未评级</span>
             )}

@@ -5,17 +5,15 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   App, Button, Card, Descriptions, Drawer, Form, Input, InputNumber, Modal,
-  Select, Space, Table, Tag,
+  Select, Space, Table,
 } from 'antd'
-import { PlusOutlined } from '@ant-design/icons'
+import Tag from '@/components/StatusTag'
 import PageContainer from '@/components/PageContainer'
 import FormDrawer from '@/components/FormDrawer'
-import SensitiveText, { maskName, maskPhone } from '@/components/SensitiveText'
-import { healthAccessApi, memberApi, staffApi } from '@/api'
+import SensitiveText, { maskName } from '@/components/SensitiveText'
+import { healthAccessApi, staffApi } from '@/api'
 import { HEALTH_ACCESS_STATUS_MAP, type HealthAccessItem } from '@/api/modules/health-access'
-import type { MemberItem } from '@/api/modules/member'
 import type { StaffItem } from '@/api/modules/staff'
-import { useUserStore } from '@/store'
 import { formatDateTime } from '@/utils'
 import './index.less'
 
@@ -50,8 +48,6 @@ function displayDetailField(key: string, value: unknown) {
 
 export default function MemberList() {
   const { message } = App.useApp()
-  const currentOrg = useUserStore((s) => s.currentOrg)
-  const [createForm] = Form.useForm()
   const [actionForm] = Form.useForm()
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS)
   const [applied, setApplied] = useState<Filters>(EMPTY_FILTERS)
@@ -60,10 +56,7 @@ export default function MemberList() {
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
-  const [members, setMembers] = useState<MemberItem[]>([])
   const [staffs, setStaffs] = useState<StaffItem[]>([])
-  const [createOpen, setCreateOpen] = useState(false)
-  const [creating, setCreating] = useState(false)
   const [detail, setDetail] = useState<HealthAccessItem>()
   const [detailLoading, setDetailLoading] = useState(false)
   const [action, setAction] = useState<ActionState>()
@@ -83,7 +76,6 @@ export default function MemberList() {
 
   useEffect(() => { load() }, [load])
   useEffect(() => {
-    memberApi.getMemberList({ page: 1, page_size: 100 }).then((res) => setMembers(res.list ?? [])).catch(() => undefined)
     staffApi.getStaffList({ page: 1, page_size: 100 }).then((res) => setStaffs(res.list ?? [])).catch(() => undefined)
   }, [])
 
@@ -101,29 +93,6 @@ export default function MemberList() {
 
   const search = () => { setPage(1); setApplied({ ...filters }) }
   const reset = () => { setFilters(EMPTY_FILTERS); setApplied(EMPTY_FILTERS); setPage(1) }
-
-  const onCreate = async () => {
-    const values = await createForm.validateFields()
-    setCreating(true)
-    try {
-      const tags = String(values.demand_tags || '').split(/[,，]/).map((item: string) => item.trim()).filter(Boolean)
-      await healthAccessApi.createHealthAccess({
-        member_id: values.member_id,
-        institution_id: currentOrg ? Number(currentOrg.id) : undefined,
-        source_type: values.source_type,
-        relation: values.relation,
-        demand_desc: values.demand_desc?.trim() || undefined,
-        demand_tags: tags.length ? JSON.stringify(tags) : undefined,
-        health_intent: values.health_intent?.trim() || undefined,
-        remark: values.remark?.trim() || undefined,
-      })
-      message.success('健康会员接入已登记')
-      setCreateOpen(false)
-      createForm.resetFields()
-      setPage(1)
-      load()
-    } catch { /* 保留输入 */ } finally { setCreating(false) }
-  }
 
   const onAction = async () => {
     if (!action) return
@@ -146,18 +115,29 @@ export default function MemberList() {
   }
 
   const columns = [
-    { title: '接入编号', dataIndex: 'id', key: 'id', width: 100 },
     {
-      title: '健康会员', key: 'member',
-      render: (_: unknown, row: HealthAccessItem) => (
-        <div className="mb-access-member">
-          <strong><SensitiveText plain type="name" value={row.member_name || `会员 #${row.member_id}`} /></strong>
-          <SensitiveText plain type="phone" value={row.member_phone} />
-        </div>
-      ),
+      title: '健康会员', key: 'member_name', dataIndex: 'member_name'
     },
-    { title: '服务需求', key: 'demand', render: (_: unknown, row: HealthAccessItem) => row.demand_desc || row.health_intent || '-' },
-    { title: '健管师', dataIndex: 'staff_name', key: 'staff_name', render: (value?: string) => <SensitiveText plain type="name" value={value} /> },
+    { 
+      title: '服务需求',
+      key: 'demand',
+      render: (_: unknown, row: HealthAccessItem) => (
+        <div className='table-cell'>
+          <strong>{row.health_intent || '-'}</strong>
+          <span>{row.apply_code}</span>
+        </div>
+      )  },
+    { 
+      title: '健管师',
+      dataIndex: 'staff_name',
+      key: 'staff_name',
+      render: (_: string, row: any) => {
+        return <div className='table-cell'>
+          <strong>{row.staff_name}</strong>
+          <span>{row.institution_name}</span>
+        </div>
+      },
+    },
     {
       title: '来源', dataIndex: 'source_type', key: 'source_type',
       render: (value?: number) => value === 1 ? '线下登记' : value != null ? `来源 ${value}` : '-',
@@ -207,7 +187,7 @@ export default function MemberList() {
     <PageContainer
       title="健康会员管理"
       description="通过健康服务接入流程登记会员需求，并完成分配、确认、跟进与转派"
-      extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>新增健康会员</Button>}
+      // extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateOpen(true)}>新增健康会员</Button>}
     >
       <Card variant="borderless" className="filter-bar">
         <Input
@@ -227,17 +207,17 @@ export default function MemberList() {
           onChange={(value) => setFilters((prev) => ({ ...prev, source_type: value }))}
           options={[{ value: 1, label: '线下登记' }]}
         />
-        <InputNumber
+        {/* <InputNumber
           min={1} precision={0} placeholder="最近 N 天" value={filters.days}
           onChange={(value) => setFilters((prev) => ({ ...prev, days: value ?? undefined }))}
-        />
+        /> */}
         <Button onClick={reset}>重置</Button>
         <Button type="primary" onClick={search}>查询</Button>
       </Card>
 
       <Card variant="borderless" className="list-card table-fill">
         <Table<HealthAccessItem>
-          rowKey="id" columns={columns} dataSource={list} loading={loading} scroll={{ x: 1050 }}
+          rowKey="id" columns={columns} dataSource={list} loading={loading}
           pagination={{
             current: page, pageSize, total, showSizeChanger: true,
             showTotal: (value) => `共 ${value} 条`,
@@ -245,33 +225,6 @@ export default function MemberList() {
           }}
         />
       </Card>
-
-      <FormDrawer
-        title="新增健康会员" open={createOpen} onClose={() => setCreateOpen(false)}
-        onSubmit={onCreate} confirmLoading={creating}
-      >
-        <Form form={createForm} layout="vertical" initialValues={{ source_type: 1, relation: 1 }}>
-          <Form.Item name="member_id" label="会员" rules={[{ required: true, message: '请选择会员' }]}>
-            <Select
-              showSearch optionFilterProp="label" placeholder="选择既有会员"
-              options={members.map((member) => ({
-                value: member.id,
-                label: `${maskName(member.name)} · ${member.phone ? maskPhone(member.phone) : member.id}`,
-              }))}
-            />
-          </Form.Item>
-          <Form.Item name="source_type" label="来源" rules={[{ required: true }]}>
-            <Select options={[{ value: 1, label: '线下登记' }]} />
-          </Form.Item>
-          <Form.Item name="relation" label="关系"><InputNumber min={1} precision={0} /></Form.Item>
-          <Form.Item name="demand_desc" label="需求描述"><Input.TextArea rows={3} maxLength={500} /></Form.Item>
-          <Form.Item name="demand_tags" label="需求标签" extra="多个标签使用逗号分隔，提交为 JSON 数组字符串">
-            <Input placeholder="如：慢病管理，定期随访" />
-          </Form.Item>
-          <Form.Item name="health_intent" label="健康管理意向"><Input.TextArea rows={2} /></Form.Item>
-          <Form.Item name="remark" label="备注"><Input.TextArea rows={2} /></Form.Item>
-        </Form>
-      </FormDrawer>
 
       <Drawer
         title={`健康会员接入 #${detail?.id ?? ''}`} width={560} open={detail != null}

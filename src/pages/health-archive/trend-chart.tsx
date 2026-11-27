@@ -1,6 +1,7 @@
 /** 将健康指标趋势接口的 series/points 绘制为带参考范围的折线图。 */
 import { useId } from 'react'
-import { Card, Empty, Tag, Tooltip } from 'antd'
+import { Card, Empty, Tooltip } from 'antd'
+import Tag from '@/components/StatusTag'
 import dayjs from 'dayjs'
 import type { MetricItem } from '@/api/modules/metric'
 import type { ArchiveData } from './Plan/shared'

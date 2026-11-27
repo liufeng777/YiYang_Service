@@ -5,7 +5,7 @@
  *   编辑回显调用 leadApi.getLeadDetail
  */
 import { useEffect, useState } from 'react'
-import { Button, Checkbox, Form, Input, Select, Tag, App, Card } from 'antd'
+import { Button, Checkbox, Form, Input, Select, App, Card } from 'antd'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import dayjs from 'dayjs'
@@ -81,7 +81,7 @@ export default function LeadEdit() {
         extra={
           <>
             {sourceType && (
-              <Tag className="lead-edit__source-tag">来源：{LEAD_SOURCE_MAP[sourceType]}</Tag>
+              <span className="status-tag status-tag--teal">来源：{LEAD_SOURCE_MAP[sourceType]}</span>
             )}
             <Button icon={<ArrowLeftOutlined />} color="primary" variant="outlined" onClick={() => navigate('/leads')}>返回线索列表</Button>
           </>

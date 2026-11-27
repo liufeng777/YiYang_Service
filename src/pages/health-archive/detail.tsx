@@ -1,6 +1,7 @@
 /** 以 member_id 为上下文的健康档案维护工作台。 */
 import { useEffect, useState } from 'react'
-import { Button, Card, Descriptions, Tabs, Tag } from 'antd'
+import { Button, Card, Descriptions, Tabs } from 'antd'
+import Tag from '@/components/StatusTag'
 import {
   ArrowLeftOutlined, CalendarOutlined, PhoneOutlined, UserOutlined,
 } from '@ant-design/icons'

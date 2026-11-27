@@ -91,7 +91,7 @@ export function MainPanel({ config }: { config: MainPanelConfig }) {
             {item.info && <span className="wb-list__info">{maskWorkbenchInfo(item.info)}</span>}
             {item.tag && (
               <span
-                className={`wb-list__tag${item.tone ? ` wb-list__tag--${item.tone}` : ''}`}
+                className={`status-tag status-tag--${item.tone === 'danger' ? 'red' : item.tone === 'success' ? 'green' : 'gray'}`}
               >
                 {item.tag}
               </span>

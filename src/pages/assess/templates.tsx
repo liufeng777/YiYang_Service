@@ -24,7 +24,7 @@ export default function AssessTemplates() {
             <div className="as-tpl-card__head">
               <FilePdfOutlined className="as-tpl-card__icon" />
               <span className="as-tpl-card__name">《{t.name}》</span>
-              <span className="as-tag as-tag--done">启用中</span>
+              <span className="status-tag status-tag--green">启用中</span>
             </div>
             <div className="as-tpl-card__desc">{t.desc}</div>
             <div className="as-meta-list">

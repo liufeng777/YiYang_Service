@@ -153,7 +153,7 @@ export default function InstitutionCreate() {
                   许可证登记号 {c.license.no} · 有效期至 {c.license.validUntil}
                 </div>
               </div>
-              <span className="org-tag org-tag--green">有效</span>
+              <span className="status-tag status-tag--green">有效</span>
               <Button onClick={() => message.info('附件上传功能待接入')}>上传或替换附件</Button>
             </div>
           </div>

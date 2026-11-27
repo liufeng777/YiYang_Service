@@ -7,21 +7,34 @@ export const HEALTH_ACCESS_STATUS_MAP: Record<number, string> = {
 }
 
 export interface HealthAccessItem extends ApiData {
-  id: number
-  member_id: number
-  member_name?: string
-  member_phone?: string
-  institution_id?: number
-  staff_id?: number
-  staff_name?: string
-  status?: number
-  source_type?: number
-  demand_desc?: string
-  demand_tags?: string
-  health_intent?: string
-  relation?: number
-  remark?: string
-  created_at?: number
+  apply_code: string,
+  created_at: number,
+  demand_desc: string,
+  demand_tags: string[],
+  followup_records: [],
+  health_intent: string,
+  id: number,
+  institution_id: number,
+  institution_name: string,
+  lead_id: number,
+  member_id: number,
+  member_name: string,
+  mobile: string,
+  operate_records: {
+    action: string,
+    content: string,
+    created_at: number,
+    op_name: string,
+    operator: string
+  }[],
+  relation: number,
+  remark: string,
+  source_type: number,
+  staff_id: number,
+  staff_name: string,
+  status: number,
+  updated_at: number,
+  user_id: number
 }
 
 export interface HealthAccessCreate extends ApiData {

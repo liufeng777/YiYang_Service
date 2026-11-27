@@ -9,37 +9,7 @@
   }
 }
 
-/* ===== 通用：标签 / 圆点 / 文本色 ===== */
-.hr-tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 1px @spacing-xs;
-  border-radius: @radius-xs;
-  font-size: @font-size-auxiliary;
-  line-height: @line-height-auxiliary;
-  font-weight: @font-weight-label;
-
-  &--disease {
-    background: @color-disease-tag-bg;
-    color: @color-disease-tag;
-  }
-
-  &--risk-high {
-    background: @color-risk-high-bg;
-    color: @color-risk-high;
-  }
-
-  &--risk-mid {
-    background: @color-risk-mid-bg;
-    color: @color-risk-mid;
-  }
-
-  &--risk-low {
-    background: @color-risk-low-bg;
-    color: @color-risk-low;
-  }
-}
-
+/* ===== 通用：圆点 / 文本色 ===== */
 .hr-dot {
   display: inline-block;
   width: 8px;
@@ -363,7 +333,7 @@
     font-weight: @font-weight-body;
   }
 
-  .hr-tag {
+  .status-tag {
     margin-top: @spacing-xs;
   }
 
@@ -436,7 +406,7 @@
     align-items: center;
     gap: @spacing-xs;
 
-    .hr-tag {
+    .status-tag {
       margin-left: auto;
     }
   }
@@ -516,7 +486,7 @@
     align-items: center;
     gap: @spacing-sm;
 
-    .hr-tag {
+    .status-tag {
       margin-left: auto;
     }
   }
@@ -1347,7 +1317,7 @@
       margin-top: @spacing-lg;
     }
 
-    .hr-tag {
+    .status-tag {
       margin-top: @spacing-xs;
     }
   }

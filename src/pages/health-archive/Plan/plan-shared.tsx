@@ -1,4 +1,4 @@
-import { Tag } from 'antd'
+import Tag from '@/components/StatusTag'
 import dayjs from 'dayjs'
 import type {
   HealthPlan, HealthPlanDetail, HealthPlanIntervention, HealthPlanReview,

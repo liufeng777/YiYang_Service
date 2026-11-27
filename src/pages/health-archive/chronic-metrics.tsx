@@ -1,5 +1,6 @@
 /** 将专病字典返回的表单定义转换为 antd 表单项。 */
-import { Alert, Form, Input, InputNumber, Select, Tag } from 'antd'
+import { Alert, Form, Input, InputNumber, Select } from 'antd'
+import Tag from '@/components/StatusTag'
 import type { ArchiveData } from './Plan/shared'
 import { asObject, display, parseStringRecord, pick } from './Plan/shared'
 

@@ -2,8 +2,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   App, Button, DatePicker, Drawer, Form, Input, InputNumber, Popconfirm,
-  Select, Space, Spin, Table, Tabs, Tag,
+  Select, Space, Spin, Table, Tabs,
 } from 'antd'
+import Tag from '@/components/StatusTag'
 import { PlusOutlined } from '@ant-design/icons'
 import type { Dayjs } from 'dayjs'
 import { planApi } from '@/api'

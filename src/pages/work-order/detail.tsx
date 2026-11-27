@@ -191,7 +191,7 @@ export default function WorkOrderDetail() {
                   <div className="wo-kv">
                     <span className="wo-kv__label">当前状态</span>
                     <span className="wo-kv__value">
-                      <span className="wo-tag wo-tag--blue">
+                      <span className="status-tag status-tag--blue">
                         {WO_STATUS_MAP[detail.wo_status] ?? '-'}
                       </span>
                     </span>

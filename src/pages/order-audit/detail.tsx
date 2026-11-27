@@ -2,7 +2,8 @@
  * 订单审核详情：基于 OrderDetail 展示订单、服务、健康档案与联系信息。
  */
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { App, Button, Checkbox, Empty, Input, Modal, Spin, Tag } from 'antd'
+import { App, Button, Checkbox, Empty, Input, Modal, Spin } from 'antd'
+import Tag from '@/components/StatusTag'
 import {
   ArrowLeftOutlined,
   CheckCircleFilled,
@@ -160,7 +161,7 @@ export default function OrderAuditDetail() {
                 <div className="oa-summary__main">
                   <div className="oa-summary__title-row">
                     <h3>{textOrDash(order.service_name)}</h3>
-                    <span className={`oa-status oa-status--${view}`}>{VIEW_TEXT[view]}</span>
+                    <span className={`status-tag status-tag--${view === 'pending' ? 'orange' : view === 'rejected' ? 'red' : 'teal'}`}>{VIEW_TEXT[view]}</span>
                   </div>
                   {/* <div className="oa-summary__meta">
                     <span>{ORDER_STATUS_MAP[order.order_status] ?? '审核不通过'}</span>

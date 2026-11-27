@@ -2,8 +2,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   Alert, App, Button, Card, Descriptions, Drawer, Form, Input, Modal,
-  Popconfirm, Radio, Select, Space, Spin, Table, Tabs, Tag, Timeline,
+  Popconfirm, Radio, Select, Space, Spin, Table, Tabs, Timeline,
 } from 'antd'
+import Tag from '@/components/StatusTag'
 import { PlusOutlined, RobotOutlined } from '@ant-design/icons'
 import { planApi } from '@/api'
 import SensitiveText from '@/components/SensitiveText'

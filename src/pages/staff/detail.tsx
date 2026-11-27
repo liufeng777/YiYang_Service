@@ -195,7 +195,7 @@ export default function StaffDetail() {
                     <span className="staff-text--muted">暂无授权服务项目</span>
                   ) : (
                     (detail.services ?? []).map((service) => (
-                      <span key={service.id} className="staff-auth-tag">
+                      <span key={service.id} className="status-tag status-tag--teal">
                         {service.name || `服务 #${service.id}`}（类型 {service.service_type}）
                       </span>
                     ))

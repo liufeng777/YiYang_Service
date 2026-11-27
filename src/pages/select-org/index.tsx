@@ -4,7 +4,7 @@
  * 直接渲染机构卡片，无需调用机构详情接口
  */
 import { useMemo, useState } from 'react'
-import { Button, Checkbox, Empty, Input, Switch, Tag, App } from 'antd'
+import { Button, Checkbox, Empty, Input, Switch, App } from 'antd'
 import { PlusOutlined, SearchOutlined, RightOutlined, CheckOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -158,7 +158,7 @@ export default function SelectOrg() {
                   onClick={() => setSelectedId(org.id)}
                 >
                   {selected && (
-                    <span className="org-card__badge">
+                    <span className="status-tag status-tag--teal org-card__badge">
                       <CheckOutlined /> 已选择
                     </span>
                   )}
@@ -166,10 +166,10 @@ export default function SelectOrg() {
                   <div className="org-card__name">{org.name}</div>
                   <div className="org-card__tags">
                     {org.type && (
-                      <Tag className="org-card__tag org-card__tag--type">{org.type}</Tag>
+                      <span className="status-tag status-tag--blue">{org.type}</span>
                     )}
                     {org.roleTag && (
-                      <Tag className="org-card__tag org-card__tag--role">{org.roleTag}</Tag>
+                      <span className="status-tag status-tag--teal">{org.roleTag}</span>
                     )}
                   </div>
                   {(org.scope || org.scopeDetail) && (

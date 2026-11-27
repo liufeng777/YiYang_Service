@@ -102,7 +102,7 @@ export default function TeamCreate() {
                 <div className="team-role__selected-label">已选成员</div>
                 <div className="team-role__selected-names">{r.selected.map(maskName).join('、')}</div>
               </div>
-              <span className={`team-tag team-tag--${r.tagTone}`}>{r.tag}</span>
+              <span className={`status-tag status-tag--${r.tagTone}`}>{r.tag}</span>
               <Button onClick={() => openDrawer(r.key)}>选择人员</Button>
             </div>
           ))}
@@ -188,7 +188,7 @@ export default function TeamCreate() {
                   {TEAM_ROLE_TEXT[m.role]} · <SensitiveText type="phone" value={m.phone} />
                 </div>
               </div>
-              <span className={`team-tag team-tag--${m.teamState === 'in' ? 'green' : m.teamState === 'other' ? 'orange' : 'blue'}`}>
+              <span className={`status-tag status-tag--${m.teamState === 'in' ? 'green' : m.teamState === 'other' ? 'orange' : 'blue'}`}>
                 {TEAM_STATE_TEXT[m.teamState]}
               </span>
               <span className={`team-candidate__check${checked ? ' team-candidate__check--on' : ''}`}>

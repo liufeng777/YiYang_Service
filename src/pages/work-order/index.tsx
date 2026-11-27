@@ -14,7 +14,7 @@ import { WO_STATUS_MAP, type WorkOrderItem } from '@/api/modules/work-order';
 import { formatDateTime } from '@/utils'
 import './index.less'
 
-/** 工单状态标签配色（wo-tag--*，对齐最新 WO_STATUS_MAP） */
+/** 工单状态 → 全局状态标签配色（对齐最新 WO_STATUS_MAP） */
 const STATUS_TONE: Record<number, string> = {
   1: 'orange', // 待派单
   2: 'blue', // 待接单(已派单)

@@ -2,8 +2,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   App, Button, Card, DatePicker, Descriptions, Drawer, Empty, Form,
-  Input, Modal, Select, Spin, Tag, Timeline,
+  Input, Modal, Select, Spin, Timeline,
 } from 'antd'
+import Tag from '@/components/StatusTag'
 import {
   CalendarOutlined, EditOutlined, MedicineBoxOutlined, PlusOutlined,
 } from '@ant-design/icons'

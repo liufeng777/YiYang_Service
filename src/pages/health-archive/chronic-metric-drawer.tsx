@@ -1,6 +1,7 @@
 /** 按慢病病种展示专病评估关联指标定义。 */
 import { useEffect, useState } from 'react'
-import { Drawer, Empty, Table, Tag } from 'antd'
+import { Drawer, Empty, Table } from 'antd'
+import Tag from '@/components/StatusTag'
 import { healthArchiveApi } from '@/api'
 import type { ChronicArchive } from '@/api/modules/health-archive'
 import { display } from './Plan/shared'

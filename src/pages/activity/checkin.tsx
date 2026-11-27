@@ -7,7 +7,8 @@
  * - POST /activities/{id}/registrations（临时到场补登记 = 代报名后再签到）
  */
 import { useCallback, useEffect, useState } from 'react'
-import { Button, Card, Form, Input, InputNumber, Select, Table, Tag, App } from 'antd'
+import { Button, Card, Form, Input, InputNumber, Select, Table, App } from 'antd'
+import Tag from '@/components/StatusTag'
 import { PlusOutlined } from '@ant-design/icons'
 import { useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'

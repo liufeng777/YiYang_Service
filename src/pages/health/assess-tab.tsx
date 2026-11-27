@@ -13,12 +13,12 @@ import {
 } from '@/pages/assess/mock'
 import './index.less'
 
-/** 风险等级 → 健康档案模块 hr-tag 类名 */
+/** 风险等级 → 全局状态标签类名 */
 const HR_RISK_CLS = {
-  good: 'hr-tag--risk-low',
-  attention: 'hr-tag--risk-mid',
-  high: 'hr-tag--risk-high',
-  insufficient: 'hr-tag--disease',
+  good: 'status-tag--green',
+  attention: 'status-tag--orange',
+  high: 'status-tag--red',
+  insufficient: 'status-tag--blue',
 } as const
 
 interface HistoryRow {
@@ -45,7 +45,7 @@ export function AssessTab() {
       title: '综合风险',
       key: 'risk',
       render: (_: unknown, row: HistoryRow) => (
-        <span className={`hr-tag ${HR_RISK_CLS[row.risk]}`}>{row.riskText}</span>
+        <span className={`status-tag ${HR_RISK_CLS[row.risk]}`}>{row.riskText}</span>
       ),
     },
     { title: '专业确认', dataIndex: 'confirm', key: 'confirm' },
@@ -79,7 +79,7 @@ export function AssessTab() {
       <div className="hr-card">
         <div className="hr-card__header">
           <span className="hr-card__title">最近一次健康力测评</span>
-          <span className="hr-tag hr-tag--risk-low">{t.latest.tag}</span>
+          <span className="status-tag status-tag--green">{t.latest.tag}</span>
         </div>
         <div className="hr-basic__hint">{t.latest.meta}</div>
         <div className="hr-metrics">
@@ -87,7 +87,7 @@ export function AssessTab() {
             <div key={d.key} className="hr-metric-card hr-metric-card--plain">
               <div className="hr-metric-card__name">{d.name}</div>
               <div className="hr-metric-card__value">
-                <span className={`hr-tag ${HR_RISK_CLS[d.level]}`}>{RISK_LEVEL[d.level].text}</span>
+                <span className={`status-tag ${HR_RISK_CLS[d.level]}`}>{RISK_LEVEL[d.level].text}</span>
               </div>
             </div>
           ))}

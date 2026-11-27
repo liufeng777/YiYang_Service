@@ -4,7 +4,8 @@
  * 操作：报名名单（/health-activity/:id/registrations）、现场签到（/health-activity/:id/check-in）
  */
 import { useCallback, useEffect, useState } from 'react'
-import { Button, Card, Table, Tag, Space } from 'antd'
+import { Button, Card, Table, Space } from 'antd'
+import Tag from '@/components/StatusTag'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import { activityApi } from '@/api'

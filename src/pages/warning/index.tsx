@@ -87,7 +87,7 @@ export default function WarningList() {
       title: '预警等级',
       key: 'severity',
       render: (_: unknown, row: WarningItem) => (
-        <span className={`wn-tag wn-tag--${SEVERITY_TONE[row.severity] ?? 'blue'}`}>
+        <span className={`status-tag status-tag--${SEVERITY_TONE[row.severity] ?? 'blue'}`}>
           {WARNING_SEVERITY_MAP[row.severity]}
         </span>
       ),
@@ -96,7 +96,7 @@ export default function WarningList() {
       title: '处理状态',
       key: 'status',
       render: (_: unknown, row: WarningItem) => (
-        <span className={`wn-tag wn-tag--${STATUS_TONE[row.warning_status] ?? 'blue'}`}>
+        <span className={`status-tag status-tag--${STATUS_TONE[row.warning_status] ?? 'blue'}`}>
           {WARNING_STATUS_MAP[row.warning_status]}
         </span>
       ),

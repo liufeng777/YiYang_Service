@@ -36,7 +36,7 @@ export default function WorkOrderAuditResult() {
             <div className="wo-result__member-org">{r.member.org}</div>
             <div className="wo-result__member-tags">
               {r.member.tags.map((t) => (
-                <span key={t} className="wo-tag wo-tag--blue">
+                <span key={t} className="status-tag status-tag--blue">
                   {t}
                 </span>
               ))}

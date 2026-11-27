@@ -36,7 +36,7 @@ function AssignSuccess({ id }: { id: string }) {
             </div>
             <div className="hr-success__tags">
               {s.tags.map((t) => (
-                <span key={t} className="hr-tag hr-tag--risk-low">
+                <span key={t} className="status-tag status-tag--green">
                   {t}
                 </span>
               ))}

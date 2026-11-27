@@ -10,7 +10,7 @@ import { FOLLOWUP_TYPE_MAP, type FollowupItem } from '@/api/modules/followup'
 import './index.less'
 
 const TYPE_OPTIONS = Object.entries(FOLLOWUP_TYPE_MAP).map(([value, label]) => ({ value: Number(value), label }))
-const TYPE_TAG_CLS: Record<number, string> = { 1: 'daily', 2: 'warning' }
+const TYPE_TAG_CLS: Record<number, string> = { 1: 'green', 2: 'orange' }
 
 function planTime(row: FollowupItem) {
   const value = row.plan_time ?? row.next_followup_date
@@ -45,7 +45,7 @@ export default function FollowupList() {
   useEffect(() => { fetchList() }, [fetchList])
 
   const typeTag = (type: number) => (
-    <span className={`fu-tag fu-tag--${TYPE_TAG_CLS[type] ?? 'plain'}`}>{FOLLOWUP_TYPE_MAP[type] ?? `类型 ${type}`}</span>
+    <span className={`status-tag status-tag--${TYPE_TAG_CLS[type] ?? 'gray'}`}>{FOLLOWUP_TYPE_MAP[type] ?? `类型 ${type}`}</span>
   )
 
   const memberColumn = {

@@ -1,6 +1,7 @@
 /** 健康活动：展示真实报名联系信息，仅保留接口支持的签到与取消操作。 */
 import { useCallback, useEffect, useState } from 'react'
-import { App, Button, Empty, Popconfirm, Spin, Tag } from 'antd'
+import { App, Button, Empty, Popconfirm, Spin } from 'antd'
+import Tag from '@/components/StatusTag'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'

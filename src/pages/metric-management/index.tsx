@@ -3,8 +3,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Key } from 'react'
 import {
   App, Button, Card, Descriptions, Drawer, Dropdown, Empty, Form, Input,
-  InputNumber, Popconfirm, Select, Space, Table, Tag, Tooltip, Tree,
+  InputNumber, Popconfirm, Select, Space, Table, Tooltip, Tree,
 } from 'antd'
+import Tag from '@/components/StatusTag'
 import type { DataNode } from 'antd/es/tree'
 import {
   ArrowLeftOutlined, CheckCircleOutlined, EditOutlined, FolderOutlined,
@@ -459,7 +460,7 @@ function MetricsPanel({ categories, selectedCategoryId }: { categories: MetricCa
                 title: '操作', key: 'action', width: 240, fixed: 'right',
                 render: (_: unknown, row: MetricItem) => (
                   <Space>
-                    <Button size="small" type="primary" onClick={() => openConfig(row)}>配置</Button>
+                    <Button size="small" onClick={() => openConfig(row)}>配置</Button>
                     <Button size="small" onClick={() => openEditor(row)}>编辑</Button>
                     <Button size="small" loading={actingCode === row.metric_code} onClick={() => toggleStatus(row)}>{row.status === 1 ? '停用' : '启用'}</Button>
                     <Popconfirm title="确认删除该检测项？" onConfirm={() => removeMetric(row)}>

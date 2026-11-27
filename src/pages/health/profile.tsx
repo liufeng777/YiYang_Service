@@ -46,7 +46,7 @@ function OverviewTab() {
         <div className="hr-card">
           <div className="hr-card__header">
             <span className="hr-card__title">健康概况</span>
-            <span className="hr-tag hr-tag--risk-low">档案完整度 {ov.completeness}%</span>
+            <span className="status-tag status-tag--green">档案完整度 {ov.completeness}%</span>
           </div>
           <div className="hr-overview-grid">
             <div className="hr-overview-item">
@@ -100,7 +100,7 @@ function OverviewTab() {
                 <div className="hr-metric-card__value">
                   {m.value} <span className="hr-metric-card__unit">{m.unit}</span>
                 </div>
-                <span className={`hr-tag hr-tag--risk-${m.level}`}>{m.status}</span>
+                <span className={`status-tag status-tag--${m.level === 'high' ? 'red' : m.level === 'mid' ? 'orange' : 'green'}`}>{m.status}</span>
                 <div className="hr-metric-card__trend">
                   查看趋势 <ArrowRightOutlined />
                 </div>
@@ -154,7 +154,7 @@ function OverviewTab() {
                 <div className="hr-side-item__head">
                   <span className={`hr-dot hr-dot--${d.dot}`} />
                   <span className="hr-side-item__name">{d.name.replace('专病档案', '档案')}</span>
-                  <span className={`hr-tag hr-tag--risk-${d.statusLevel}`}>{d.status}</span>
+                  <span className={`status-tag status-tag--${d.statusLevel === 'mid' ? 'orange' : d.statusLevel === 'info' ? 'blue' : 'green'}`}>{d.status}</span>
                 </div>
                 <div className="hr-side-item__sub">
                   {d.summary} · {d.updated}
@@ -167,7 +167,7 @@ function OverviewTab() {
         <div className="hr-card">
           <div className="hr-card__header">
             <span className="hr-card__title">健康管理进展</span>
-            <span className="hr-tag hr-tag--risk-low">{p.progress.planTag}</span>
+            <span className="status-tag status-tag--green">{p.progress.planTag}</span>
           </div>
           <div className="hr-progress">
             <div className="hr-progress__row">
@@ -227,7 +227,7 @@ function DiseaseTab() {
             <div className="hr-disease-card__head">
               <span className={`hr-dot hr-dot--${d.dot}`} />
               <span className="hr-disease-card__name">{d.name}</span>
-              <span className={`hr-tag hr-tag--risk-${d.statusLevel}`}>{d.status}</span>
+              <span className={`status-tag status-tag--${d.statusLevel === 'mid' ? 'orange' : d.statusLevel === 'info' ? 'blue' : 'green'}`}>{d.status}</span>
             </div>
             <div className="hr-disease-card__summary">{d.summary}</div>
             <div className="hr-disease-card__updated">{d.updated}</div>
@@ -412,11 +412,11 @@ export default function HealthProfile() {
               <div className="hr-member__head">
                 <span className="hr-member__name"><SensitiveText type="name" value={p.name} /></span>
                 {p.diseases.map((d, i) => (
-                  <span key={d} className={i === 0 ? 'hr-tag hr-tag--risk-low' : 'hr-tag hr-tag--disease'}>
+                  <span key={d} className={i === 0 ? 'status-tag status-tag--green' : 'status-tag status-tag--blue'}>
                     {d}
                   </span>
                 ))}
-                <span className={`hr-tag hr-tag--risk-${p.risk}`}>{RISK_TEXT[p.risk]}</span>
+                <span className={`status-tag status-tag--${p.risk === 'high' ? 'red' : p.risk === 'mid' ? 'orange' : 'green'}`}>{RISK_TEXT[p.risk]}</span>
               </div>
               <div className="hr-member__sub">
                 {p.gender} · {p.age}岁 · 档案编号 {p.profileNo}

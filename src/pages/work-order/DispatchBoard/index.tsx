@@ -571,16 +571,16 @@ export default function DispatchBoard({
                           </div>
                         }
                       >
-                        <span className="wo-tag wo-tag--green">期望 ×{expAll.length}</span>
+                        <span className="status-tag status-tag--green">期望 ×{expAll.length}</span>
                       </Tooltip>
                     )}
                   </div>
                   {/* <div className="wo-board__staff-sub">
                     {c.position_name}
                     {c.upcoming_credential_expire ? (
-                      <span className="wo-tag wo-tag--orange">资质临期</span>
+                      <span className="status-tag status-tag--orange">资质临期</span>
                     ) : (
-                      <span className="wo-tag wo-tag--green">可派</span>
+                      <span className="status-tag status-tag--green">可派</span>
                     )}
                   </div> */}
                 </div>

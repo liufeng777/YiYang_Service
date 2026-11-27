@@ -6,7 +6,8 @@
  * 对应 mock 页面已从路由移除，仅保留当前机构真实信息。
  */
 import { useEffect, useState } from 'react'
-import { Table, Tag } from 'antd'
+import { Table } from 'antd'
+import Tag from '@/components/StatusTag'
 import PageContainer from '@/components/PageContainer'
 import SensitiveText from '@/components/SensitiveText'
 import { institutionApi } from '@/api'

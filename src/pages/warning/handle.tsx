@@ -99,7 +99,7 @@ export default function WarningHandle() {
       <PageContainer
         title="健康预警医生处置"
         description="医生一次完成健康风险判断与派生层级变化确认，避免重复预警和重复处置"
-        extra={<span className="wn-tag wn-tag--orange">待医生处理</span>}
+        extra={<span className="status-tag status-tag--orange">待医生处理</span>}
       >
         <div className="wn-handle">
           {/* 左：预警与核实信息 */}

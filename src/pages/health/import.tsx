@@ -39,10 +39,10 @@ function ImportResult() {
               创建{r.created}份 · 关联{r.linked}份 · 失败{r.failed}份 · 待实名{r.pendingRealname}份
             </div>
             <div className="hr-success__tags">
-              <span className="hr-tag hr-tag--risk-low">创建{r.created}</span>
-              <span className="hr-tag hr-tag--disease">关联{r.linked}</span>
-              <span className="hr-tag hr-tag--risk-mid">失败{r.failed}</span>
-              <span className="hr-tag hr-tag--risk-mid">待实名{r.pendingRealname}</span>
+              <span className="status-tag status-tag--green">创建{r.created}</span>
+              <span className="status-tag status-tag--blue">关联{r.linked}</span>
+              <span className="status-tag status-tag--orange">失败{r.failed}</span>
+              <span className="status-tag status-tag--orange">待实名{r.pendingRealname}</span>
             </div>
           </div>
         </div>
@@ -127,7 +127,7 @@ export default function HealthRecordImport() {
               </div>
             </div>
             <div className="hr-import__filebar-right">
-              <span className="hr-tag hr-tag--disease">{p.scope}</span>
+              <span className="status-tag status-tag--blue">{p.scope}</span>
               <span className="hr-import__file-note">{p.note}</span>
             </div>
           </div>
@@ -192,7 +192,7 @@ export default function HealthRecordImport() {
           <div className="hr-card hr-import__card">
             <div className="hr-card__header">
               <span className="hr-card__title">2. 校验与匹配预览</span>
-              {fileName && <span className="hr-tag hr-tag--risk-low">校验完成</span>}
+              {fileName && <span className="status-tag status-tag--green">校验完成</span>}
             </div>
             <div className="hr-import__desc">
               错误记录不会导入；重复档案只做关联，不新建第二份档案。

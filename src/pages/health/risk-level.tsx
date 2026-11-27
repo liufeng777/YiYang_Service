@@ -24,7 +24,7 @@ export default function RiskLevelDetail() {
             <div className="hr-overview-item__label">当前综合风险</div>
             <div className="hr-risk__current">
               <span className="hr-risk__level">{r.current}</span>
-              <span className="hr-tag hr-tag--risk-mid">{r.tag}</span>
+              <span className="status-tag status-tag--orange">{r.tag}</span>
             </div>
           </div>
           <div className="hr-risk__meta">
@@ -51,7 +51,7 @@ export default function RiskLevelDetail() {
                   <span className="hr-risk-basis__label">{b.label}</span>
                   <span className="hr-risk-basis__value">{b.value}</span>
                   <span className="hr-risk-basis__note">{b.note}</span>
-                  <span className={`hr-tag hr-tag--risk-${b.level}`}>{b.tag}</span>
+                  <span className={`status-tag status-tag--${b.level === 'high' ? 'red' : b.level === 'mid' ? 'orange' : 'green'}`}>{b.tag}</span>
                 </div>
               ))}
             </div>

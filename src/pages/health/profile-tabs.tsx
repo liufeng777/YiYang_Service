@@ -99,7 +99,7 @@ export function BasicInfoTab() {
             <div className="hr-basic__item hr-basic__item--gap">
               <div className="hr-overview-item__label">账号操作人</div>
               <div className="hr-overview-item__value"><SensitiveText type="name" value={b.relation.operator} /></div>
-              {b.relation.authorized && <span className="hr-tag hr-tag--risk-low">已获档案授权</span>}
+              {b.relation.authorized && <span className="status-tag status-tag--green">已获档案授权</span>}
             </div>
           </div>
 
@@ -186,7 +186,7 @@ export function HistoryTab() {
             <div key={f.label} className="hr-basic__item">
               <div className="hr-overview-item__label">{f.label}</div>
               <div className="hr-overview-item__value">{f.value}</div>
-              {f.affectsPlan && <span className="hr-tag hr-tag--risk-low">影响方案生成</span>}
+              {f.affectsPlan && <span className="status-tag status-tag--green">影响方案生成</span>}
             </div>
           ))}
         </div>
@@ -255,7 +255,7 @@ export function MetricsTab() {
             <div className="hr-metric-card__value">
               {c.value} <span className="hr-metric-card__unit">{c.unit}</span>
             </div>
-            <span className={`hr-tag hr-tag--risk-${c.level}`}>{c.status}</span>
+            <span className={`status-tag status-tag--${c.level === 'high' ? 'red' : c.level === 'mid' ? 'orange' : 'green'}`}>{c.status}</span>
           </div>
         ))}
       </div>
@@ -317,7 +317,7 @@ export function RecordsTab() {
             按时间汇总诊疗、评估、随访与服务事件；详情返回原业务记录，避免重复维护
           </div>
         </div>
-        <span className="hr-tag hr-tag--risk-low">只读汇总</span>
+        <span className="status-tag status-tag--green">只读汇总</span>
       </div>
 
       <div className="hr-card">
@@ -350,7 +350,7 @@ export function RecordsTab() {
                 </div>
                 <div className="hr-timeline__summary">{e.summary}</div>
               </div>
-              <span className="hr-tag hr-tag--risk-low">{e.module}</span>
+              <span className="status-tag status-tag--green">{e.module}</span>
             </div>
           ))}
         </div>
@@ -520,7 +520,7 @@ function ExamWizard({ onBack }: { onBack: () => void }) {
                     <td className="hr-lab-table__muted">{ind.unit}</td>
                     <td className="hr-lab-table__muted">{ind.range}</td>
                     <td>
-                      <span className={`hr-tag hr-tag--risk-${ind.level}`}>{ind.judge}</span>
+                      <span className={`status-tag status-tag--${ind.level === 'high' ? 'red' : ind.level === 'mid' ? 'orange' : 'green'}`}>{ind.judge}</span>
                     </td>
                   </tr>
                 ))}
@@ -606,7 +606,7 @@ function ExamWizard({ onBack }: { onBack: () => void }) {
                     <div className="hr-wizard__item-name">{it.name}</div>
                     <div className="hr-wizard__item-count">{it.count}项</div>
                   </div>
-                  {selected === it.name && <span className="hr-tag hr-tag--risk-low">已选择</span>}
+                  {selected === it.name && <span className="status-tag status-tag--green">已选择</span>}
                 </div>
               ))}
           </div>
@@ -622,7 +622,7 @@ function ExamWizard({ onBack }: { onBack: () => void }) {
                   onClick={() => setSelected(n)}
                 >
                   <div className="hr-wizard__item-name">{n}</div>
-                  {selected === n && <span className="hr-tag hr-tag--risk-low">已选择</span>}
+                  {selected === n && <span className="status-tag status-tag--green">已选择</span>}
                 </div>
               ))}
           </div>
@@ -680,9 +680,9 @@ export function ExamTab() {
       key: 'source',
       render: (v: ExamItem['source']) =>
         v === 'manual' ? (
-          <span className="hr-tag hr-tag--risk-low">手动录入</span>
+          <span className="status-tag status-tag--green">手动录入</span>
         ) : (
-          <span className="hr-tag hr-tag--disease">C端上传</span>
+          <span className="status-tag status-tag--blue">C端上传</span>
         ),
     },
     { title: '机构', dataIndex: 'org', key: 'org' },
