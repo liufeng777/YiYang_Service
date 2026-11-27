@@ -67,6 +67,11 @@ export function switchInstitution(data: { institution_id: number }) {
   )
 }
 
-export function logout() {
-  return http.post<null>('/v1/staff/auth/logout')
+export function logout(token?: string) {
+  return http.post<null>('/v1/staff/auth/logout', undefined, {
+    // 主动退出时 401 属于可忽略结果，不能再次触发全局 logout。
+    skipUnauthorizedHandler: true,
+    // 本地会话会立即清理，因此显式保留点击退出时的 token。
+    headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+  })
 }

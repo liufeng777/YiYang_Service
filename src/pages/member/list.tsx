@@ -10,7 +10,7 @@ import {
 import Tag from '@/components/StatusTag'
 import PageContainer from '@/components/PageContainer'
 import FormDrawer from '@/components/FormDrawer'
-import SensitiveText, { maskName } from '@/components/SensitiveText'
+import SensitiveText from '@/components/SensitiveText'
 import { healthAccessApi, staffApi } from '@/api'
 import { HEALTH_ACCESS_STATUS_MAP, type HealthAccessItem } from '@/api/modules/health-access'
 import type { StaffItem } from '@/api/modules/staff'
@@ -33,7 +33,7 @@ function display(value: unknown) {
 
 function displayDetailField(key: string, value: unknown) {
   const raw = typeof value === 'string' || typeof value === 'number' ? value : undefined
-  if (['member_name', 'contact_name', 'staff_name'].includes(key)) {
+  if (['member_name', 'contact_name'].includes(key)) {
     return <SensitiveText type="name" value={raw} />
   }
   if (['member_phone', 'contact_phone', 'phone'].includes(key)) {
@@ -116,7 +116,8 @@ export default function MemberList() {
 
   const columns = [
     {
-      title: '健康会员', key: 'member_name', dataIndex: 'member_name'
+      title: '健康会员', key: 'member_name', dataIndex: 'member_name',
+      render: (value?: string) => <SensitiveText allowReveal={false} type="name" value={value} />,
     },
     { 
       title: '服务需求',
@@ -159,7 +160,7 @@ export default function MemberList() {
         <Form.Item name="staff_id" label="目标健管师" rules={[{ required: true, message: '请选择健管师' }]}>
           <Select
             showSearch optionFilterProp="label"
-            options={staffs.map((staff) => ({ value: staff.id, label: `${maskName(staff.name)} · ${staff.position_name || staff.position_code || staff.id}` }))}
+            options={staffs.map((staff) => ({ value: staff.id, label: `${staff.name} · ${staff.position_name || staff.position_code || staff.id}` }))}
           />
         </Form.Item>
       )}

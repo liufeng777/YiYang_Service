@@ -33,7 +33,13 @@ export const WARNING_SEVERITY_MAP: Record<number, string> = {
   3: '高风险',
 }
 
-/** 预警列表项（GET /warnings 出参，对齐 §6.1） */
+/** 预警来源（设计稿预警类型：健康异常 / 层级变更） */
+export const WARNING_SOURCE_MAP: Record<number, string> = {
+  1: '健康异常',
+  2: '层级变更',
+}
+
+/** 预警列表及详情（详情接口的 metric_values 为对象，列表兼容 JSON 字符串） */
 export interface WarningItem {
   id: number
   member_id: number
@@ -45,15 +51,19 @@ export interface WarningItem {
   /** 处理状态（WARNING_STATUS_MAP） */
   warning_status: number
   /** 触发指标值快照 */
-  metric_values?: string
-  /** 以下来源、关联工单与处置字段由详情接口按需返回 */
+  metric_values?: string | Record<string, unknown>
+  /** 以下来源、关联记录与处置字段由详情接口按需返回 */
   warning_source?: number
+  source_id?: number
   content?: string
   remark?: string
+  images?: string | string[]
   handled_reason?: string
-  handled_by_name: string
+  handled_by?: number
+  handled_by_name?: string
   handled_at?: number
   created_at: number
+  updated_at?: number
 }
 
 /** 预警列表查询参数（swagger：status / severity / warning_source / member_id / 分页） */

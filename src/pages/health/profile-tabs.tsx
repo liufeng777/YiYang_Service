@@ -31,7 +31,7 @@ function BasicSensitiveField({ label, value }: { label: string; value: string })
   if (label === '居住地址') return <SensitiveText type="address" value={value} />
   if (label === '身份证件') return <SensitiveText type="idCard" value={value} />
   if (label === '手机号' || label === '联系电话') return <SensitiveText type="phone" value={value} />
-  if (['姓名', '姓名 / 关系', '责任医生', '健康管理师'].includes(label)) {
+  if (['姓名', '姓名 / 关系'].includes(label)) {
     return <SensitiveText type="name" value={value} />
   }
   return <>{value}</>

@@ -130,8 +130,8 @@ export default function WorkOrderList() {
       key: 'member',
       render: (_: unknown, row: WorkOrderItem) => (
         <div className='table-cell'>
-          <strong><SensitiveText plain type="name" value={row.member_name} /></strong>
-          <span className='table-cell__span'><SensitiveText plain type="phone" value={row.member_phone || row.contact_phone} /></span>
+          <strong><SensitiveText allowReveal={false} type="name" value={row.member_name} /></strong>
+          <span className='table-cell__span'><SensitiveText allowReveal={false} type="phone" value={row.member_phone || row.contact_phone} /></span>
         </div>
       ),
     },
@@ -140,8 +140,8 @@ export default function WorkOrderList() {
       key: 'contact_name',
       render: (_: unknown, row: WorkOrderItem) => (
         <div className='table-cell'>
-          <strong><SensitiveText plain type="name" value={row.contact_name} /></strong>
-          <span className='table-cell__span'><SensitiveText plain type="phone" value={row.member_phone || row.contact_phone} /></span>
+          <strong><SensitiveText allowReveal={false} type="name" value={row.contact_name} /></strong>
+          <span className='table-cell__span'><SensitiveText allowReveal={false} type="phone" value={row.member_phone || row.contact_phone} /></span>
         </div>
       ),
     },

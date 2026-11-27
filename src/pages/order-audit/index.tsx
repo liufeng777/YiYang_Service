@@ -71,7 +71,7 @@ export default function OrderAuditList() {
       title: '服务对象',
       key: 'member_name',
       dataIndex: 'member_name',
-      render: (value?: string) => <SensitiveText plain type="name" value={value} />,
+      render: (value?: string) => <SensitiveText allowReveal={false} type="name" value={value} />,
     },
     { 
       title: '服务项目',
@@ -123,7 +123,6 @@ export default function OrderAuditList() {
       <PageContainer
         title="订单审核"
         description="核对服务适用性、相关禁忌与申请资料，完成订单审核"
-        extra={<Button onClick={() => navigate('/order-audit/mock')}>预览模拟订单</Button>}
       >
         {/* 筛选 */}
         <Card variant="borderless" className="filter-bar">

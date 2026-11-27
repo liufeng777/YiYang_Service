@@ -154,8 +154,8 @@ export default function HealthPlansPanel({ memberId }: { memberId: string }) {
                 title: '创建人 / 确认人', key: 'operators', width: 150,
                 render: (_, row) => (
                   <div className="archive-primary-cell">
-                    <strong><SensitiveText type="name" value={row.created_by_name} /></strong>
-                    <span>确认：<SensitiveText type="name" value={row.confirmed_by_name} /></span>
+                    <strong><SensitiveText plain type="name" value={row.created_by_name} /></strong>
+                    <span>确认：<SensitiveText plain type="name" value={row.confirmed_by_name} /></span>
                   </div>
                 ),
               },
@@ -208,8 +208,8 @@ export default function HealthPlansPanel({ memberId }: { memberId: string }) {
                 <Descriptions.Item label="方案类型">{planTypeText(parts.plan.plan_type)}</Descriptions.Item>
                 <Descriptions.Item label="执行周期">{parts.plan.duration_days ? `${parts.plan.duration_days} 天` : '-'}</Descriptions.Item>
                 <Descriptions.Item label="方案周期">{planDate(parts.plan.start_date)} 至 {planDate(parts.plan.end_date)}</Descriptions.Item>
-                <Descriptions.Item label="创建人"><SensitiveText type="name" value={parts.plan.created_by_name} /></Descriptions.Item>
-                <Descriptions.Item label="确认人"><SensitiveText type="name" value={parts.plan.confirmed_by_name} /></Descriptions.Item>
+                <Descriptions.Item label="创建人"><SensitiveText plain type="name" value={parts.plan.created_by_name} /></Descriptions.Item>
+                <Descriptions.Item label="确认人"><SensitiveText plain type="name" value={parts.plan.confirmed_by_name} /></Descriptions.Item>
                 <Descriptions.Item label="创建时间">{formatTimestamp(parts.plan.created_at)}</Descriptions.Item>
                 <Descriptions.Item label="健康管理意向" span={3}>{display(parts.plan.health_intent)}</Descriptions.Item>
                 <Descriptions.Item label="最近审批意见" span={3}>{display(parts.plan.review_remark)}</Descriptions.Item>
@@ -266,7 +266,7 @@ export default function HealthPlansPanel({ memberId }: { memberId: string }) {
                           color: review.action === 4 ? 'red' : review.action === 3 ? 'green' : 'blue',
                           children: (
                             <div className="plan-review-item">
-                              <Space wrap>{reviewActionTag(review)}<strong><SensitiveText type="name" value={review.operator_name} /></strong><span>{formatTimestamp(review.operated_at)}</span></Space>
+                              <Space wrap>{reviewActionTag(review)}<strong><SensitiveText plain type="name" value={review.operator_name} /></strong><span>{formatTimestamp(review.operated_at)}</span></Space>
                               <div>角色：{reviewRoleText(review.role)}</div>
                               {review.remark && <p>{review.remark}</p>}
                             </div>

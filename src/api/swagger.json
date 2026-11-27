@@ -3340,6 +3340,54 @@
               }
           }
       },
+      "/api/v1/staff/health-members": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "返回接入当前 staff 所属机构（健康接入状态=已确认）的会员，会员信息同会员列表。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-健康评估"
+              ],
+              "summary": "已接入会员列表",
+              "parameters": [
+                  {
+                      "type": "string",
+                      "description": "关键字",
+                      "name": "keyword",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "页码",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数",
+                      "name": "page_size",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
       "/api/v1/staff/institutions/current": {
           "get": {
               "security": [
@@ -5549,6 +5597,58 @@
                       "schema": {
                           "$ref": "#/definitions/staff.ReqStaffSaveNotifyPref"
                       }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/orders": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-订单排单"
+              ],
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "页码",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数",
+                      "name": "page_size",
+                      "in": "query"
+                  },
+                  {
+                      "type": "string",
+                      "description": "关键字",
+                      "name": "keyword",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "订单状态过滤(0=全部)",
+                      "name": "order_status",
+                      "in": "query"
                   }
               ],
               "responses": {

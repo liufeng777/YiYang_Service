@@ -118,7 +118,7 @@ export default function HeaderBar() {
         >
           <Space className="layout-header__user" size={8}>
             <Avatar size={28} icon={<UserOutlined />} style={{ background: '#27866B' }} />
-            <SensitiveText type="name" value={userInfo?.nickname || '管理员'} />
+            <SensitiveText plain type="name" value={userInfo?.nickname || '管理员'} />
           </Space>
         </Dropdown>
         <MessageCenter open={messageOpen} onClose={() => setMessageOpen(false)} onUnreadChange={setUnreadCount} />

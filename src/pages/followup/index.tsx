@@ -109,7 +109,7 @@ export default function FollowupList() {
       render: (_, row) => (
         <div className="table-cell">
           <strong>
-            <SensitiveText plain type="name" value={row.member_name} />
+            <SensitiveText allowReveal={false} type="name" value={row.member_name} />
           </strong>
           <span className="table-cell__span">
             {Number(row.gender ?? row.member_gender) === 1 ? '男' : Number(row.gender ?? row.member_gender) === 2 ? '女' : '性别未知'}

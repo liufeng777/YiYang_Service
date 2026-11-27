@@ -65,6 +65,9 @@ interface UserState {
    * - 验证码登录：传 phone + code（POST /api/v1/staff/auth/sms-login）
    */
   login: (params: { phone: string; password?: string; code?: string }) => Promise<void>
+  /** 仅清理本地会话，供 401 拦截器使用，不调用服务端 logout。 */
+  clearSession: () => void
+  /** 用户主动退出：服务端注销一次，并立即清理本地会话。 */
   logout: () => void
 }
 
@@ -184,17 +187,19 @@ export const useUserStore = create<UserState>()(
             positionName:
               staff?.position_name || current?.position_name || POSITION_NAMES[positionCode],
             institutionName: current?.institution_name,
-            permissions:
-              staff?.permissions && staff.permissions.length > 0
-                ? staff.permissions
-                : POSITION_PERMISSIONS[positionCode],
+            // 仅在字段未下发时按岗位兜底；明确返回 [] 必须保持无权限，不能放大入口可见范围。
+            permissions: staff?.permissions ?? POSITION_PERMISSIONS[positionCode],
           },
         })
       },
-      logout: () => {
-        // 服务端注销 token（失败不阻塞本地登出）
-        authApi.logout().catch(() => undefined)
+      clearSession: () => {
         set({ token: '', userInfo: null, institutions: [], currentOrg: null })
+      },
+      logout: () => {
+        const { token, clearSession } = useUserStore.getState()
+        // 服务端仅注销一次；失败或 401 均不阻塞本地退出。
+        authApi.logout(token).catch(() => undefined)
+        clearSession()
       },
     }),
     {

@@ -50,7 +50,7 @@ export default function StaffAuditDetail() {
           <div className="staff-profile__main">
             <div className="staff-profile__avatar">{d.name[0]}</div>
             <div>
-              <div className="staff-profile__name"><SensitiveText type="name" value={d.name} /></div>
+              <div className="staff-profile__name"><SensitiveText plain type="name" value={d.name} /></div>
               <div className="staff-profile__meta">{d.roleOrg}</div>
             </div>
           </div>

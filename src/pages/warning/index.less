@@ -213,7 +213,126 @@
   &__submit {
     display: flex;
     justify-content: flex-end;
+    gap: @spacing-sm;
     margin-top: @spacing-lg;
+  }
+
+  &__metric--green {
+    background: @color-risk-low-bg;
+
+    .wn-handle__metric-name,
+    .wn-handle__metric-value {
+      color: @color-risk-low;
+    }
+  }
+
+  &__metric--orange {
+    background: @color-risk-mid-bg;
+
+    .wn-handle__metric-name,
+    .wn-handle__metric-value {
+      color: @color-risk-mid;
+    }
+  }
+
+  &__metric--gray {
+    background: @color-health-banner-bg;
+
+    .wn-handle__metric-name,
+    .wn-handle__metric-value {
+      color: @color-text-secondary;
+    }
+  }
+}
+
+.wn-handle--detail {
+  grid-template-columns: minmax(0, 1fr) 360px;
+}
+
+.wn-detail {
+  &__main,
+  &__side {
+    min-width: 0;
+  }
+
+  &__side {
+    display: flex;
+    flex-direction: column;
+    gap: @spacing-md;
+  }
+
+  &__title-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: @spacing-sm;
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: @spacing-xs @spacing-lg;
+  }
+
+  &__section {
+    margin-top: @spacing-xl;
+  }
+
+  &__section-title {
+    .text-title-card();
+    margin: 0 0 @spacing-md;
+  }
+
+  &__content {
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: @line-height-body;
+  }
+
+  &__descriptions {
+    margin-top: @spacing-lg;
+  }
+
+  &__empty {
+    color: @color-text-secondary;
+    font-size: @font-size-body;
+    line-height: @line-height-body;
+  }
+
+  &__images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: @spacing-md;
+  }
+
+  &__image {
+    width: 120px;
+    height: 90px;
+    object-fit: cover;
+    border: 1px solid @color-border;
+    border-radius: @radius-sm;
+  }
+
+  &__conditions {
+    margin-top: @spacing-lg;
+    padding-top: @spacing-lg;
+    border-top: 1px solid @color-border;
+  }
+}
+
+@media (max-width: 1200px) {
+  .wn-handle--detail {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .wn-detail {
+    &__title-row,
+    &__meta {
+      align-items: flex-start;
+      flex-direction: column;
+    }
   }
 }
 

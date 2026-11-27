@@ -42,7 +42,7 @@ export default function InstitutionDetail() {
             </div>
             <div className="org-detail__meta">统一社会信用代码：{d.creditCode}</div>
             <div className="org-detail__meta">
-              {d.address} · 负责人：<SensitiveText type="name" value={d.principal} /> · <SensitiveText type="phone" value={d.phone} />
+              {d.address} · 负责人：<SensitiveText plain type="name" value={d.principal} /> · <SensitiveText plain type="phone" value={d.phone} />
             </div>
           </div>
           <div className="org-detail__sync">

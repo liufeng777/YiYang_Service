@@ -8,7 +8,7 @@ import { Button, Select } from 'antd'
 import { ArrowLeftOutlined, CheckOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
-import SensitiveText, { maskName } from '@/components/SensitiveText'
+import SensitiveText from '@/components/SensitiveText'
 import { mockAssign, mockCreateSuccess } from './mock'
 import './index.less'
 
@@ -93,7 +93,7 @@ export default function HealthAssign() {
     )
   }
 
-  const toOptions = (list: string[], sensitive = false) => list.map((v) => ({ value: v, label: sensitive ? maskName(v) : v }))
+  const toOptions = (list: string[], _sensitive = false) => list.map((v) => ({ value: v, label: v }))
   const ready = team && doctor && nurse && manager
 
   return (

@@ -20,6 +20,9 @@ export interface DashboardOverview {
     plan_pending_confirm: number
   }
   visit: { today_visit: number }
+  /** 今日安排由后端按当前人员与机构返回，具体条目结构暂未用于工作台卡片。 */
+  schedules: unknown[]
+  today_work: number
 }
 
 export interface DashboardWarningItem {

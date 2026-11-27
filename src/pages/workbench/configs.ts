@@ -2,52 +2,148 @@
  * 各岗位工作台模板配置
  * - 模板按登录用户的 positionCode 选择（见 user store POSITIONS：
  *   Admin 医护管理员 / Doctor 执业医师 / HealthMgr 健管师 / Caregiver 照护人员）
- * - 数据当前为设计稿示例 mock；接入后端后替换为：
- *   GET /api/v1/staff/dashboard/overview（今日工作概览）
- *   GET /api/v1/staff/dashboard/warnings（首页预警快捷清单）
- *   见 src/api/modules/workbench.ts
- * - 快捷入口「受目录权限控制」：配置 permissions 权限码后按用户权限过滤
+ * - 数值统一取自 GET /api/v1/staff/dashboard/overview（今日工作概览）：
+ *   配置里的 key 指定 overview 字段，见 fields.ts；未配置 key 表示接口无该口径，显示「-」
+ * - 列表面板取 GET /api/v1/staff/dashboard/warnings（首页预警快捷清单）
+ * - 每一项都按 permissions 过滤（对齐《协同工作台-API设计》权限码模型）：
+ *   用户没有对应页面的权限时该指标 / 入口不展示，避免「进入处理」跳到 403 页面
+ * - 指标体系与跳转路由一一对应：指标指向承载该类待办的列表页
  */
 import { POSITIONS, type PositionCode } from '@/store/modules/user'
 import { PERMISSIONS } from '@/router/routes'
 import type { WorkbenchConfig } from './types'
 
-/** 健管师（默认模板，设计稿：健康管理师.png） */
-const healthManager: WorkbenchConfig = {
+/** 医护管理员（设计稿：机构管理员.png） */
+const orgAdmin: WorkbenchConfig = {
   greeting: true,
-  subtitle: '今日优先处理健康告警和到期随访',
+  subtitle: '关注今日派单、工单履约与健康预警处置',
   banner: {
-    title: '红色健康告警',
-    count: 3,
-    desc: '其中1例来自上门服务现场上报，需立即核实并提交团队医生',
-    actionText: '立即处理',
-    path: '/warning',
+    title: '待派单工单',
+    count: 0,
+    desc: '存在待派单与派单确认中的工单，请及时安排服务人员',
+    actionText: '进入处理',
+    path: '/work-order',
+    key: 'today.pending_dispatch',
+    permissions: [PERMISSIONS.WO_VIEW],
   },
   metrics: [
-    { label: '待完善档案', value: 8, linkText: '进入处理', path: '/member' },
-    { label: '待回复咨询', value: 6, linkText: '进入处理', path: '/consultation' },
-    { label: '今日随访', value: 12, linkText: '进入处理', path: '/followup' },
-    { label: '医生意见待跟进', value: 4, linkText: '进入处理', path: '/warning' },
+    { label: '待派单', value: 0, key: 'today.pending_dispatch', linkText: '进入处理', path: '/work-order', permissions: [PERMISSIONS.WO_VIEW] },
+    { label: '派单确认中', value: 0, key: 'today.dispatch_confirming', linkText: '进入处理', path: '/work-order', permissions: [PERMISSIONS.WO_VIEW] },
+    { label: '服务中工单', value: 0, key: 'today.wo_running', linkText: '进入处理', path: '/work-order', permissions: [PERMISSIONS.WO_VIEW] },
+    { label: '活跃预警', value: 0, key: 'health.warn_active', danger: true, linkText: '进入处理', path: '/warning', permissions: [PERMISSIONS.WARN_VIEW] },
   ],
   main: {
-    title: '今日核心任务',
+    title: '健康预警待处置',
     variant: 'dot',
-    items: [
-      { title: '患者健康告警', info: '张女士 · 血压186/106mmHg', tag: '立即核实', tone: 'danger' },
-      { title: '专病档案待完善', info: '李先生 · 糖尿病档案', tag: '今天 10:30', tone: 'muted' },
-      { title: 'AI方案初审', info: '陈女士 · 第2周期方案', tag: '今天 12:00', tone: 'muted' },
-      { title: '专病随访', info: '周先生 · 高血压随访', tag: '今天 15:00', tone: 'muted' },
-      { title: '医生意见待跟进', info: '王女士 · 建议今日复诊', tag: '今天完成', tone: 'muted' },
-    ],
+    items: [],
+    emptyText: '暂无待处置预警',
+    permissions: [PERMISSIONS.WARN_VIEW],
   },
   side: {
     type: 'stats',
-    title: '在管患者概况',
+    title: '今日运营概况',
+    permissions: [PERMISSIONS.WO_VIEW, PERMISSIONS.APPT_VIEW, PERMISSIONS.FOLLOWUP, PERMISSIONS.HEALTH_ASSESS],
     items: [
-      { label: '在管患者', value: '126人' },
-      { label: '高风险患者', value: '18人', danger: true },
-      { label: '本周新接管', value: '7人' },
-      { label: '7日未联系', value: '5人' },
+      { label: '今日完成工单', value: '-', key: 'today.wo_completed', permissions: [PERMISSIONS.WO_VIEW] },
+      { label: '今日到访', value: '-', key: 'appointment.arriving_today', permissions: [PERMISSIONS.APPT_VIEW] },
+      { label: '今日到期随访', value: '-', key: 'health.followup_due_today', permissions: [PERMISSIONS.FOLLOWUP] },
+      { label: '待确认评估', value: '-', key: 'health.pending_assessment', permissions: [PERMISSIONS.HEALTH_ASSESS] },
+    ],
+  },
+  quickLinksTitle: '管理快捷入口',
+  quickLinks: [
+    { label: '人员管理', path: '/staff', permissions: [PERMISSIONS.STAFFMGR_VIEW] },
+    { label: '机构信息', path: '/organization', permissions: [PERMISSIONS.ORG_VIEW] },
+    { label: '订单审核', path: '/order-audit', permissions: [PERMISSIONS.ORDER_VIEW, PERMISSIONS.WO_VIEW] },
+    { label: '健康预警', path: '/warning', permissions: [PERMISSIONS.WARN_VIEW] },
+  ],
+}
+
+/**
+ * 执业医师（设计稿：审核医生.png）
+ * 待办优先级：工单（订单）审核 → 方案复核 → 健康预警 → 健康评估确认
+ */
+const reviewDoctor: WorkbenchConfig = {
+  greeting: true,
+  subtitle: '优先处理服务订单审核、健康方案复核与健康预警',
+  banner: {
+    title: '高风险健康预警',
+    count: 0,
+    desc: '当前高风险健康预警，等待医生核实处置',
+    actionText: '进入预警管理',
+    path: '/warning',
+    key: 'health.warn_high',
+    permissions: [PERMISSIONS.WARN_VIEW],
+  },
+  metrics: [
+    // 订单审核接口未提供待审核数量（overview 无该口径），仅保留进入入口
+    { label: '待审核服务订单', value: '-', linkText: '进入处理', path: '/order-audit', permissions: [PERMISSIONS.ORDER_VIEW, PERMISSIONS.WO_VIEW] },
+    { label: '待复核方案', value: 0, key: 'health.plan_pending_confirm', linkText: '进入处理', path: '/health-record', permissions: [PERMISSIONS.HEALTH_VIEW] },
+    { label: '活跃健康预警', value: 0, key: 'health.warn_active', danger: true, linkText: '进入处理', path: '/warning', permissions: [PERMISSIONS.WARN_VIEW] },
+    { label: '待确认健康评估', value: 0, key: 'health.pending_assessment', linkText: '进入处理', path: '/health-record', permissions: [PERMISSIONS.HEALTH_ASSESS] },
+  ],
+  main: {
+    title: '健康预警待处置',
+    variant: 'dot',
+    items: [],
+    emptyText: '暂无待处置预警',
+    permissions: [PERMISSIONS.WARN_VIEW],
+  },
+  side: {
+    type: 'stats',
+    title: '今日健康待办',
+    permissions: [PERMISSIONS.WARN_VIEW, PERMISSIONS.FOLLOWUP, PERMISSIONS.HEALTH_ASSESS],
+    items: [
+      { label: '活跃预警', value: '-', key: 'health.warn_active', permissions: [PERMISSIONS.WARN_VIEW] },
+      { label: '高风险预警', value: '-', key: 'health.warn_high', danger: true, permissions: [PERMISSIONS.WARN_VIEW] },
+      { label: '今日到期随访', value: '-', key: 'health.followup_due_today', permissions: [PERMISSIONS.FOLLOWUP] },
+      { label: '待确认评估', value: '-', key: 'health.pending_assessment', permissions: [PERMISSIONS.HEALTH_ASSESS] },
+    ],
+  },
+  quickLinksTitle: '专业信息快捷入口',
+  quickLinks: [
+    { label: '健康档案', path: '/health-record', tone: 'info', permissions: [PERMISSIONS.HEALTH_VIEW] },
+    { label: '健康会员', path: '/member', tone: 'info', permissions: [PERMISSIONS.HEALTH_VIEW] },
+    { label: '健康预警', path: '/warning', tone: 'info', permissions: [PERMISSIONS.WARN_VIEW] },
+    { label: '随访管理', path: '/followup', tone: 'info', permissions: [PERMISSIONS.FOLLOWUP] },
+  ],
+}
+
+/** 健管师（默认模板，设计稿：健康管理师.png） */
+const healthManager: WorkbenchConfig = {
+  greeting: true,
+  subtitle: '今日优先处理健康预警和到期随访',
+  banner: {
+    title: '高风险健康预警',
+    count: 0,
+    desc: '当前高风险健康预警，需立即核实并提交团队医生',
+    actionText: '立即处理',
+    path: '/warning',
+    key: 'health.warn_high',
+    permissions: [PERMISSIONS.WARN_VIEW],
+  },
+  metrics: [
+    { label: '待完善档案', value: '-', linkText: '进入处理', path: '/health-record', permissions: [PERMISSIONS.HEALTH_VIEW] },
+    { label: '待回复咨询', value: '-', linkText: '进入处理', path: '/consultation', permissions: [PERMISSIONS.CONSULT_VIEW] },
+    { label: '今日随访', value: 0, key: 'health.followup_due_today', linkText: '进入处理', path: '/followup', permissions: [PERMISSIONS.FOLLOWUP] },
+    { label: '活跃健康预警', value: 0, key: 'health.warn_active', danger: true, linkText: '进入处理', path: '/warning', permissions: [PERMISSIONS.WARN_VIEW] },
+  ],
+  main: {
+    title: '健康预警待处置',
+    variant: 'dot',
+    items: [],
+    emptyText: '暂无待处置预警',
+    permissions: [PERMISSIONS.WARN_VIEW],
+  },
+  side: {
+    type: 'stats',
+    title: '今日健康待办',
+    permissions: [PERMISSIONS.WARN_VIEW, PERMISSIONS.FOLLOWUP, PERMISSIONS.HEALTH_ASSESS],
+    items: [
+      { label: '活跃预警', value: '-', key: 'health.warn_active', permissions: [PERMISSIONS.WARN_VIEW] },
+      { label: '高风险预警', value: '-', key: 'health.warn_high', danger: true, permissions: [PERMISSIONS.WARN_VIEW] },
+      { label: '今日到期随访', value: '-', key: 'health.followup_due_today', permissions: [PERMISSIONS.FOLLOWUP] },
+      { label: '待确认评估', value: '-', key: 'health.pending_assessment', permissions: [PERMISSIONS.HEALTH_ASSESS] },
     ],
   },
   quickLinksTitle: '快捷入口',
@@ -59,145 +155,31 @@ const healthManager: WorkbenchConfig = {
   ],
 }
 
-/** 医护管理员（设计稿：机构管理员.png） */
-const orgAdmin: WorkbenchConfig = {
-  greeting: true,
-  subtitle: '当前机构：幸福护理院 · 关注人员负荷、订单趋势与未来30日活动',
-  banner: {
-    title: '运营异常待监督',
-    count: 7,
-    desc: '工单异常5条、人员资质即将到期1人、团队缺员1组',
-    actionText: '进入处理',
-    path: '/exception',
-  },
-  metrics: [
-    { label: '今日订单', value: 86, linkText: '进入处理', path: '/work-order' },
-    { label: '完成率', value: '94.2%', linkText: '进入处理', path: '/work-order' },
-    { label: '超负荷人员', value: 4, danger: true, linkText: '进入处理', path: '/staff' },
-    { label: '未来30日活动', value: 8, suffix: '场', linkText: '进入处理', path: '/health-activity' },
-  ],
-  main: {
-    title: '人员负荷',
-    variant: 'plain',
-    items: [
-      { title: '王医生', info: '在管68 · 待办12', tag: '高', tone: 'danger' },
-      { title: '李护士', info: '工单9 · 待办6', tag: '高', tone: 'danger' },
-      { title: '张健管师', info: '在管42 · 待办15', tag: '高', tone: 'danger' },
-      { title: '陈护士', info: '工单5 · 待办3', tag: '正常', tone: 'success' },
-      { title: '刘健管师', info: '在管31 · 待办7', tag: '正常', tone: 'success' },
-    ],
-  },
-  side: {
-    type: 'trend',
-    title: '机构订单趋势（近30日）',
-    bars: [42, 55, 48, 62, 58, 70, 66, 78, 82, 76, 90],
-    stats: [
-      { label: '订单量', value: '2,418' },
-      { label: '完成率', value: '94.2%' },
-      { label: '取消', value: '38' },
-      { label: '异常', value: '27', danger: true },
-    ],
-    footnote: '近期活动：未来30日共8场 · 报名214人 · 当前平均报名率71%',
-  },
-  quickLinksTitle: '管理快捷入口',
-  quickLinks: [
-    { label: '人员管理', path: '/staff', permissions: [PERMISSIONS.STAFFMGR_VIEW] },
-    { label: '机构信息', path: '/organization', permissions: [PERMISSIONS.ORG_VIEW] },
-    { label: '入住协同', path: '/admission', permissions: [PERMISSIONS.APPT_VIEW] },
-    { label: '健康活动', path: '/health-activity', permissions: [PERMISSIONS.ACTIVITY_VIEW] },
-  ],
-}
-
-/** 执业医师（设计稿：审核医生.png） */
-const reviewDoctor: WorkbenchConfig = {
-  greeting: true,
-  subtitle: '优先处理健康预警、服务订单审核与健康评估确认',
-  banner: {
-    title: '高风险健康预警',
-    count: 2,
-    desc: '健康异常 1 条 · 层级升高 1 条，等待医生判断',
-    actionText: '进入预警管理',
-    path: '/warning',
-  },
-  metrics: [
-    { label: '待审核服务订单', value: 7, linkText: '进入处理', path: '/order-audit' },
-    { label: '待确认健康评估', value: 9, linkText: '进入处理', path: '/assessment' },
-    { label: '待回复咨询', value: 6, linkText: '进入处理', path: '/consultation' },
-    { label: '待处理预警', value: 5, danger: true, linkText: '进入处理', path: '/warning' },
-  ],
-  main: {
-    title: '医生待办队列',
-    variant: 'plain',
-    items: [
-      { title: '健康异常预警', info: '张女士 · 突发胸闷', tag: '红色 · 立即', tone: 'danger' },
-      { title: '服务订单审核', info: 'PICC维护 · 王先生', tag: '服务时间 14:00', tone: 'muted' },
-      { title: '健康评估确认', info: '李女士 · 高血压高风险', tag: '今天 11:00', tone: 'muted' },
-      { title: '层级变更复核', info: '赵女士 · 中风险升为高风险', tag: '待医生复核', tone: 'muted' },
-      { title: '预警处置回写', info: '周先生 · 血压复测', tag: '今天 15:00', tone: 'muted' },
-    ],
-  },
-  side: {
-    type: 'stats',
-    title: '今日审核概况',
-    items: [
-      { label: '已完成审核', value: '14' },
-      { label: '待审核订单', value: '7' },
-      { label: '待确认评估', value: '9' },
-      { label: '高风险预警', value: '2', danger: true },
-    ],
-  },
-  quickLinksTitle: '专业信息快捷入口',
-  quickLinks: [
-    { label: '患者健康摘要', path: '/member', tone: 'info', permissions: [PERMISSIONS.HEALTH_VIEW] },
-    { label: '检查检验', path: '/member', tone: 'info', permissions: [PERMISSIONS.HEALTH_VIEW] },
-    { label: '用药记录', path: '/member', tone: 'info', permissions: [PERMISSIONS.HEALTH_VIEW] },
-    { label: '分层分级', path: '/assessment', tone: 'info', permissions: [PERMISSIONS.HEALTH_ASSESS] },
-  ],
-}
-
 /** 照护人员（Caregiver：上门照护 / 工单执行为主） */
 const caregiver: WorkbenchConfig = {
   greeting: true,
-  subtitle: '关注今日服务工单、上门安排与异常上报',
+  subtitle: '关注今日服务工单与上门安排',
   banner: {
-    title: '待处理工单异常',
-    count: 2,
-    desc: '服务现场如有异常请及时上报，机构管理员与医生已同步收到提醒',
-    actionText: '进入异常处理',
-    path: '/exception',
+    title: '待派单工单',
+    count: 0,
+    desc: '存在待派单与派单确认中的工单，请关注本人服务安排',
+    actionText: '进入处理',
+    path: '/work-order',
+    key: 'today.pending_dispatch',
+    permissions: [PERMISSIONS.WO_VIEW],
   },
   metrics: [
-    { label: '今日工单', value: 6, linkText: '进入处理', path: '/work-order' },
-    { label: '待上门服务', value: 3, linkText: '进入处理', path: '/work-order' },
-    { label: '本周完成', value: 18, linkText: '进入处理', path: '/work-order' },
-    { label: '异常上报', value: 1, danger: true, linkText: '进入处理', path: '/exception' },
+    { label: '服务中工单', value: 0, key: 'today.wo_running', linkText: '进入处理', path: '/work-order', permissions: [PERMISSIONS.WO_VIEW] },
+    { label: '待派单', value: 0, key: 'today.pending_dispatch', linkText: '进入处理', path: '/work-order', permissions: [PERMISSIONS.WO_VIEW] },
+    { label: '派单确认中', value: 0, key: 'today.dispatch_confirming', linkText: '进入处理', path: '/work-order', permissions: [PERMISSIONS.WO_VIEW] },
+    { label: '今日完成工单', value: 0, key: 'today.wo_completed', linkText: '进入处理', path: '/work-order', permissions: [PERMISSIONS.WO_VIEW] },
   ],
-  main: {
-    title: '今日服务安排',
-    variant: 'plain',
-    items: [
-      { title: '上门基础护理', info: '王淑兰 · 西城护理院', tag: '09:30', tone: 'muted' },
-      { title: '康复训练协助', info: '李建国 · 月坛驿站', tag: '11:00', tone: 'muted' },
-      { title: '生活照护服务', info: '陈玉兰 · 居家', tag: '14:00', tone: 'muted' },
-      { title: '用药提醒随访', info: '赵德福 · 居家', tag: '16:30', tone: 'muted' },
-    ],
-  },
-  side: {
-    type: 'stats',
-    title: '本周服务概况',
-    items: [
-      { label: '已完成工单', value: '18' },
-      { label: '服务时长', value: '26小时' },
-      { label: '待签到', value: '2' },
-      { label: '异常上报', value: '1', danger: true },
-    ],
-  },
+  // 今日服务安排 / 本周服务概况无对应接口，不展示空面板
   quickLinksTitle: '快捷入口',
   quickLinks: [
     { label: '服务工单', path: '/work-order', permissions: [PERMISSIONS.WO_VIEW] },
     { label: '患者档案', path: '/member', permissions: [PERMISSIONS.HEALTH_VIEW] },
     { label: '咨询记录', path: '/consultation', permissions: [PERMISSIONS.CONSULT_VIEW] },
-    { label: '异常上报', path: '/exception', tone: 'warn', permissions: [PERMISSIONS.WO_DISPATCH] },
   ],
 }
 

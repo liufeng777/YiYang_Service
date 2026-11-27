@@ -62,7 +62,10 @@ const TYPE_LABEL: Record<SensitiveType, string> = {
   name: '姓名', phone: '手机号', idCard: '身份证号', address: '详细地址',
 }
 
-/** 详情默认脱敏并通过眼睛切换；列表可传 plain 直接显示原文，不展示切换按钮。 */
+/**
+ * 默认脱敏并通过眼睛切换；allowReveal=false 时仅显示脱敏值且不展示眼睛。
+ * plain 仅用于机构人员等明确允许直接展示原文的场景。
+ */
 export default function SensitiveText({ type, value, className, allowReveal = true, plain = false }: {
   type: SensitiveType
   value: SensitiveValue

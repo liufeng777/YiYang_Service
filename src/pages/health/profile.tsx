@@ -128,7 +128,7 @@ function OverviewTab() {
                   </div>
                   <div className="hr-timeline__summary">{r.summary}</div>
                 </div>
-                <span className="hr-timeline__operator"><SensitiveText type="name" value={r.operator} /></span>
+                <span className="hr-timeline__operator"><SensitiveText plain type="name" value={r.operator} /></span>
               </div>
             ))}
           </div>
@@ -357,7 +357,7 @@ function MedicationTab() {
               </div>
             </div>
             <div className="hr-med-summary__foot">
-              最近核对：{s.lastCheck} · <SensitiveText type="name" value={s.checker.replace(/^健管师/, '')} />
+              最近核对：{s.lastCheck} · <SensitiveText plain type="name" value={s.checker.replace(/^健管师/, '')} />
             </div>
           </div>
 
@@ -426,11 +426,11 @@ export default function HealthProfile() {
           <div className="hr-member__meta">
             <div className="hr-member__meta-item">
               <div className="hr-member__meta-label">责任医生</div>
-              <div className="hr-member__meta-value"><SensitiveText type="name" value={p.doctor} /></div>
+              <div className="hr-member__meta-value"><SensitiveText plain type="name" value={p.doctor} /></div>
             </div>
             <div className="hr-member__meta-item">
               <div className="hr-member__meta-label">健康管理师</div>
-              <div className="hr-member__meta-value"><SensitiveText type="name" value={p.manager} /></div>
+              <div className="hr-member__meta-value"><SensitiveText plain type="name" value={p.manager} /></div>
             </div>
             <div className="hr-member__meta-item">
               <div className="hr-member__meta-label">当前机构</div>

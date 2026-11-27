@@ -7,6 +7,13 @@ import { message } from 'antd'
 import { useUserStore } from '@/store/modules/user'
 import type { Result } from '@/types/api'
 
+declare module 'axios' {
+  interface AxiosRequestConfig {
+    /** 主动退出等场景自行处理 401，不触发全局登出与错误提示。 */
+    skipUnauthorizedHandler?: boolean
+  }
+}
+
 /**
  * axios 实例封装
  * - 请求拦截：自动携带 token
@@ -43,8 +50,8 @@ function handleUnauthorized(msg?: string) {
     redirectTimer = null
     // 先取路径再清 token：清空后 AuthGuard 会立刻重定向，届时拿不到原页面路径
     const onLoginPage = window.location.pathname.includes('/login')
-    // 延迟结束后才登出，否则 AuthGuard 会在提示展示期间就把页面跳走
-    useUserStore.getState().logout()
+    // 401 仅清理本地会话，不能再次调用服务端 logout 形成循环。
+    useUserStore.getState().clearSession()
     // 已在登录页（如登录接口自身返回 401）无需整页刷新，保留错误提示即可
     if (onLoginPage) return
     window.location.href = '/login'
@@ -80,7 +87,7 @@ service.interceptors.response.use(
     }
     // 401 未登录 / token 失效
     if (res.code === 401) {
-      handleUnauthorized(res.message)
+      if (!response.config.skipUnauthorizedHandler) handleUnauthorized(res.message)
       return Promise.reject(new Error(res.message || UNAUTHORIZED_MESSAGE))
     }
     message.error(res.message || '请求失败')
@@ -102,8 +109,8 @@ service.interceptors.response.use(
     }
     const msg = backendMessage || error.message || '网络异常，请稍后重试'
     if (status === 401) {
-      // 401 优先展示后端文案，取不到时由 handleUnauthorized 使用兜底文案
-      handleUnauthorized(backendMessage)
+      // 主动退出等标记请求自行处理 401，不进入全局登出流程。
+      if (!error.config?.skipUnauthorizedHandler) handleUnauthorized(backendMessage)
     } else {
       message.error(msg)
     }

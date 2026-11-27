@@ -82,15 +82,15 @@ export default function ConsultationList() {
       title: '咨询人',
       key: 'member_name',
       dataIndex: 'member_name',
-      render: (v: string) => <SensitiveText plain type="name" value={v} />
+      render: (v: string) => <SensitiveText allowReveal={false} type="name" value={v} />
     },
     {
       title: '联系人',
       key: 'contact',
       render: (_: unknown, row: ConsultationItem) => (
         <div className='table-cell'>
-          <strong><SensitiveText plain type="name" value={row.contact_name} /></strong>
-          <span className='table-cell__span'><SensitiveText plain type="phone" value={row.contact_phone} /></span>
+          <strong><SensitiveText allowReveal={false} type="name" value={row.contact_name} /></strong>
+          <span className='table-cell__span'><SensitiveText allowReveal={false} type="phone" value={row.contact_phone} /></span>
         </div>
       ),
     },

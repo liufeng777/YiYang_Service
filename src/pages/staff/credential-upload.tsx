@@ -9,7 +9,6 @@ import { ArrowLeftOutlined, UploadOutlined } from '@ant-design/icons'
 import type { Dayjs } from 'dayjs'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
-import { maskName } from '@/components/SensitiveText'
 import { staffApi, uploadApi } from '@/api'
 import type { StaffDetail } from '@/api/modules/staff'
 import './index.less'
@@ -154,7 +153,7 @@ export default function CredentialUpload({
     <div className="staff-page">
       <PageContainer
         title="新增执业资质"
-        description={staff ? `为 ${maskName(staff.name)} 上传资质文件并登记有效期` : '上传资质文件并登记有效期'}
+        description={staff ? `为 ${staff.name} 上传资质文件并登记有效期` : '上传资质文件并登记有效期'}
         extra={<Button icon={<ArrowLeftOutlined />} onClick={() => navigate(`/staff/${id}`)}>返回人员详情</Button>}
       >
         {content}

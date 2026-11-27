@@ -18,15 +18,20 @@ function joinPath(parent: string, child: string) {
 }
 
 /**
- * 判断用户权限是否可访问某个路由 meta
- * - meta.permissions 未配置 / 为空数组：所有登录用户可访问
- * - 用户拥有 all:manage（机构管理员全量权限）：放行所有导航
+ * 判断权限码集合是否满足（菜单、路由守卫、工作台配置共用）
+ * - 未配置 / 为空数组：所有登录用户可访问
+ * - 用户拥有 all:manage（机构管理员全量权限）：放行全部
  * - 配置后：用户拥有任一指定权限码即可访问
  */
-export function hasAccess(meta: RouteMeta, userPermissions: string[]): boolean {
-  if (!meta.permissions || meta.permissions.length === 0) return true
+export function hasAnyPermission(codes: string[] | undefined, userPermissions: string[]): boolean {
+  if (!codes || codes.length === 0) return true
   if (userPermissions.includes(ALL_MANAGE_PERMISSION)) return true
-  return meta.permissions.some((code) => userPermissions.includes(code))
+  return codes.some((code) => userPermissions.includes(code))
+}
+
+/** 判断用户权限是否可访问某个路由 meta（规则见 hasAnyPermission） */
+export function hasAccess(meta: RouteMeta, userPermissions: string[]): boolean {
+  return hasAnyPermission(meta.permissions, userPermissions)
 }
 
 /** 按用户权限码过滤路由表（导航与子级均过滤；导航下无可访问子级时整组剔除） */

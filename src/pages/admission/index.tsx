@@ -232,7 +232,7 @@ export default function AdmissionList() {
       title: '会员',
       key: 'member',
       render: (_: unknown, row: AppointmentItem) => (
-        <SensitiveText plain type="name" value={row.member_name || row.contact_name} />
+        <SensitiveText allowReveal={false} type="name" value={row.member_name || row.contact_name} />
       ),
     },
     { 
@@ -242,8 +242,8 @@ export default function AdmissionList() {
       width: 160,
       render: (v: string, r: any) => (
         <div className='table-cell'>
-          <strong><SensitiveText plain type="name" value={r.contact_name} /></strong>
-          <span className='table-cell__span'><SensitiveText plain type="phone" value={v} /></span>
+          <strong><SensitiveText allowReveal={false} type="name" value={r.contact_name} /></strong>
+          <span className='table-cell__span'><SensitiveText allowReveal={false} type="phone" value={v} /></span>
         </div>
       )
     },

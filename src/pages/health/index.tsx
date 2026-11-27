@@ -81,10 +81,10 @@ export default function HealthRecordList() {
               {(row.name || '-').slice(0, 1)}
             </Avatar>
             <div>
-              <div className="hr-row__name"><SensitiveText plain type="name" value={row.name} /></div>
+              <div className="hr-row__name"><SensitiveText allowReveal={false} type="name" value={row.name} /></div>
               <div className="hr-row__sub">
                 {row.gender === 1 ? '男' : row.gender === 2 ? '女' : '-'}
-                {age !== null ? ` · ${age}岁` : ''}&nbsp;&nbsp;<SensitiveText plain type="phone" value={row.phone} />
+                {age !== null ? ` · ${age}岁` : ''}&nbsp;&nbsp;<SensitiveText allowReveal={false} type="phone" value={row.phone} />
               </div>
             </div>
           </div>

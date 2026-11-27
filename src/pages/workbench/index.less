@@ -8,6 +8,11 @@
     grid-template-columns: 1.6fr 1fr;
     gap: @spacing-md;
     margin-top: @spacing-md;
+
+    /* 仅剩一个面板（另一面板无权限或接口无数据）时占满整行 */
+    &--single {
+      grid-template-columns: 1fr;
+    }
   }
 }
 
@@ -49,7 +54,8 @@
 /* ===== 指标卡片 ===== */
 .wb-metrics {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  /* 指标数量随权限变化（无权限的指标不渲染），按可用宽度自适应列数 */
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: @spacing-md;
 }
 

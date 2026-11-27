@@ -6,9 +6,8 @@
 import { useMemo } from 'react'
 import { ArrowRightOutlined } from '@ant-design/icons'
 import { Link } from 'react-router-dom'
-import { maskName } from '@/components/SensitiveText'
 import { useUserStore } from '@/store/modules/user'
-import { ALL_MANAGE_PERMISSION } from '@/router/menu'
+import { hasAnyPermission } from '@/router/menu'
 import type {
   BannerConfig,
   MetricItem,
@@ -17,15 +16,6 @@ import type {
   TrendPanelConfig,
   QuickLink,
 } from './types'
-
-/** 工作台文本中的人员姓名默认掩码，兼容“姓名 · 说明”和“事项 · 姓名”。 */
-function maskWorkbenchInfo(value: string) {
-  return value.replace(/(^| · )([\u4e00-\u9fa5]{2,4})(?= · |$)/g, (_, prefix: string, name: string) => `${prefix}${maskName(name)}`)
-}
-
-function maskWorkbenchTitle(value: string) {
-  return /(?:医生|护士|健管师)$/.test(value) ? maskName(value) : value
-}
 
 /** 空权限数组常量（避免选择器每次返回新引用导致无限重渲染） */
 const EMPTY_PERMISSIONS: string[] = []
@@ -47,8 +37,9 @@ export function AlertBanner({ config }: { config: BannerConfig }) {
   )
 }
 
-/** 指标卡片行 */
+/** 指标卡片行（指标已被权限过滤，为空时不占位） */
 export function MetricRow({ items }: { items: MetricItem[] }) {
+  if (items.length === 0) return null
   return (
     <div className="wb-metrics">
       {items.map((item) => (
@@ -86,9 +77,9 @@ export function MainPanel({ config }: { config: MainPanelConfig }) {
                   className={`wb-list__dot${item.tone === 'danger' ? ' wb-list__dot--danger' : ''}`}
                 />
               )}
-              <span className="wb-list__title">{maskWorkbenchTitle(item.title)}</span>
+              <span className="wb-list__title">{item.title}</span>
             </div>
-            {item.info && <span className="wb-list__info">{maskWorkbenchInfo(item.info)}</span>}
+            {item.info && <span className="wb-list__info">{item.info}</span>}
             {item.tag && (
               <span
                 className={`status-tag status-tag--${item.tone === 'danger' ? 'red' : item.tone === 'success' ? 'green' : 'gray'}`}
@@ -160,14 +151,7 @@ export function QuickLinksRow({ title, links }: { title: string; links: QuickLin
   const permissions = useUserStore((state) => state.userInfo?.permissions ?? EMPTY_PERMISSIONS)
 
   const visibleLinks = useMemo(
-    () =>
-      links.filter(
-        (link) =>
-          !link.permissions ||
-          link.permissions.length === 0 ||
-          permissions.includes(ALL_MANAGE_PERMISSION) ||
-          link.permissions.some((code) => permissions.includes(code)),
-      ),
+    () => links.filter((link) => hasAnyPermission(link.permissions, permissions)),
     [links, permissions],
   )
 

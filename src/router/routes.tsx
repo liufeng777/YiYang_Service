@@ -57,6 +57,8 @@ export const PERMISSIONS = {
   WARN_VIEW: 'warning:view',
   /** 服务工单 */
   WO_VIEW: 'work_order:view',
+  /** 订单审核（待确认订单） */
+  ORDER_VIEW: 'order:view',
   /** 异常处理（派单/改派/催单） */
   WO_DISPATCH: 'work_order:edit',
   /** 健康活动（运营后台域，预留权限码） */
@@ -316,7 +318,9 @@ export const routes: RouteConfig[] = [
       title: '订单审核',
       icon: <AuditOutlined />,
       group: '服务履约',
-      permissions: [PERMISSIONS.WO_VIEW],
+      // 订单审核对接 orders 接口：order:view 为审核岗（医生）权限，
+      // 兼容仅有工单查看权限的历史角色，避免既有菜单可见性回退
+      permissions: [PERMISSIONS.ORDER_VIEW, PERMISSIONS.WO_VIEW],
     },
     children: [
       {

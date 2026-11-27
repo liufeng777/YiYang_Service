@@ -414,7 +414,7 @@ export default function DispatchBoard({
           e.stopPropagation()
           setSelectedId(o.id)
         }}
-        title={`${o.work_order_no} · ${maskName(o.member_name)} · ${o.service_name}　期望：${maskName(o.expect_staff_name) || '无'} ${fmtMin(expectedMinOf(o))}~${fmtMin(expectedMinOf(o) + durationOf(o))}　拖动或点选后点击空档调整`}
+        title={`${o.work_order_no} · ${maskName(o.member_name)} · ${o.service_name}　期望：${o.expect_staff_name || '无'} ${fmtMin(expectedMinOf(o))}~${fmtMin(expectedMinOf(o) + durationOf(o))}　拖动或点选后点击空档调整`}
       >
         <span className="wo-board__plan-text">
           <span className="wo-board__plan-no">{o.work_order_no}</span>
@@ -465,7 +465,7 @@ export default function DispatchBoard({
                     : 'wo-board__chip--adjusted'
               } ${o.id === selectedId ? 'wo-board__chip--selected' : ''}`}
               onClick={() => setSelectedId(o.id)}
-              title={`${o.work_order_no} · ${o.service_name} · 期望 ${maskName(o.expect_staff_name) || '无'} ${fmtMin(expectedMinOf(o))}~${fmtMin(expectedMinOf(o) + durationOf(o))}`}
+              title={`${o.work_order_no} · ${o.service_name} · 期望 ${o.expect_staff_name || '无'} ${fmtMin(expectedMinOf(o))}~${fmtMin(expectedMinOf(o) + durationOf(o))}`}
             >
               {woShort(o)} {maskName(o.member_name)}
             </span>
@@ -557,7 +557,7 @@ export default function DispatchBoard({
               <div key={c.id} className="wo-board__row">
                 <div className="wo-board__staff">
                   <div className="wo-board__staff-name">
-                    {maskName(c.name)}
+                    {c.name}
                     {expAll.length > 0 && (
                       <Tooltip
                         title={
@@ -626,7 +626,7 @@ export default function DispatchBoard({
                           top: 52 + lane * 18,
                           height: 16,
                         }}
-                        title={`${maskName(o.member_name)} 的客户期望：${maskName(c.name)} ${fmtMin(em)}~${fmtMin(em + durationOf(o))}`}
+                        title={`${maskName(o.member_name)} 的客户期望：${c.name} ${fmtMin(em)}~${fmtMin(em + durationOf(o))}`}
                         onClick={(e) => e.stopPropagation()}
                       >
                         期望·{maskName(o.member_name)}

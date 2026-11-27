@@ -101,8 +101,8 @@ export default function LeadList() {
       key: 'contact',
       render: (_: unknown, record: LeadItem) => (
         <span className="lead-table__contact">
-          <SensitiveText plain type="name" value={record.contact_name || record.name} />{' '}
-          <SensitiveText plain type="phone" value={record.contact_phone || record.phone} />
+          <SensitiveText allowReveal={false} type="name" value={record.contact_name || record.name} />{' '}
+          <SensitiveText allowReveal={false} type="phone" value={record.contact_phone || record.phone} />
         </span>
       ),
     },

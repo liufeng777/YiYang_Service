@@ -68,10 +68,8 @@ export default function SelectOrg() {
           positionCode,
           positionName: res.position_name || selectedOrg.roleTag,
           institutionName: selectedOrg.name,
-          permissions:
-            res.permissions && res.permissions.length > 0
-              ? res.permissions
-              : userInfo.permissions,
+          // 权限以目标机构返回值为准，空数组或字段缺失均不沿用原机构权限。
+          permissions: res.permissions ?? [],
         })
       }
       setCurrentOrg(selectedOrg)
@@ -105,9 +103,9 @@ export default function SelectOrg() {
         <div className="select-org__user">
           <span className="select-org__avatar">{(userInfo?.nickname ?? '用')[0]}</span>
           <div className="select-org__user-info">
-            <div className="select-org__user-name"><SensitiveText type="name" value={userInfo?.nickname ?? '用户'} /></div>
+            <div className="select-org__user-name"><SensitiveText plain type="name" value={userInfo?.nickname ?? '用户'} /></div>
             <div className="select-org__user-account">
-              账号 <SensitiveText type="phone" value={userInfo?.phone} />
+              账号 <SensitiveText plain type="phone" value={userInfo?.phone} />
             </div>
           </div>
           <Button type="link" className="select-org__logout" onClick={onLogout}>

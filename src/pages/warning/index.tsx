@@ -15,6 +15,7 @@ import {
   WARNING_STATUS_MAP,
   type WarningItem,
 } from '@/api/modules/warning'
+import { formatDateTime } from '@/utils/index'
 import './index.less'
 
 const SEVERITY_TONE: Record<number, string> = { 1: 'green', 2: 'orange', 3: 'red' }
@@ -81,7 +82,7 @@ export default function WarningList() {
       title: '服务对象',
       key: 'member_name',
       dataIndex: 'member_name',
-      render: (value?: string) => <SensitiveText plain type="name" value={value} />,
+      render: (value?: string) => <SensitiveText allowReveal={false} type="name" value={value} />,
     },
     {
       title: '预警等级',
@@ -102,9 +103,21 @@ export default function WarningList() {
       ),
     },
     {
-      title: '触发时间',
+      title: '创建时间',
       dataIndex: 'created_at',
-      key: 'created_at'
+      key: 'created_at',
+      render: (v: number) => formatDateTime(v * 1000)
+    },
+    {
+      title: '处理',
+      key: 'handled',
+      render: (_: unknown, row: WarningItem) => {
+        const handledAt = (row as WarningItem & { handled_by_name?: string; handled_at?: number })
+        return (handledAt.handled_by_name || handledAt.handled_at) ? <div className='table-cell'>
+          <strong>{handledAt.handled_by_name || '-'}</strong>
+          <span className='table-cell__span'>{formatDateTime((handledAt.handled_at ?? 0) * 1000)}</span>
+        </div> : <></>
+        }
     },
     {
       title: '操作',
