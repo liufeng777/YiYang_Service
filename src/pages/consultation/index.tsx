@@ -90,7 +90,7 @@ export default function ConsultationList() {
       render: (_: unknown, row: ConsultationItem) => (
         <div className='table-cell'>
           <strong><SensitiveText plain type="name" value={row.contact_name} /></strong>
-          <SensitiveText plain type="phone" value={row.contact_phone} />
+          <span className='table-cell__span'><SensitiveText plain type="phone" value={row.contact_phone} /></span>
         </div>
       ),
     },

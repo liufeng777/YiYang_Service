@@ -21,7 +21,6 @@ import { lazy } from 'react'
 import type { ReactNode } from 'react'
 import {
   DashboardOutlined,
-  ExperimentOutlined,
   ScheduleOutlined,
   AlertOutlined,
   AuditOutlined,
@@ -273,8 +272,13 @@ export const routes: RouteConfig[] = [
       },
       {
         path: 'create',
-        meta: { title: '创建健康预警回访', hideInMenu: true },
+        meta: { title: '新建随访', hideInMenu: true },
         component: lazy(() => import('@/pages/followup/create')),
+      },
+      {
+        path: ':id',
+        meta: { title: '随访详情', hideInMenu: true },
+        component: lazy(() => import('@/pages/followup/detail')),
       },
       {
         path: ':id/execute',

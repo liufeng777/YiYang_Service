@@ -124,7 +124,7 @@ export default function MemberList() {
       render: (_: unknown, row: HealthAccessItem) => (
         <div className='table-cell'>
           <strong>{row.health_intent || '-'}</strong>
-          <span>{row.apply_code}</span>
+          <span className='table-cell__span'>{row.apply_code}</span>
         </div>
       )  },
     { 
@@ -134,7 +134,7 @@ export default function MemberList() {
       render: (_: string, row: any) => {
         return <div className='table-cell'>
           <strong>{row.staff_name}</strong>
-          <span>{row.institution_name}</span>
+          <span className='table-cell__span'>{row.institution_name}</span>
         </div>
       },
     },

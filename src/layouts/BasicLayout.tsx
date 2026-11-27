@@ -29,8 +29,6 @@ const NO_API_PREFIXES = [
   '/health/assign',
   '/health/risk-level',
   '/health/risk-change',
-  // 随访子页面（列表已对接；创建/执行为问卷向导，接口待补充）
-  '/followup/create',
   // 人员管理子页面（列表/新增/详情已对接）
   '/staff/credentials',
   '/staff/qualification',
@@ -43,11 +41,7 @@ const NO_API_PREFIXES = [
   '/leads/convert-success',
 ]
 
-/** 随访执行页路径形如 /followup/123/execute */
-const NO_API_PATTERNS = [/^\/followup\/\d+\/execute/]
-
 function isNoApiPage(pathname: string) {
-  if (NO_API_PATTERNS.some((re) => re.test(pathname))) return true
   return NO_API_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))
 }
 

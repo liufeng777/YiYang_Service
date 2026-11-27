@@ -243,7 +243,7 @@ export default function AdmissionList() {
       render: (v: string, r: any) => (
         <div className='table-cell'>
           <strong><SensitiveText plain type="name" value={r.contact_name} /></strong>
-          <SensitiveText plain type="phone" value={v} />
+          <span className='table-cell__span'><SensitiveText plain type="phone" value={v} /></span>
         </div>
       )
     },

@@ -95,7 +95,7 @@ export default function StaffList() {
       render: (_: unknown, row: StaffItem) => (
         <div className='table-cell'>
           <strong><SensitiveText plain type="name" value={row.name} /></strong>
-          <SensitiveText plain type="phone" value={row.phone} />
+          <span className='table-cell__span'><SensitiveText plain type="phone" value={row.phone} /></span>
         </div>
       ),
     },
@@ -105,7 +105,7 @@ export default function StaffList() {
       render: (_: unknown, row: StaffItem) => (
         <div className='table-cell'>
           <strong>{STAFF_TYPE_MAP[row.staff_type] ?? '-'}</strong>
-          <span>{row.referral_code}</span>
+          <span className='table-cell__span'>{row.referral_code}</span>
         </div>
       )
     },
@@ -115,7 +115,7 @@ export default function StaffList() {
       render: (_: unknown, row: StaffItem) =>
         <div className='table-cell'>
           <strong>{row.position_name || '-'}</strong>
-          {row.title && row.title !== row.position_name && <span>{row.title || '-'}</span>}
+          {row.title && row.title !== row.position_name && <span className='table-cell__span'>{row.title || '-'}</span>}
         </div>
     },
     {

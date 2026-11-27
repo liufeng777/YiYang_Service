@@ -63,7 +63,7 @@ export default function OrderAuditList() {
       render: (_: unknown, row: OrderItem) => (
         <div className="table-cell">
           <strong>{row.order_no || '-'}</strong>
-          <span>{row.created_at ? formatDateTime(row.created_at * 1000) : '-'}</span>
+          <span className='table-cell__span'>{row.created_at ? formatDateTime(row.created_at * 1000) : '-'}</span>
         </div>
       ),
     },
@@ -83,7 +83,7 @@ export default function OrderAuditList() {
             {row.service_name || '-'}
             {row.service_count && ` (${row.service_count}次)`}
           </strong>
-          {row.remark && <span>{row.remark}</span>}
+          {row.remark && <span className='table-cell__span'>{row.remark}</span>}
         </div>
       ),
     },
@@ -93,7 +93,7 @@ export default function OrderAuditList() {
       render: (_: unknown, row: OrderItem) => (
         <div className="table-cell">
           <strong>{row.amount != null ? `¥${row.amount}` : '-'}</strong>
-          <span>{row.paid_at ? formatDateTime(row.paid_at * 1000) : '-'}</span>
+          <span className='table-cell__span'>{row.paid_at ? formatDateTime(row.paid_at * 1000) : '-'}</span>
         </div>
       ),
     },

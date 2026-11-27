@@ -183,11 +183,11 @@ export default function WarningHandle() {
               ))}
             </ol>
             <div className="wn-handle__submit">
+              <Button style={{ marginRight: 12 }} onClick={onIgnore} loading={submitting}>
+                忽略预警
+              </Button>
               <Button type="primary" onClick={onSubmit} loading={submitting}>
                 提交医生处置
-              </Button>
-              <Button style={{ marginLeft: 12 }} onClick={onIgnore} loading={submitting}>
-                忽略预警
               </Button>
             </div>
           </div>

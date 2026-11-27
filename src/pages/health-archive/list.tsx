@@ -52,7 +52,7 @@ export default function HealthArchiveList() {
       render: (v: string, r: ArchiveListItem) => (
         <div className='table-cell'>
           <strong><SensitiveText plain type="name" value={v} /></strong>
-          <span>{r.gender === 1 ? '男' : r.gender === 2 ? '女' : '未知'} · {r.age != null ? `${r.age}岁` : '年龄未知'}</span>
+          <span className='table-cell__span'>{r.gender === 1 ? '男' : r.gender === 2 ? '女' : '未知'} · {r.age != null ? `${r.age}岁` : '年龄未知'}</span>
         </div>
       )
     },

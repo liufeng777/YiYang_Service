@@ -154,7 +154,7 @@ const RECORD_CONFIG: Record<RecordKind, { title: string; fields: FieldConfig[] }
         render: (record) => (
           <div className="table-cell">
             <strong>{archiveEnumLabel({}, 'allergen_name', record.allergen_name)}</strong>
-            {record.allergen_code != null && record.allergen_code !== '' && <span>{archiveEnumLabel({}, 'allergen_code', record.allergen_code)}</span>}
+            {record.allergen_code != null && record.allergen_code !== '' && <span className='table-cell__span'>{archiveEnumLabel({}, 'allergen_code', record.allergen_code)}</span>}
           </div>
         ),
       },
@@ -182,7 +182,7 @@ const RECORD_CONFIG: Record<RecordKind, { title: string; fields: FieldConfig[] }
       { name: 'disease_name', label: '疾病名称', required: true, render: (record) => (
         <div className="table-cell">
           <strong>{archiveEnumLabel({}, 'disease_name', record.disease_name)}</strong>
-          {record.icd10_code != null && record.icd10_code !== '' && <span>{archiveEnumLabel({}, 'icd10_code', record.icd10_code)}</span>}
+          {record.icd10_code != null && record.icd10_code !== '' && <span className='table-cell__span'>{archiveEnumLabel({}, 'icd10_code', record.icd10_code)}</span>}
         </div>
       )},
       { name: 'relation', label: '亲属关系', type: 'number' },

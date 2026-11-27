@@ -121,7 +121,7 @@ export default function WorkOrderList() {
       render: (_: unknown, row: WorkOrderItem) => (
         <div className='table-cell'>
           <strong>{row.work_order_no}</strong>
-          <span>订单 {row.order_no || '-'}</span>
+          <span className='table-cell__span'>订单 {row.order_no || '-'}</span>
         </div>
       ),
     },
@@ -131,7 +131,7 @@ export default function WorkOrderList() {
       render: (_: unknown, row: WorkOrderItem) => (
         <div className='table-cell'>
           <strong><SensitiveText plain type="name" value={row.member_name} /></strong>
-          <SensitiveText plain type="phone" value={row.member_phone || row.contact_phone} />
+          <span className='table-cell__span'><SensitiveText plain type="phone" value={row.member_phone || row.contact_phone} /></span>
         </div>
       ),
     },
@@ -141,7 +141,7 @@ export default function WorkOrderList() {
       render: (_: unknown, row: WorkOrderItem) => (
         <div className='table-cell'>
           <strong><SensitiveText plain type="name" value={row.contact_name} /></strong>
-          <SensitiveText plain type="phone" value={row.member_phone || row.contact_phone} />
+          <span className='table-cell__span'><SensitiveText plain type="phone" value={row.member_phone || row.contact_phone} /></span>
         </div>
       ),
     },
@@ -152,7 +152,7 @@ export default function WorkOrderList() {
       render: (_: unknown, row: WorkOrderItem) => (
         <div className='table-cell'>
           <strong>{row.service_name || '-'}</strong>
-          <span>{row.duration}</span>
+          <span className='table-cell__span'>{row.duration}</span>
         </div>
       ),
     },
@@ -163,14 +163,14 @@ export default function WorkOrderList() {
         {row.wo_status === 1 ? (
           <>
             <strong><SensitiveText plain type="name" value={row.expect_staff_name} /></strong>
-            <span>
+            <span className='table-cell__span'>
               {row.expected_start_at ? formatDateTime(row.expected_start_at * 1000) : '-'}
             </span>
           </>
         ) :(
           <>
             <strong><SensitiveText plain type="name" value={row.assigned_staff_name} /></strong>
-            <span>
+            <span className='table-cell__span'>
               {row.assigned_at ? formatDateTime(row.assigned_at * 1000) : '-'}
             </span>
           </>
