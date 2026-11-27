@@ -1,7 +1,7 @@
 import { http } from '@/utils/request'
 import type { PageParams, PageResult } from '@/types/api'
 
-export const REFUND_STATUS_MAP: Record<number, string> = { 1: '待业务审批', 2: '待财务审批', 3: '已驳回', 4: '已退款' }
+export const REFUND_STATUS_MAP: Record<number, string> = { 1: '待审批', 2: '已同意', 3: '已驳回', 4: '已退款' }
 
 export interface RefundItem {
   id: number

@@ -11,14 +11,14 @@
  *   拖拽按抓取点偏移落位，块落在视觉上看到的位置
  * - 状态提示（无冲突 / N 单冲突）位于底部左下角；
  *   「确认派单（N）」批量提交所有无冲突且已分配的工单；其余留板继续调整
- * 数据来源：候选人员、待派单队列、人员排班及派单提交均使用真实接口。
+ * 数据来源：候选人员、待派单队列、员工派单情况及派单提交均使用真实接口。
  */
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent } from 'react'
 import { Button, DatePicker, Drawer, Spin, Tooltip, App } from 'antd'
 import { CheckCircleFilled, WarningFilled, CloseOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
-import { scheduleApi, staffApi, workOrderApi } from '@/api'
+import { orderApi, staffApi, workOrderApi } from '@/api'
 import { maskName } from '@/components/SensitiveText'
 import type { WorkOrderItem } from '@/api/modules/work-order'
 import {
@@ -28,7 +28,6 @@ import {
   findConflicts,
   fmtMin,
   overlaps,
-  timeToMinutes,
   type BusyBlock,
   type DispatchCandidate,
 } from './board-utils'
@@ -147,41 +146,40 @@ export default function DispatchBoard({
       .finally(() => setLoading(false))
   }, [open])
 
-  /* 按当前日期读取真实人员排班，用于时段冲突提示。 */
+  /* 按当前日期读取各员工已有工单，用于占用时段展示与冲突提示。 */
   useEffect(() => {
     if (!open) return
     setLoading(true)
-    scheduleApi
-      .getSchedules({ page: 1, page_size: 200, view: 'day', date: dateStr })
+    orderApi
+      .getOrdersByStaff(dateStr)
       .then((res) => {
         const next = new Map<number, BusyBlock[]>()
-        res.list.forEach((item) => {
-          const staffId = item.staff_id ?? item.assigned_staff_id
-          if (!staffId || item.status === 9 || item.schedule_status === 4) return
+        res.list.forEach((staff) => {
+          if (!staff.staff_id) return
+          const blocks = (staff.work_orders ?? []).flatMap((item) => {
+            const plannedStart = item.planned_start_at ? dayjs(item.planned_start_at * 1000) : null
+            const plannedStop = item.planned_stop_at ? dayjs(item.planned_stop_at * 1000) : null
+            if (!plannedStart) return []
 
-          const plannedStart = item.planned_start_at ? dayjs(item.planned_start_at * 1000) : null
-          const plannedStop = item.planned_stop_at ? dayjs(item.planned_stop_at * 1000) : null
-          const startMin = plannedStart
-            ? plannedStart.hour() * 60 + plannedStart.minute()
-            : timeToMinutes(item.start_time)
-          const endMin = plannedStop
-            ? plannedStop.hour() * 60 + plannedStop.minute()
-            : timeToMinutes(item.end_time)
-          if (startMin == null || endMin == null || endMin <= startMin) return
+            const startMin = plannedStart.hour() * 60 + plannedStart.minute()
+            const endMin = plannedStop
+              ? plannedStop.hour() * 60 + plannedStop.minute()
+              : startMin + (item.duration || 60)
+            if (endMin <= startMin) return []
 
-          const serviceTitle = [item.member_name, item.service_name].filter(Boolean).join(' · ')
-          const blocks = next.get(staffId) ?? []
-          blocks.push({
-            startMin,
-            endMin,
-            title: serviceTitle || item.work_order_no || item.remark || '已排安排',
+            const serviceTitle = [item.member_name, item.service_name].filter(Boolean).join(' · ')
+            return [{
+              startMin,
+              endMin,
+              title: serviceTitle || item.work_order_no || item.order_no || item.remark || '已排安排',
+            }]
           })
-          next.set(staffId, blocks)
+          next.set(staff.staff_id, blocks)
         })
         setSchedules(next)
       })
       .catch(() => {
-        // 请求失败时不使用模拟排班，避免产生虚假冲突。
+        // 请求失败时不使用模拟工单，避免产生虚假冲突。
         setSchedules(new Map())
       })
       .finally(() => setLoading(false))

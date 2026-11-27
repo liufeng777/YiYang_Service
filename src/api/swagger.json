@@ -3347,7 +3347,7 @@
                       "BearerAuth": []
                   }
               ],
-              "description": "返回接入当前 staff 所属机构（健康接入状态=已确认）的会员，会员信息同会员列表。",
+              "description": "返回接入当前 staff 所属机构（健康接入状态=已确认）的健康对象。",
               "consumes": [
                   "application/json"
               ],
@@ -3355,9 +3355,9 @@
                   "application/json"
               ],
               "tags": [
-                  "staff-健康评估"
+                  "staff-健康会员"
               ],
-              "summary": "已接入会员列表",
+              "summary": "健康会员列表",
               "parameters": [
                   {
                       "type": "string",
@@ -3949,7 +3949,7 @@
                       "BearerAuth": []
                   }
               ],
-              "description": "健康档案会员分页，含当前风险/照护等级。",
+              "description": "健康对象分页，含当前风险/照护等级。",
               "consumes": [
                   "application/json"
               ],
@@ -3957,9 +3957,9 @@
                   "application/json"
               ],
               "tags": [
-                  "staff-健康评估"
+                  "staff-健康会员"
               ],
-              "summary": "会员列表（健档索引）",
+              "summary": "健康对象列表（member）",
               "parameters": [
                   {
                       "type": "string",
@@ -4020,9 +4020,9 @@
                   "application/json"
               ],
               "tags": [
-                  "staff-健康评估"
+                  "staff-健康会员"
               ],
-              "summary": "建档",
+              "summary": "建档（创建健康对象）",
               "parameters": [
                   {
                       "description": "会员档案",
@@ -4059,7 +4059,7 @@
                   "application/json"
               ],
               "tags": [
-                  "staff-健康评估"
+                  "staff-健康会员"
               ],
               "summary": "设置会员活跃状态",
               "parameters": [
@@ -4252,7 +4252,7 @@
                   "application/json"
               ],
               "tags": [
-                  "staff-健康评估"
+                  "staff-健康会员"
               ],
               "summary": "会员健康档案详情",
               "parameters": [
@@ -5648,6 +5648,42 @@
                       "type": "integer",
                       "description": "订单状态过滤(0=全部)",
                       "name": "order_status",
+                      "in": "query"
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/orders/by-staff": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "按天(默认今天，可用 date=YYYY-MM-DD 指定)返回当前机构下每个上门服务人员(staff_type=2)对应的工单简要信息。\n工单按实际排定时间(planned_start_at)归属到当天，已取消/中止的工单不展示；仅列出在职上门服务人员(无工单则 work_orders 为空数组)。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-工单"
+              ],
+              "summary": "按天查看上门服务人员的工单",
+              "parameters": [
+                  {
+                      "type": "string",
+                      "description": "日期 YYYY-MM-DD，默认今天",
+                      "name": "date",
                       "in": "query"
                   }
               ],

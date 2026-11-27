@@ -22,6 +22,40 @@ export interface OrderItem {
   created_at?: number
 }
 
+/** 按员工聚合的当日工单简要信息（GET /orders/by-staff）。 */
+export interface StaffOrderBrief {
+  id?: number
+  work_order_id?: number
+  order_no?: string
+  work_order_no?: string
+  member_name?: string
+  service_name?: string
+  wo_status?: number
+  /** 计划服务起止时间（秒）。 */
+  planned_start_at?: number
+  planned_stop_at?: number
+  /** 服务时长（分钟），缺少计划结束时间时用于补算。 */
+  duration?: number
+  remark?: string
+}
+
+export interface StaffOrdersItem {
+  staff_id: number
+  staff_name?: string
+  work_orders?: StaffOrderBrief[]
+}
+
+export interface StaffOrdersResponse {
+  date: string
+  institution_id: number
+  list: StaffOrdersItem[]
+}
+
+/** 按天查看上门服务人员的工单，date 格式为 YYYY-MM-DD。 */
+export function getOrdersByStaff(date?: string) {
+  return http.get<StaffOrdersResponse>('/v1/staff/orders/by-staff', date ? { date } : {})
+}
+
 export interface OrderDetail {
   address_detail: string
   address_region: string
