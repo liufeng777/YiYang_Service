@@ -50,14 +50,14 @@ export default function HealthArchiveList() {
       dataIndex: 'member_name',
       render: (v: string, r: ArchiveListItem) => (
         <div className='table-cell'>
-          <strong><SensitiveText type="name" value={v} /></strong>
+          <strong><SensitiveText plain type="name" value={v} /></strong>
           <span>{r.gender === 1 ? '男' : r.gender === 2 ? '女' : '未知'} · {r.age != null ? `${r.age}岁` : '年龄未知'}</span>
         </div>
       )
     },
     {
       title: '联系电话', dataIndex: 'phone', key: 'phone',
-      render: (value?: string) => <SensitiveText type="phone" value={value} />,
+      render: (value?: string) => <SensitiveText plain type="phone" value={value} />,
     },
     {
       title: '接入状态', dataIndex: 'access_status', key: 'access_status',
@@ -65,7 +65,7 @@ export default function HealthArchiveList() {
     },
     {
       title: '最后编辑', dataIndex: 'editor_name', key: 'editor_name',
-      render: (value?: string) => <SensitiveText type="name" value={value} />,
+      render: (value?: string) => <SensitiveText plain type="name" value={value} />,
     },
     {
       title: '档案更新时间',

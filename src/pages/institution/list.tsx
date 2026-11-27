@@ -90,7 +90,7 @@ export default function InstitutionInfo() {
             <div>
               <div className="org-kv__label">联系人</div>
               <div className="org-info-grid__value">
-                <SensitiveText type="name" value={institution.manager_name} />（<SensitiveText type="phone" value={institution.manager_phone} />）
+                <SensitiveText plain type="name" value={institution.manager_name} />（<SensitiveText plain type="phone" value={institution.manager_phone} />）
               </div>
             </div>
             <div>

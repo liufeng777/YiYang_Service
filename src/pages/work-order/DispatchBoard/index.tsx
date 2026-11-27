@@ -42,6 +42,8 @@ const POOL_STAFF_ID = 0
 interface Plan {
   staffId: number
   startMin: number
+  /** 方案所在排班日期；跨天工单从待分配池拖入后按当前看板日期展示 */
+  date: string
 }
 
 /** 事件坐标 → 轨道上的分钟数（吸附到 SLOT_STEP） */
@@ -98,15 +100,15 @@ export default function DispatchBoard({
     candidates.find((s) => s.id === o.expect_staff) ??
     candidates.find((s) => s.name && s.name === o.expect_staff_name)
 
-  /* 当前日期的工单（排除已派出） */
+  /* 当前排班日期的工单：默认取客户期望日期，拖放后取方案日期（排除已派出） */
   const dayOrders = useMemo(
     () =>
-      allOrders.filter(
-        (o) =>
-          dayjs(o.expected_start_at * 1000).format('YYYY-MM-DD') === dateStr &&
-          !doneIds.includes(o.id),
-      ),
-    [allOrders, dateStr, doneIds],
+      allOrders.filter((o) => {
+        if (doneIds.includes(o.id)) return false
+        const expectedDate = dayjs(o.expected_start_at * 1000).format('YYYY-MM-DD')
+        return (plans[o.id]?.date ?? expectedDate) === dateStr
+      }),
+    [allOrders, plans, dateStr, doneIds],
   )
 
   /* 待分配池：跨天共享，不受日期筛选约束 */
@@ -179,12 +181,16 @@ export default function DispatchBoard({
       allOrders.forEach((o) => {
         if (next[o.id] || doneIds.includes(o.id)) return
         const exp = matchExpected(o)
+        const planDate = o.expected_start_at
+          ? dayjs(o.expected_start_at * 1000).format('YYYY-MM-DD')
+          : dateStr
         if (exp && o.expected_start_at) {
-          next[o.id] = { staffId: exp.id, startMin: expectedMinOf(o) }
+          next[o.id] = { staffId: exp.id, startMin: expectedMinOf(o), date: planDate }
         } else {
           next[o.id] = {
             staffId: POOL_STAFF_ID,
             startMin: o.expected_start_at ? expectedMinOf(o) : BOARD_START,
+            date: planDate,
           }
         }
       })
@@ -219,7 +225,14 @@ export default function DispatchBoard({
   const isExpectedPlan = (o: WorkOrderItem) => {
     const p = plans[o.id]
     const exp = matchExpected(o)
-    return !!p && !!exp && p.staffId === exp.id && p.startMin === expectedMinOf(o)
+    const expectedDate = dayjs(o.expected_start_at * 1000).format('YYYY-MM-DD')
+    return (
+      !!p &&
+      !!exp &&
+      p.date === expectedDate &&
+      p.staffId === exp.id &&
+      p.startMin === expectedMinOf(o)
+    )
   }
 
   const conflictCount = dayOrders.filter(hasConflict).length
@@ -232,7 +245,7 @@ export default function DispatchBoard({
     const o = chipOrders.find((x) => x.id === orderId)
     if (!o) return
     if (staffId === POOL_STAFF_ID) {
-      setPlans((prev) => ({ ...prev, [orderId]: { staffId, startMin } }))
+      setPlans((prev) => ({ ...prev, [orderId]: { staffId, startMin, date: dateStr } }))
       return
     }
     const dur = durationOf(o)
@@ -252,7 +265,7 @@ export default function DispatchBoard({
       message.warning(`${maskName(o.member_name)}：该时段已排「${maskName(others[0].member_name)}」的工单，请错开`)
       return
     }
-    setPlans((prev) => ({ ...prev, [orderId]: { staffId, startMin } }))
+    setPlans((prev) => ({ ...prev, [orderId]: { staffId, startMin, date: dateStr } }))
   }
 
   /** 批量确认：提交所有无冲突且已分配的工单，其余留板 */
@@ -381,7 +394,7 @@ export default function DispatchBoard({
         <div style={{flex: 1}}>
           <div className="wo-modal__title">
             <div>
-              {chipOrders.length > 1 ? `排单板 · 批量派单（${chipOrders.length} 单）` : '排单板 · 派单'}
+              <span style={{marginRight: 20}}>{chipOrders.length > 1 ? `排单板 · 批量派单（${chipOrders.length} 单）` : '排单板 · 派单'}</span>
               <DatePicker
                 value={dayjs(dateStr)}
                 onChange={(d) => d && setDateStr(d.format('YYYY-MM-DD'))}

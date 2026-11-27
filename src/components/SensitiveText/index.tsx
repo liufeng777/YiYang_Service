@@ -62,12 +62,13 @@ const TYPE_LABEL: Record<SensitiveType, string> = {
   name: '姓名', phone: '手机号', idCard: '身份证号', address: '详细地址',
 }
 
-/** 敏感信息默认脱敏，点击眼睛仅在当前组件内临时显示原文。 */
-export default function SensitiveText({ type, value, className, allowReveal = true }: {
+/** 详情默认脱敏并通过眼睛切换；列表可传 plain 直接显示原文，不展示切换按钮。 */
+export default function SensitiveText({ type, value, className, allowReveal = true, plain = false }: {
   type: SensitiveType
   value: SensitiveValue
   className?: string
   allowReveal?: boolean
+  plain?: boolean
 }) {
   const [visible, setVisible] = useState(false)
   const raw = String(value ?? '').trim()
@@ -78,8 +79,8 @@ export default function SensitiveText({ type, value, className, allowReveal = tr
 
   return (
     <span className={['sensitive-text', className].filter(Boolean).join(' ')}>
-      <span className="sensitive-text__value">{visible ? raw : maskSensitive(type, raw)}</span>
-      {allowReveal && (
+      <span className="sensitive-text__value">{plain || visible ? raw : maskSensitive(type, raw)}</span>
+      {allowReveal && !plain && (
         <Tooltip title={visible ? `隐藏${TYPE_LABEL[type]}` : `查看${TYPE_LABEL[type]}`}>
           <Button
             type="text" size="small" className="sensitive-text__toggle"

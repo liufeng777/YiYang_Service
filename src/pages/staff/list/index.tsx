@@ -93,8 +93,8 @@ export default function StaffList() {
       key: 'name',
       render: (_: unknown, row: StaffItem) => (
         <div className='table-cell'>
-          <strong><SensitiveText type="name" value={row.name} /></strong>
-          <SensitiveText type="phone" value={row.phone} />
+          <strong><SensitiveText plain type="name" value={row.name} /></strong>
+          <SensitiveText plain type="phone" value={row.phone} />
         </div>
       ),
     },

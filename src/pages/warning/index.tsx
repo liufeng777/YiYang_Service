@@ -81,7 +81,7 @@ export default function WarningList() {
       title: '服务对象',
       key: 'member_name',
       dataIndex: 'member_name',
-      render: (value?: string) => <SensitiveText type="name" value={value} />,
+      render: (value?: string) => <SensitiveText plain type="name" value={value} />,
     },
     {
       title: '预警等级',

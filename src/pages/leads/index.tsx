@@ -101,8 +101,8 @@ export default function LeadList() {
       key: 'contact',
       render: (_: unknown, record: LeadItem) => (
         <span className="lead-table__contact">
-          <SensitiveText type="name" value={record.contact_name || record.name} />{' '}
-          <SensitiveText type="phone" value={record.contact_phone || record.phone} />
+          <SensitiveText plain type="name" value={record.contact_name || record.name} />{' '}
+          <SensitiveText plain type="phone" value={record.contact_phone || record.phone} />
         </span>
       ),
     },
@@ -135,7 +135,7 @@ export default function LeadList() {
       title: '负责人',
       dataIndex: 'owner_staff_name',
       key: 'owner_staff_name',
-      render: (v: string | undefined, record: LeadItem) => <SensitiveText type="name" value={v || record.assignee_name} />,
+      render: (v: string | undefined, record: LeadItem) => <SensitiveText plain type="name" value={v || record.assignee_name} />,
     },
     {
       title: '登记时间',

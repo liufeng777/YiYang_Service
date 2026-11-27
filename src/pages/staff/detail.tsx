@@ -8,6 +8,7 @@
  */
 import { useCallback, useEffect, useState } from 'react'
 import { Button, Segmented, Spin } from 'antd'
+import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import SensitiveText from '@/components/SensitiveText'
@@ -82,6 +83,7 @@ export default function StaffDetail() {
             ? '查看人员关系、人员角色、执业资质、服务授权、审核记录和派单资格'
             : '单页查看基础信息和账号状态'
         }
+        extra={<Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/staff')}>返回人员列表</Button>}
       >
         <Spin spinning={loading}>
           {/* 专业服务人员 Tabs */}

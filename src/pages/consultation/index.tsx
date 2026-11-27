@@ -82,15 +82,15 @@ export default function ConsultationList() {
       title: '咨询人',
       key: 'member_name',
       dataIndex: 'member_name',
-      render: (v: string) => <SensitiveText type="name" value={v} />
+      render: (v: string) => <SensitiveText plain type="name" value={v} />
     },
     {
       title: '联系人',
       key: 'contact',
       render: (_: unknown, row: ConsultationItem) => (
         <div className='table-cell'>
-          <strong><SensitiveText type="name" value={row.contact_name} /></strong>
-          <SensitiveText type="phone" value={row.contact_phone} />
+          <strong><SensitiveText plain type="name" value={row.contact_name} /></strong>
+          <SensitiveText plain type="phone" value={row.contact_phone} />
         </div>
       ),
     },
@@ -117,7 +117,7 @@ export default function ConsultationList() {
         row.answer ? (
           <span>
             {row.answer}
-            {row.responder_name ? <span className="cs-row__sub">（<SensitiveText type="name" value={row.responder_name} />）</span> : null}
+            {row.responder_name ? <span className="cs-row__sub">（<SensitiveText plain type="name" value={row.responder_name} />）</span> : null}
           </span>
         ) : (
           <span className="cs-row__sub">-</span>

@@ -142,8 +142,8 @@ function NotifyPreferences({ open }: { open: boolean }) {
   return (
     <div className="message-preferences">
       <Card
-        size="small" title="触达偏好"
-        extra={<Button type="primary" loading={saving} onClick={savePreferences}>保存偏好</Button>}
+        title="触达偏好"
+        extra={<Button type="primary" icon={<CheckOutlined />} loading={saving} onClick={savePreferences}>保存偏好</Button>}
       >
         <Spin spinning={loading}>
           <Form form={preferenceForm} layout="vertical" initialValues={{ category_off: [], night_silent: false, sms_enabled: false, wechat_enabled: false }}>
@@ -160,11 +160,11 @@ function NotifyPreferences({ open }: { open: boolean }) {
       </Card>
 
       <Card
-        size="small" title="微信订阅模板"
+        title="微信订阅模板"
         extra={(
           <Space>
             <Button icon={<ReloadOutlined />} loading={subscriptionLoading} onClick={querySubscription}>查询状态</Button>
-            <Button type="primary" loading={subscriptionSaving} onClick={saveSubscription}>保存订阅</Button>
+            <Button type="primary" icon={<CheckOutlined />} loading={subscriptionSaving} onClick={saveSubscription}>保存订阅</Button>
           </Space>
         )}
       >
@@ -282,7 +282,7 @@ export default function MessageCenter({ open, onClose, onUnreadChange }: {
               key: 'messages', label: '消息列表',
               children: (
                 <Card
-                  size="small" title="站内消息"
+                  title="站内消息"
                   extra={(
                     <Space wrap>
                       <Button icon={<CheckOutlined />} loading={marking} disabled={!selectedRowKeys.length} onClick={markSelected}>标记已读</Button>
@@ -297,13 +297,13 @@ export default function MessageCenter({ open, onClose, onUnreadChange }: {
                   )}
                 >
                   <div className="message-filter-bar">
-                    <Select allowClear placeholder="全部消息类型" value={filters.message_type} options={MESSAGE_TYPE_OPTIONS} onChange={(value) => setFilters({ ...filters, message_type: value })} />
-                    <Select
+                    <Select style={{width: 200}} allowClear placeholder="全部消息类型" value={filters.message_type} options={MESSAGE_TYPE_OPTIONS} onChange={(value) => setFilters({ ...filters, message_type: value })} />
+                    <Select style={{width: 200}}
                       allowClear placeholder="全部读取状态" value={filters.is_read}
                       options={[{ value: 1, label: '未读' }, { value: 2, label: '已读' }]}
                       onChange={(value) => setFilters({ ...filters, is_read: value })}
                     />
-                    <Input allowClear placeholder="业务对象类型，如 WO" value={filters.entity_type} onChange={(event) => setFilters({ ...filters, entity_type: event.target.value.trim() })} />
+                    {/* <Input allowClear placeholder="业务对象类型，如 WO" value={filters.entity_type} onChange={(event) => setFilters({ ...filters, entity_type: event.target.value.trim() })} /> */}
                     <Button onClick={() => { setFilters({}); setApplied({}); setPage(1) }}>重置</Button>
                     <Button type="primary" onClick={() => { setApplied({ ...filters }); setPage(1) }}>查询</Button>
                   </div>
@@ -327,7 +327,7 @@ export default function MessageCenter({ open, onClose, onUnreadChange }: {
                         render: (value) => <Tag color={value === 1 ? 'red' : 'default'}>{value === 1 ? '未读' : value === 2 ? '已读' : text(value)}</Tag>,
                       },
                       { title: '接收时间', key: 'created_at', width: 155, render: (_, row) => messageTime(row) },
-                      { title: '操作', key: 'action', width: 70, render: (_, row) => <Button size="small" onClick={() => void openDetail(row)}>查看</Button> },
+                      // { title: '操作', key: 'action', width: 70, render: (_, row) => <Button size="small" onClick={() => void openDetail(row)}>查看</Button> },
                     ]}
                     pagination={{
                       current: page, pageSize: PAGE_SIZE, total,

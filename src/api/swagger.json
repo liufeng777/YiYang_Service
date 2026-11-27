@@ -3368,6 +3368,40 @@
               }
           }
       },
+      "/api/v1/staff/institutions/current/config": {
+          "put": {
+              "description": "仅可修改服务半径、每日可预约工单上限、预约最少提前时间、每日可预约开始/结束时间、最迟取消间隔 6 项配置；机构基础信息不在此接口改动。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "协同工作台-机构"
+              ],
+              "summary": "修改机构服务配置（医护人员）",
+              "parameters": [
+                  {
+                      "description": "机构服务配置（指针字段，nil=不改）",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "$ref": "#/definitions/staff.ReqStaffInstitutionUpdateConfig"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
       "/api/v1/staff/leads": {
           "get": {
               "security": [
@@ -4180,6 +4214,67 @@
                       "name": "id",
                       "in": "path",
                       "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/members/{id}/health/events": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "description": "健管师在会员健康管理详情页查看该会员全部业务事件（接入/方案/订单/工单/退款/预警/档案/评估/随访等）。限定当前机构。",
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-会员健康管理"
+              ],
+              "summary": "会员事件时间线",
+              "parameters": [
+                  {
+                      "type": "integer",
+                      "description": "会员ID",
+                      "name": "id",
+                      "in": "path",
+                      "required": true
+                  },
+                  {
+                      "type": "string",
+                      "description": "事件域过滤，空=全部",
+                      "name": "domain",
+                      "in": "query"
+                  },
+                  {
+                      "type": "string",
+                      "description": "事件类型过滤，空=该域全部",
+                      "name": "event_type",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "页码，默认1",
+                      "name": "page",
+                      "in": "query"
+                  },
+                  {
+                      "type": "integer",
+                      "description": "每页条数，默认10，最大100",
+                      "name": "page_size",
+                      "in": "query"
                   }
               ],
               "responses": {
@@ -5453,75 +5548,6 @@
                       "required": true,
                       "schema": {
                           "$ref": "#/definitions/staff.ReqStaffSaveNotifyPref"
-                      }
-                  }
-              ],
-              "responses": {
-                  "200": {
-                      "description": "OK",
-                      "schema": {
-                          "$ref": "#/definitions/pkg.Response"
-                      }
-                  }
-              }
-          }
-      },
-      "/api/v1/staff/notify-subscriptions": {
-          "get": {
-              "security": [
-                  {
-                      "BearerAuth": []
-                  }
-              ],
-              "produces": [
-                  "application/json"
-              ],
-              "tags": [
-                  "staff-消息"
-              ],
-              "summary": "查询微信订阅模板状态",
-              "parameters": [
-                  {
-                      "type": "string",
-                      "description": "微信订阅模板码 e.g. WO_ASSIGNED",
-                      "name": "tpl_code",
-                      "in": "query",
-                      "required": true
-                  }
-              ],
-              "responses": {
-                  "200": {
-                      "description": "OK",
-                      "schema": {
-                          "$ref": "#/definitions/pkg.Response"
-                      }
-                  }
-              }
-          },
-          "put": {
-              "security": [
-                  {
-                      "BearerAuth": []
-                  }
-              ],
-              "consumes": [
-                  "application/json"
-              ],
-              "produces": [
-                  "application/json"
-              ],
-              "tags": [
-                  "staff-消息"
-              ],
-              "summary": "保存微信订阅模板状态",
-              "parameters": [
-                  {
-                      "description": "订阅状态",
-                      "name": "body",
-                      "in": "body",
-                      "required": true,
-                      "schema": {
-                          "$ref": "#/definitions/staff.ReqStaffSaveSubscription"
                       }
                   }
               ],
@@ -6874,6 +6900,80 @@
               "parameters": [
                   {
                       "description": "人员信息",
+                      "name": "body",
+                      "in": "body",
+                      "required": true,
+                      "schema": {
+                          "type": "object"
+                      }
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/staffs/by-phone": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-人员管理"
+              ],
+              "summary": "按手机号精确查找人员",
+              "parameters": [
+                  {
+                      "type": "string",
+                      "description": "手机号",
+                      "name": "phone",
+                      "in": "query",
+                      "required": true
+                  }
+              ],
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
+      "/api/v1/staff/staffs/existed-one": {
+          "post": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-人员管理"
+              ],
+              "summary": "绑定已存在人员到当前机构",
+              "parameters": [
+                  {
+                      "description": "绑定参数",
                       "name": "body",
                       "in": "body",
                       "required": true,
@@ -8375,6 +8475,35 @@
               }
           }
       },
+      "staff.ReqStaffInstitutionUpdateConfig": {
+          "type": "object",
+          "properties": {
+              "daily_close_second": {
+                  "description": "每日可预约结束时间(当天0点秒偏移，默认64800=18:00)",
+                  "type": "integer"
+              },
+              "daily_max_work_orders": {
+                  "description": "每日可预约工单数量上限（默认16）",
+                  "type": "integer"
+              },
+              "daily_open_second": {
+                  "description": "每日可预约开始时间(当天0点秒偏移，默认28800=08:00)",
+                  "type": "integer"
+              },
+              "max_cancel_interval_min": {
+                  "description": "已预约工单最迟取消间隔(分，默认180)",
+                  "type": "integer"
+              },
+              "min_lead_time_min": {
+                  "description": "服务工单预约最少提前时间(分，默认180)",
+                  "type": "integer"
+              },
+              "service_radius_km": {
+                  "description": "服务半径(km)，0=不限",
+                  "type": "number"
+              }
+          }
+      },
       "staff.ReqStaffMarkLeadLost": {
           "type": "object",
           "required": [
@@ -8651,30 +8780,6 @@
               "wechat_enabled": {
                   "description": "微信触达 1开/0关（nil=不修改）",
                   "type": "integer"
-              }
-          }
-      },
-      "staff.ReqStaffSaveSubscription": {
-          "type": "object",
-          "required": [
-              "tpl_code"
-          ],
-          "properties": {
-              "expire_at": {
-                  "description": "长期订阅有效期(UTC秒, 0=不限)",
-                  "type": "integer"
-              },
-              "remain_count": {
-                  "description": "一次性剩余次数",
-                  "type": "integer"
-              },
-              "subscribe_type": {
-                  "description": "0-未订阅 1-一次性 2-长期",
-                  "type": "integer"
-              },
-              "tpl_code": {
-                  "description": "微信订阅模板码",
-                  "type": "string"
               }
           }
       },

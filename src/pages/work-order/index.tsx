@@ -130,8 +130,8 @@ export default function WorkOrderList() {
       key: 'member',
       render: (_: unknown, row: WorkOrderItem) => (
         <div className='table-cell'>
-          <strong><SensitiveText type="name" value={row.member_name} /></strong>
-          <SensitiveText type="phone" value={row.member_phone || row.contact_phone} />
+          <strong><SensitiveText plain type="name" value={row.member_name} /></strong>
+          <SensitiveText plain type="phone" value={row.member_phone || row.contact_phone} />
         </div>
       ),
     },
@@ -140,8 +140,8 @@ export default function WorkOrderList() {
       key: 'contact_name',
       render: (_: unknown, row: WorkOrderItem) => (
         <div className='table-cell'>
-          <strong><SensitiveText type="name" value={row.contact_name} /></strong>
-          <SensitiveText type="phone" value={row.member_phone || row.contact_phone} />
+          <strong><SensitiveText plain type="name" value={row.contact_name} /></strong>
+          <SensitiveText plain type="phone" value={row.member_phone || row.contact_phone} />
         </div>
       ),
     },
@@ -162,14 +162,14 @@ export default function WorkOrderList() {
       render: (_: unknown, row: WorkOrderItem) => <div className='table-cell'>
         {row.wo_status === 1 ? (
           <>
-            <strong><SensitiveText type="name" value={row.expect_staff_name} /></strong>
+            <strong><SensitiveText plain type="name" value={row.expect_staff_name} /></strong>
             <span>
               {row.expected_start_at ? formatDateTime(row.expected_start_at * 1000) : '-'}
             </span>
           </>
         ) :(
           <>
-            <strong><SensitiveText type="name" value={row.assigned_staff_name} /></strong>
+            <strong><SensitiveText plain type="name" value={row.assigned_staff_name} /></strong>
             <span>
               {row.assigned_at ? formatDateTime(row.assigned_at * 1000) : '-'}
             </span>

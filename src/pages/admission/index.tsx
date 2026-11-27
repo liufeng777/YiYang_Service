@@ -231,7 +231,7 @@ export default function AdmissionList() {
       title: '会员',
       key: 'member',
       render: (_: unknown, row: AppointmentItem) => (
-        <SensitiveText type="name" value={row.member_name || row.contact_name} />
+        <SensitiveText plain type="name" value={row.member_name || row.contact_name} />
       ),
     },
     { 
@@ -241,8 +241,8 @@ export default function AdmissionList() {
       width: 160,
       render: (v: string, r: any) => (
         <div className='table-cell'>
-          <strong><SensitiveText type="name" value={r.contact_name} /></strong>
-          <SensitiveText type="phone" value={v} />
+          <strong><SensitiveText plain type="name" value={r.contact_name} /></strong>
+          <SensitiveText plain type="phone" value={v} />
         </div>
       )
     },
@@ -275,7 +275,7 @@ export default function AdmissionList() {
       title: '接待人员',
       dataIndex: 'assigned_staff_name',
       key: 'assigned_staff_name',
-      render: (v: string) => <SensitiveText type="name" value={v} />,
+      render: (v: string) => <SensitiveText plain type="name" value={v} />,
     },
     {
       title: '预约状态',

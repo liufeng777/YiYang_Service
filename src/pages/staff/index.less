@@ -77,6 +77,15 @@
     height: 32px;
   }
 
+  &__hint {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
+
+    &--selected {
+      color: @color-login-cta;
+    }
+  }
+
   .ant-select,
   .ant-picker {
     width: 100%;
@@ -97,10 +106,25 @@
 }
 
 .staff-section__title {
+  display: flex;
+  align-items: center;
+  gap: @spacing-xs;
+  padding-bottom: @spacing-sm;
+  border-bottom: 1px solid @color-border;
+  color: @color-text-primary;
   font-size: @font-size-title-card;
   line-height: @line-height-title-card;
-  font-weight: @font-weight-body-medium;
+  font-weight: @font-weight-title-module;
   margin: @spacing-xl 0 @spacing-md;
+
+  &::before {
+    content: '';
+    width: 4px;
+    height: @font-size-title-card;
+    flex: 0 0 4px;
+    border-radius: @radius-full;
+    background: @color-primary;
+  }
 
   &:first-child {
     margin-top: 0;
@@ -299,46 +323,124 @@
   font-size: @font-size-body;
 }
 
-/* ===== 新增人员 ===== */
+/* ===== 新增人员：固定类型区与操作区，仅表单内容滚动 ===== */
+.staff-create {
+  .page-container__body {
+    overflow: hidden;
+  }
+}
+
+.staff-create__layout {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.staff-create__header {
+  flex-shrink: 0;
+}
+
+.staff-create__content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  padding-right: @spacing-xs;
+
+  .staff-card {
+    margin-bottom: @spacing-md;
+  }
+}
+
 .staff-create__type {
-  margin-top: @spacing-md;
+  margin-top: 0;
+
+  .ant-segmented {
+    padding: @spacing-2xs;
+    background: @color-bg-active;
+  }
+
+  .ant-segmented-group {
+    gap: @spacing-sm;
+  }
+
+  .ant-segmented-item {
+    border: 1px solid @color-border;
+    border-radius: @radius-sm;
+    background: @color-bg-card;
+  }
+
+  .ant-segmented-item-selected {
+    border-color: @color-primary;
+    background: @color-primary-light;
+    color: @color-login-cta;
+  }
+}
+
+.staff-create__type-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: @spacing-2xs;
+  padding: @spacing-sm @spacing-md;
+}
+
+.staff-create__type-title {
+  font-size: @font-size-title-card;
+  line-height: @line-height-title-card;
+  font-weight: @font-weight-title-module;
+}
+
+.staff-create__type-desc {
+  .text-auxiliary();
 }
 
 .staff-create__actions {
+  flex-shrink: 0;
   display: flex;
   justify-content: flex-end;
   gap: @spacing-sm;
-  margin-top: @spacing-lg;
+  margin-top: 0;
+  padding-top: @spacing-md;
+  border-top: 1px solid @color-border;
+  background: @color-bg-page;
 }
 
 .staff-steps {
-  .card-surface();
   margin-top: @spacing-md;
-  padding: @spacing-xs;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: @spacing-xs;
+  padding: @spacing-lg @spacing-xl;
+  border-bottom: 1px solid @color-border;
 
-  &__item {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: @spacing-sm;
-    padding: @spacing-sm 0;
-    border-radius: @radius-sm;
+  .ant-steps-item-title {
     font-size: @font-size-body;
-    color: @color-text-secondary;
-    cursor: pointer;
-
-    &--active {
-      background: @color-primary-light;
-      color: @color-login-cta;
-      font-weight: @font-weight-body-medium;
-    }
   }
 
-  &__no {
-    font-size: @font-size-auxiliary;
+  .ant-steps-item-process .ant-steps-item-title {
+    font-weight: @font-weight-title-module;
+  }
+
+  .ant-steps-item-container {
+    padding-bottom: @spacing-2xs;
+  }
+}
+
+.staff-phone-option {
+  padding: @spacing-2xs 0;
+
+  &__main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: @spacing-md;
+    font-size: @font-size-body;
+  }
+
+  &__meta {
+    .text-auxiliary();
+    margin-top: @spacing-2xs;
   }
 }
 

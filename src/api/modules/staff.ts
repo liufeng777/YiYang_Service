@@ -23,6 +23,26 @@ export interface StaffDetail extends StaffItem {
   schedule_count?: number
 }
 
+/** 按手机号查询人员结果。 */
+export interface StaffSearchItem {
+  id: number,
+  id_card: string,
+  name: string,
+  phone: string,
+  referral_code: string,
+  title: string
+  gender: number
+}
+
+type StaffSearchResponse = StaffSearchItem | StaffSearchItem[] | null
+
+/** GET /api/v1/staff/staffs/by-phone：按完整手机号精确查找人员。 */
+export async function searchStaffByPhone(phone: string) {
+  const result = await http.get<StaffSearchResponse>('/v1/staff/staffs/by-phone', { phone: phone.trim() })
+  if (!result) return []
+  return Array.isArray(result) ? result : [result]
+}
+
 export interface CredentialItem {
   id: number
   staff_id: number

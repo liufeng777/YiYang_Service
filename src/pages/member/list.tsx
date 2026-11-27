@@ -151,13 +151,13 @@ export default function MemberList() {
       title: '健康会员', key: 'member',
       render: (_: unknown, row: HealthAccessItem) => (
         <div className="mb-access-member">
-          <strong><SensitiveText type="name" value={row.member_name || `会员 #${row.member_id}`} /></strong>
-          <SensitiveText type="phone" value={row.member_phone} />
+          <strong><SensitiveText plain type="name" value={row.member_name || `会员 #${row.member_id}`} /></strong>
+          <SensitiveText plain type="phone" value={row.member_phone} />
         </div>
       ),
     },
     { title: '服务需求', key: 'demand', render: (_: unknown, row: HealthAccessItem) => row.demand_desc || row.health_intent || '-' },
-    { title: '健管师', dataIndex: 'staff_name', key: 'staff_name', render: (value?: string) => <SensitiveText type="name" value={value} /> },
+    { title: '健管师', dataIndex: 'staff_name', key: 'staff_name', render: (value?: string) => <SensitiveText plain type="name" value={value} /> },
     {
       title: '来源', dataIndex: 'source_type', key: 'source_type',
       render: (value?: number) => value === 1 ? '线下登记' : value != null ? `来源 ${value}` : '-',
