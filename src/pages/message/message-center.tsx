@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { Key } from 'react'
 import {
-  App, Button, Card, DatePicker, Descriptions, Drawer, Form, Input, InputNumber,
+  App, Button, Card, DatePicker, Drawer, Form, Input, InputNumber,
   Popconfirm, Select, Space, Spin, Switch, Table, Tabs, Tag,
 } from 'antd'
 import { CheckOutlined, ReloadOutlined } from '@ant-design/icons'
@@ -206,9 +206,9 @@ export default function MessageCenter({ open, onClose, onUnreadChange }: {
   const [loading, setLoading] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState<Key[]>([])
   const [marking, setMarking] = useState(false)
-  const [detailOpen, setDetailOpen] = useState(false)
-  const [detailLoading, setDetailLoading] = useState(false)
-  const [detail, setDetail] = useState<StaffMessage>()
+  // const [detailOpen, setDetailOpen] = useState(false)
+  // const [detailLoading, setDetailLoading] = useState(false)
+  // const [detail, setDetail] = useState<StaffMessage>()
 
   const refreshUnread = useCallback(async () => {
     try {
@@ -239,15 +239,15 @@ export default function MessageCenter({ open, onClose, onUnreadChange }: {
     void refreshUnread()
   }, [open, loadList, refreshUnread])
 
-  const openDetail = async (row: StaffMessage) => {
-    setDetailOpen(true)
-    setDetail(undefined)
-    setDetailLoading(true)
-    try {
-      setDetail(await messageApi.getMessageDetail(row.id))
-      await Promise.all([loadList(), refreshUnread()])
-    } catch { /* 拦截器统一提示 */ } finally { setDetailLoading(false) }
-  }
+  // const openDetail = async (row: StaffMessage) => {
+  //   setDetailOpen(true)
+  //   setDetail(undefined)
+  //   setDetailLoading(true)
+  //   try {
+  //     setDetail(await messageApi.getMessageDetail(row.id))
+  //     await Promise.all([loadList(), refreshUnread()])
+  //   } catch { /* 拦截器统一提示 */ } finally { setDetailLoading(false) }
+  // }
 
   const markSelected = async () => {
     const ids = selectedRowKeys.map(Number).filter(Number.isFinite)
@@ -343,7 +343,7 @@ export default function MessageCenter({ open, onClose, onUnreadChange }: {
         />
       </Drawer>
 
-      <Drawer
+      {/* <Drawer
         title={detail ? messageTitle(detail) : '消息详情'} width={640}
         open={detailOpen} onClose={() => setDetailOpen(false)} className="message-detail-drawer"
       >
@@ -358,7 +358,7 @@ export default function MessageCenter({ open, onClose, onUnreadChange }: {
             </Descriptions>
           )}
         </Spin>
-      </Drawer>
+      </Drawer> */}
     </>
   )
 }

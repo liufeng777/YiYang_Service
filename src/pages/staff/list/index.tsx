@@ -5,8 +5,8 @@
  * 说明：顶部统计卡无对应接口，已移除
  */
 import { useCallback, useEffect, useState } from 'react'
-import { Button, Card, Input, Select, Space, Table } from 'antd'
-import { PlusOutlined } from '@ant-design/icons'
+import { Button, Card, Input, Modal, Select, Space, Table } from 'antd'
+import { PlusOutlined, SolutionOutlined, UserOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import SensitiveText from '@/components/SensitiveText'
@@ -33,6 +33,7 @@ interface Filters {
 
 export default function StaffList() {
   const navigate = useNavigate()
+  const [createTypeOpen, setCreateTypeOpen] = useState(false)
   const [filters, setFilters] = useState<Filters>({ keyword: '' })
   const [applied, setApplied] = useState<Filters>({ keyword: '' })
   const [positions, setPositions] = useState<PositionItem[]>([])
@@ -148,6 +149,11 @@ export default function StaffList() {
     },
   ]
 
+  const openCreate = (type: 'normal' | 'pro') => {
+    setCreateTypeOpen(false)
+    navigate(`/staff/create?type=${type}`)
+  }
+
   return (
     <div className="staff-page">
       <PageContainer
@@ -155,7 +161,7 @@ export default function StaffList() {
         description="机构管理员维护当前机构普通用户、专业服务人员及账号状态"
         extra={
           <Space>
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => navigate('/staff/create')}>
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateTypeOpen(true)}>
               新增人员
             </Button>
           </Space>
@@ -224,6 +230,29 @@ export default function StaffList() {
           />
         </Card>
       </PageContainer>
+
+      <Modal
+        title="选择人员类型"
+        open={createTypeOpen}
+        onCancel={() => setCreateTypeOpen(false)}
+        footer={null}
+        centered
+        width={520}
+      >
+        <p className="staff-type-modal__desc">请选择本次要新增的人员类型，进入后按对应流程填写。</p>
+        <div className="staff-type-choices">
+          <button type="button" className="staff-type-choice" onClick={() => openCreate('normal')}>
+            <UserOutlined className="staff-type-choice__icon" />
+            <span className="staff-type-choice__title">普通用户</span>
+            <span className="staff-type-choice__desc">填写基础信息、人员角色与账号状态</span>
+          </button>
+          <button type="button" className="staff-type-choice" onClick={() => openCreate('pro')}>
+            <SolutionOutlined className="staff-type-choice__icon" />
+            <span className="staff-type-choice__title">专业服务人员</span>
+            <span className="staff-type-choice__desc">填写基础信息并上传执业资质</span>
+          </button>
+        </div>
+      </Modal>
     </div>
   )
 }

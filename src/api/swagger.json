@@ -6817,6 +6817,33 @@
               }
           }
       },
+      "/api/v1/staff/services/simp": {
+          "get": {
+              "security": [
+                  {
+                      "BearerAuth": []
+                  }
+              ],
+              "consumes": [
+                  "application/json"
+              ],
+              "produces": [
+                  "application/json"
+              ],
+              "tags": [
+                  "staff-人员管理"
+              ],
+              "summary": "所有服务简要信息(按分类树状返回)",
+              "responses": {
+                  "200": {
+                      "description": "OK",
+                      "schema": {
+                          "$ref": "#/definitions/pkg.Response"
+                      }
+                  }
+              }
+          }
+      },
       "/api/v1/staff/staffs": {
           "get": {
               "security": [

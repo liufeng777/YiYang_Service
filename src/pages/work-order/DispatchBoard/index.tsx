@@ -78,11 +78,12 @@ export default function DispatchBoard({
   const [submitting, setSubmitting] = useState(false)
   const [doneIds, setDoneIds] = useState<number[]>([])
   const [schedules, setSchedules] = useState<Map<number, BusyBlock[]>>(new Map())
-  const [dateStr, setDateStr] = useState(() =>
-    orders.length > 0
-      ? dayjs(orders[0].expected_start_at * 1000).format('YYYY-MM-DD')
-      : dayjs().format('YYYY-MM-DD'),
-  )
+  const [dateStr, setDateStr] = useState(() => {
+    const expectedAt = orders[0]?.expected_start_at
+    return expectedAt && dayjs(expectedAt * 1000).isAfter(dayjs())
+      ? dayjs(expectedAt * 1000).format('YYYY-MM-DD')
+      : dayjs().format('YYYY-MM-DD')
+  })
   /** 拖拽抓取点偏移（分钟）：落点 = 指针位置 - 偏移，块落在视觉位置 */
   const dragRef = useRef<{ id: number; offset: number } | null>(null)
 
@@ -155,13 +156,27 @@ export default function DispatchBoard({
       .then((res) => {
         const next = new Map<number, BusyBlock[]>()
         res.list.forEach((item) => {
-          if (!item.staff_id || item.status === 9) return
-          const startMin = timeToMinutes(item.start_time)
-          const endMin = timeToMinutes(item.end_time)
+          const staffId = item.staff_id ?? item.assigned_staff_id
+          if (!staffId || item.status === 9 || item.schedule_status === 4) return
+
+          const plannedStart = item.planned_start_at ? dayjs(item.planned_start_at * 1000) : null
+          const plannedStop = item.planned_stop_at ? dayjs(item.planned_stop_at * 1000) : null
+          const startMin = plannedStart
+            ? plannedStart.hour() * 60 + plannedStart.minute()
+            : timeToMinutes(item.start_time)
+          const endMin = plannedStop
+            ? plannedStop.hour() * 60 + plannedStop.minute()
+            : timeToMinutes(item.end_time)
           if (startMin == null || endMin == null || endMin <= startMin) return
-          const blocks = next.get(item.staff_id) ?? []
-          blocks.push({ startMin, endMin, title: item.remark || '已排安排' })
-          next.set(item.staff_id, blocks)
+
+          const serviceTitle = [item.member_name, item.service_name].filter(Boolean).join(' · ')
+          const blocks = next.get(staffId) ?? []
+          blocks.push({
+            startMin,
+            endMin,
+            title: serviceTitle || item.work_order_no || item.remark || '已排安排',
+          })
+          next.set(staffId, blocks)
         })
         setSchedules(next)
       })
@@ -172,24 +187,33 @@ export default function DispatchBoard({
       .finally(() => setLoading(false))
   }, [open, dateStr])
 
-  /* 初始化默认方案：期望人员 + 期望时段；
-     无期望人员 / 期望时间的工单进入待分配池（位置取期望时间，无则 08:00 起） */
+  /* 初始化默认方案：期望人员 + 期望时段；期望时间已过期时改取当前时间。
+     无期望人员 / 期望时间的工单进入待分配池（无期望时间时位置取 08:00） */
   useEffect(() => {
     if (!open || candidates.length === 0) return
     setPlans((prev) => {
       const next = { ...prev }
+      const now = dayjs()
       allOrders.forEach((o) => {
         if (next[o.id] || doneIds.includes(o.id)) return
         const exp = matchExpected(o)
-        const planDate = o.expected_start_at
-          ? dayjs(o.expected_start_at * 1000).format('YYYY-MM-DD')
+        const expectedAt = o.expected_start_at ? dayjs(o.expected_start_at * 1000) : null
+        const expectedIsFuture = expectedAt?.isAfter(now) ?? false
+        const defaultStartMin = expectedIsFuture
+          ? expectedMinOf(o)
+          : Math.min(
+              Math.max(now.hour() * 60 + now.minute(), BOARD_START),
+              BOARD_END - durationOf(o),
+            )
+        const planDate = expectedAt
+          ? (expectedIsFuture ? expectedAt : now).format('YYYY-MM-DD')
           : dateStr
-        if (exp && o.expected_start_at) {
-          next[o.id] = { staffId: exp.id, startMin: expectedMinOf(o), date: planDate }
+        if (exp && expectedAt) {
+          next[o.id] = { staffId: exp.id, startMin: defaultStartMin, date: planDate }
         } else {
           next[o.id] = {
             staffId: POOL_STAFF_ID,
-            startMin: o.expected_start_at ? expectedMinOf(o) : BOARD_START,
+            startMin: expectedAt ? defaultStartMin : BOARD_START,
             date: planDate,
           }
         }
@@ -290,6 +314,24 @@ export default function DispatchBoard({
     }
     setSubmitting(false)
     if (dispatched.length > 0) {
+      /* 已派工单立即转为人员占用时段，继续给其他工单派单时仍可见且参与冲突校验。 */
+      setSchedules((prev) => {
+        const next = new Map(prev)
+        dispatched.forEach((id) => {
+          const order = allOrders.find((item) => item.id === id)
+          const plan = plans[id]
+          if (!order || !plan) return
+          next.set(plan.staffId, [
+            ...(next.get(plan.staffId) ?? []),
+            {
+              startMin: plan.startMin,
+              endMin: plan.startMin + durationOf(order),
+              title: `${order.member_name} · ${order.service_name}`,
+            },
+          ])
+        })
+        return next
+      })
       setDoneIds((prev) => [...prev, ...dispatched])
       setPlans((prev) => {
         const next = { ...prev }

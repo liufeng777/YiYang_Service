@@ -2,9 +2,8 @@
  * 人员管理 - 人员详情
  * 设计稿：专业服务人员.png（Tabs：基本信息/执业资质/服务授权）、普通人员.png（单页）
  * 已对接：
- * - GET /api/v1/staff/staffs/:id              人员详情（§7.2）
+ * - GET /api/v1/staff/staffs/:id              人员详情（含 services 授权服务对象数组）
  * - GET /api/v1/staff/staffs/:id/credentials  执业资质列表（§7.3）
- * 说明：服务授权项目名字典接口待补充，授权项目以 ID 展示
  */
 import { useCallback, useEffect, useState } from 'react'
 import { Button, Segmented, Spin } from 'antd'
@@ -187,17 +186,17 @@ export default function StaffDetail() {
                   <div className="staff-card__title">服务授权</div>
                   <div className="staff-card__sub">查看该人员已授权的机构服务项目</div>
                 </div>
-                <span className="staff-text--muted">服务项目名称与独立授权接口未在 Swagger 中定义</span>
+                <span className="staff-text--muted">共 {detail.services?.length ?? 0} 项</span>
               </div>
               <div className="staff-field">
                 <div className="staff-field__label">已授权项目</div>
                 <div className="staff-auth-tags">
-                  {(detail.service_ids ?? []).length === 0 ? (
+                  {(detail.services ?? []).length === 0 ? (
                     <span className="staff-text--muted">暂无授权服务项目</span>
                   ) : (
-                    (detail.service_ids ?? []).map((sid) => (
-                      <span key={sid} className="staff-auth-tag">
-                        服务 #{sid}
+                    (detail.services ?? []).map((service) => (
+                      <span key={service.id} className="staff-auth-tag">
+                        {service.name || `服务 #${service.id}`}（类型 {service.service_type}）
                       </span>
                     ))
                   )}

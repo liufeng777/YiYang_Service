@@ -234,6 +234,52 @@
   }
 }
 
+.staff-type-modal__desc {
+  .text-auxiliary();
+  margin: 0 0 @spacing-lg;
+}
+
+.staff-type-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: @spacing-md;
+}
+
+.staff-type-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: @spacing-sm;
+  padding: @spacing-xl;
+  border: 1px solid @color-border;
+  border-radius: @radius-md;
+  background: @color-bg-card;
+  color: @color-text-primary;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s, background-color 0.2s;
+
+  &:hover,
+  &:focus-visible {
+    border-color: @color-primary;
+    background: @color-primary-light;
+  }
+
+  &__icon {
+    color: @color-primary;
+    font-size: @font-size-title-module;
+  }
+
+  &__title {
+    .text-title-card();
+  }
+
+  &__desc {
+    .text-auxiliary();
+  }
+}
+
 /* ===== 人员详情 ===== */
 .staff-detail__tabs {
   .card-surface();

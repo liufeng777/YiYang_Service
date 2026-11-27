@@ -11,14 +11,24 @@ import type { ReassignLog, WorkOrderPhoto } from './work-order'
 export interface ScheduleItem {
   id: number
   staff_id?: number
+  /** service_schedules 使用 assigned_staff_id 标识服务人员。 */
+  assigned_staff_id?: number
   staff_name?: string
   institution_id?: number
   /** YYYY-MM-DD */
   schedule_date?: string
+  service_date?: string
   start_time?: string
   end_time?: string
+  /** 服务排期的计划起止时间（秒）。 */
+  planned_start_at?: number
+  planned_stop_at?: number
   shift_type?: number
   status?: number
+  schedule_status?: number
+  work_order_no?: string
+  member_name?: string
+  service_name?: string
   remark?: string
   created_at?: number
 }

@@ -1,6 +1,14 @@
 import { http } from '@/utils/request'
 import type { PageParams, PageResult } from '@/types/api'
 
+/** 服务简要信息；ListAllServiceSimp 按分类树返回时通过 children 挂载子级。 */
+export interface ServiceSimpleItem {
+  id: number
+  name: string
+  service_type: number | string
+  children?: ServiceSimpleItem[]
+}
+
 export interface StaffItem {
   id: number
   institution_id: number
@@ -11,7 +19,6 @@ export interface StaffItem {
   phone: string
   avatar_url: string
   title: string
-  service_ids?: number[]
   referral_code?: string
   status: number
   upcoming_credential_expire: boolean
@@ -21,6 +28,8 @@ export interface StaffDetail extends StaffItem {
   id_card?: string
   credentials?: CredentialItem[]
   schedule_count?: number
+  /** 已授权服务，替代原 service_ids 数字数组。 */
+  services?: ServiceSimpleItem[]
 }
 
 /** 按手机号查询人员结果。 */
@@ -106,4 +115,9 @@ export function updateCredential(id: number | string, data: Partial<CredentialIt
 
 export function getPositions() {
   return http.get<PageResult<PositionItem>>('/v1/staff/positions')
+}
+
+/** ListAllServiceSimp：所有服务简要信息，按分类树状返回。 */
+export function getAllServicesSimp() {
+  return http.get<ServiceSimpleItem[]>('/v1/staff/services/simp')
 }

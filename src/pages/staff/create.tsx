@@ -6,24 +6,27 @@
  * - GET  /api/v1/staff/positions       岗位（人员角色）选项
  * - GET  /api/v1/staff/staffs/by-phone 按完整手机号精确查找人员
  * - POST /api/v1/staff/staffs           新增人员（§7.2）
- * 说明：执业资质上传 / 服务项目授权接口待后端补充，专业人员向导的第 2/3 步暂为演示交互
+ * 说明：服务项目授权接口待后端补充，专业人员向导的第 3 步暂为演示交互
  */
 import { useEffect, useMemo, useState } from 'react'
-import { AutoComplete, Button, Checkbox, DatePicker, Input, Segmented, Select, Steps, Switch, App } from 'antd'
+import { AutoComplete, Button, Input, Select, Steps, Switch, App } from 'antd'
 import { ArrowLeftOutlined, LoadingOutlined, SearchOutlined } from '@ant-design/icons'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import { staffApi } from '@/api'
 import type { PositionItem, StaffSearchItem } from '@/api/modules/staff'
 import { useUserStore } from '@/store/modules/user'
+import CredentialUpload from './credential-upload'
+import type { CredentialDraft } from './credential-upload'
 import './index.less'
 
 type StaffTypeKey = 'normal' | 'pro'
 
 const PRO_STEPS = ['基本信息', '执业资质', '服务授权']
+const PASSWORD_RULE = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,20}$/
 
 /** 人员关系选项（字典接口待补充，先按设计稿固定项） */
-const RELATION_OPTIONS = ['本机构在职', '多点执业', '外部协作']
+// const RELATION_OPTIONS = ['本机构在职', '多点执业', '外部协作']
 
 export default function StaffCreate() {
   const navigate = useNavigate()
@@ -31,9 +34,7 @@ export default function StaffCreate() {
   const [searchParams] = useSearchParams()
   const currentOrg = useUserStore((state) => state.currentOrg)
   const institutionName = useUserStore((state) => state.userInfo?.institutionName)
-  const [type, setType] = useState<StaffTypeKey>(
-    searchParams.get('type') === 'pro' ? 'pro' : 'normal',
-  )
+  const type: StaffTypeKey = searchParams.get('type') === 'pro' ? 'pro' : 'normal'
   const [step, setStep] = useState(() => {
     const s = Number(searchParams.get('step'))
     return s >= 1 && s <= 3 ? s : 1
@@ -59,8 +60,10 @@ export default function StaffCreate() {
   const [password, setPassword] = useState('')
   const [enabled, setEnabled] = useState(true)
   const [positionCode, setPositionCode] = useState<string>()
-  const [relations, setRelations] = useState<string[]>(['本机构在职'])
+  // const [relations, setRelations] = useState<string[]>(['本机构在职'])
   const [submitting, setSubmitting] = useState(false)
+  const [credentialDraft, setCredentialDraft] = useState<CredentialDraft>({ file_urls: [] })
+  const [credentialUploading, setCredentialUploading] = useState(false)
 
   /* 其他机构人员查询 */
   const [phoneSearchResults, setPhoneSearchResults] = useState<StaffSearchItem[]>([])
@@ -107,7 +110,6 @@ export default function StaffCreate() {
     const staff = phoneSearchResults.find((item) => item.phone === selectedPhone)
     if (!staff) return
 
-    // setType(staff.staff_type === 2 ? 'pro' : 'normal')
     setStep(1)
     setName(staff.name)
     setGender(staff.gender)
@@ -133,20 +135,51 @@ export default function StaffCreate() {
     return `步骤 ${step}/3：${stepDesc}`
   }, [type, step])
 
-  const validBase = name.trim() && gender && phone.trim() && positionCode
+  const validateBase = () => {
+    if (!name.trim() || !gender || !phone.trim() || !positionCode) {
+      message.warning('请填写姓名、性别、手机号与人员角色')
+      return false
+    }
+    if (!password) {
+      message.warning('请填写初始密码')
+      return false
+    }
+    if (!PASSWORD_RULE.test(password)) {
+      message.warning('初始密码需为 8-20 位，且同时包含字母和数字')
+      return false
+    }
+    return true
+  }
+
+  const validateCredential = () => {
+    if (credentialUploading) {
+      message.warning('资质文件仍在上传，请稍候')
+      return false
+    }
+    if (!credentialDraft.credential_type?.trim()) {
+      message.warning('请输入资质类型')
+      return false
+    }
+    if (!credentialDraft.valid_until) {
+      message.warning('请选择资质有效期')
+      return false
+    }
+    if (!credentialDraft.file_urls.length) {
+      message.warning('请至少成功上传一份资质文件')
+      return false
+    }
+    return true
+  }
 
   const doCreate = async (staffType: number) => {
-    if (!validBase) {
-      message.warning('请填写姓名、性别、手机号与人员角色')
-      return
-    }
+    if (!validateBase() || (staffType === 2 && !validateCredential())) return
     if (!currentOrg?.id) {
       message.warning('未获取到当前机构，请重新选择机构')
       return
     }
     setSubmitting(true)
     try {
-      await staffApi.createStaff({
+      const staff = await staffApi.createStaff({
         institution_id: Number(currentOrg.id),
         name: name.trim(),
         phone: phone.trim(),
@@ -155,12 +188,25 @@ export default function StaffCreate() {
         staff_type: staffType,
         position_code: positionCode,
         status: enabled ? 1 : 0,
-        password: password.trim() || undefined,
+        password,
       })
+      if (staffType === 2) {
+        try {
+          await staffApi.createCredential(staff.id, {
+            credential_type: credentialDraft.credential_type!.trim(),
+            valid_until: credentialDraft.valid_until!.format('YYYY-MM-DD'),
+            file_urls: credentialDraft.file_urls,
+          })
+        } catch {
+          message.warning('人员已保存，但资质保存失败，请在人员详情补录')
+          navigate('/staff')
+          return
+        }
+      }
       message.success(
         staffType === 1
           ? '人员已保存'
-          : '人员已保存；执业资质与服务授权接口待补充，请稍后在详情页维护',
+          : '人员与执业资质已保存；服务授权接口待补充，请稍后在详情页维护',
       )
       navigate('/staff')
     } catch {
@@ -178,50 +224,16 @@ export default function StaffCreate() {
         extra={<Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/staff')}>返回人员列表</Button>}
       >
         <div className="staff-create__layout">
-          <div className="staff-create__header">
-            {/* 人员类型切换 */}
-            <div className="staff-create__type">
-              <Segmented
-                block
-                size="large"
-                value={type}
-                onChange={(v) => {
-                  setType(v as StaffTypeKey)
-                  setStep(1)
-                }}
-                options={[
-                  {
-                    value: 'normal',
-                    label: (
-                      <div className="staff-create__type-option">
-                        <span className="staff-create__type-title">普通用户</span>
-                        <span className="staff-create__type-desc">基础信息与人员角色</span>
-                      </div>
-                    ),
-                  },
-                  {
-                    value: 'pro',
-                    label: (
-                      <div className="staff-create__type-option">
-                        <span className="staff-create__type-title">专业服务人员</span>
-                        <span className="staff-create__type-desc">基础信息、执业资质与服务授权</span>
-                      </div>
-                    ),
-                  },
-                ]}
-              />
-            </div>
-
-            {/* 专业人员步骤条：使用编号节点与连接线，与人员类型 Tab 区分 */}
-            {type === 'pro' && (
+          {type === 'pro' && (
+            <div className="staff-create__header">
               <Steps
                 className="staff-steps"
                 current={step - 1}
                 onChange={(current) => setStep(current + 1)}
                 items={PRO_STEPS.map((title) => ({ title }))}
               />
-            )}
-          </div>
+            </div>
+          )}
 
           <div className="staff-create__content">
         {/* 步骤 1 / 普通用户：基本信息 */}
@@ -300,8 +312,9 @@ export default function StaffCreate() {
               <div className="staff-field">
                 <div className="staff-field__label">初始密码 <span className="staff-required">*</span></div>
                 <Input.Password
-                  placeholder="不填则由服务端生成并短信下发"
+                  placeholder="8-20 位，需包含字母和数字"
                   value={password}
+                  maxLength={20}
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
@@ -351,7 +364,7 @@ export default function StaffCreate() {
               </div>
             </div>
 
-            {type === 'pro' && (
+            {/* {type === 'pro' && (
               <>
                 <div className="staff-field">
                   <div className="staff-field__label">人员关系</div>
@@ -373,24 +386,18 @@ export default function StaffCreate() {
                   </div>
                 </div>
               </>
-            )}
+            )} */}
           </div>
         )}
 
-        {/* 步骤 2：执业资质（接口待补充，演示交互） */}
-        {type === 'pro' && step === 2 && (
-          <div className="staff-card">
-            <div className="staff-card__header">
-              <div>
-                <div className="staff-card__title">执业资质</div>
-                <div className="staff-card__sub">
-                  证照照片用于证明合法执业；无法在线核验时由资质审核员人工审核
-                </div>
-              </div>
-            </div>
-            <div className="staff-note">
-              执业资质上传接口待后端补充；人员创建成功后可在「人员详情 - 执业资质」中维护。
-            </div>
+        {/* 步骤 2：保持组件挂载，返回上一步时保留表单与已上传文件 */}
+        {type === 'pro' && (
+          <div hidden={step !== 2}>
+            <CredentialUpload
+              embedded
+              onDraftChange={setCredentialDraft}
+              onUploadingChange={setCredentialUploading}
+            />
           </div>
         )}
 
@@ -404,7 +411,7 @@ export default function StaffCreate() {
               </div>
             </div>
             <div className="staff-note">
-              服务项目列表与授权接口待后端补充；当前先保存人员基本信息。
+              服务项目列表与授权接口待后端补充；本次将保存人员基本信息与执业资质。
             </div>
           </div>
         )}
@@ -430,10 +437,8 @@ export default function StaffCreate() {
                   <Button
                     type="primary"
                     onClick={() => {
-                      if (step === 1 && !validBase) {
-                        message.warning('请填写姓名、性别、手机号与人员角色')
-                        return
-                      }
+                      if (step === 1 && !validateBase()) return
+                      if (step === 2 && !validateCredential()) return
                       setStep(step + 1)
                     }}
                   >

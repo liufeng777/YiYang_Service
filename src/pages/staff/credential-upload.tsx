@@ -3,7 +3,7 @@
  * 文件先经 /upload 上传，再调用 /staffs/{id}/credentials；不包含未定义的 OCR 流程。
  */
 import { useEffect, useState } from 'react'
-import { Alert, App, Button, Card, DatePicker, Form, Input, Spin, Upload } from 'antd'
+import { App, Button, Card, DatePicker, Form, Input, Spin, Upload } from 'antd'
 import type { UploadFile, UploadProps } from 'antd'
 import { ArrowLeftOutlined, UploadOutlined } from '@ant-design/icons'
 import type { Dayjs } from 'dayjs'
@@ -19,7 +19,24 @@ interface CredentialForm {
   valid_until: Dayjs
 }
 
-export default function CredentialUpload() {
+export interface CredentialDraft {
+  credential_type?: string
+  valid_until?: Dayjs
+  file_urls: string[]
+}
+
+interface CredentialUploadProps {
+  /** 嵌入新增人员向导时，仅维护草稿，由父页面在人员创建后保存。 */
+  embedded?: boolean
+  onDraftChange?: (draft: CredentialDraft) => void
+  onUploadingChange?: (uploading: boolean) => void
+}
+
+export default function CredentialUpload({
+  embedded = false,
+  onDraftChange,
+  onUploadingChange,
+}: CredentialUploadProps) {
   const navigate = useNavigate()
   const { id } = useParams()
   const { message } = App.useApp()
@@ -33,10 +50,19 @@ export default function CredentialUpload() {
   const fileUrls = Object.values(uploadedUrls)
 
   useEffect(() => {
-    if (!id) return
+    if (embedded || !id) return
     setLoading(true)
     staffApi.getStaffDetail(id).then(setStaff).catch(() => undefined).finally(() => setLoading(false))
-  }, [id])
+  }, [embedded, id])
+
+  useEffect(() => {
+    if (!embedded) return
+    onDraftChange?.({ ...form.getFieldsValue(), file_urls: Object.values(uploadedUrls) })
+  }, [embedded, uploadedUrls, form, onDraftChange])
+
+  useEffect(() => {
+    onUploadingChange?.(uploading)
+  }, [onUploadingChange, uploading])
 
   const customRequest: UploadProps['customRequest'] = async (options) => {
     const file = options.file as File & { uid: string }
@@ -56,7 +82,7 @@ export default function CredentialUpload() {
   }
 
   const submit = async () => {
-    if (!id) return
+    if (embedded || !id) return
     const values = await form.validateFields()
     if (!fileUrls.length) {
       message.warning('请至少成功上传一份资质文件')
@@ -78,6 +104,52 @@ export default function CredentialUpload() {
     }
   }
 
+  const content = (
+    <Spin spinning={loading}>
+      <Card variant="borderless" className="staff-card">
+        <Form
+          form={form}
+          layout="vertical"
+          onValuesChange={() => {
+            if (embedded) onDraftChange?.({ ...form.getFieldsValue(), file_urls: fileUrls })
+          }}
+        >
+          <Form.Item name="credential_type" label="资质类型" rules={[{ required: true, whitespace: true, message: '请输入资质类型' }]}>
+            <Input placeholder="如：护士执业证书" maxLength={100} />
+          </Form.Item>
+          <Form.Item name="valid_until" label="有效期至" rules={[{ required: true, message: '请选择有效期' }]}>
+            <DatePicker />
+          </Form.Item>
+          <Form.Item label="资质文件" required>
+            <Upload
+              multiple
+              fileList={fileList}
+              customRequest={customRequest}
+              onChange={({ fileList: nextFiles }) => setFileList(nextFiles)}
+              onRemove={(file) => {
+                setUploadedUrls((prev) => {
+                  const next = { ...prev }
+                  delete next[file.uid]
+                  return next
+                })
+              }}
+            >
+              <Button icon={<UploadOutlined />} loading={uploading}>上传文件</Button>
+            </Upload>
+          </Form.Item>
+        </Form>
+        {!embedded && (
+          <div className="staff-detail__actions">
+            <Button onClick={() => navigate(`/staff/${id}`)}>取消</Button>
+            <Button type="primary" loading={submitting} disabled={uploading} onClick={submit}>保存资质</Button>
+          </div>
+        )}
+      </Card>
+    </Spin>
+  )
+
+  if (embedded) return <div className="staff-credential-embedded">{content}</div>
+
   return (
     <div className="staff-page">
       <PageContainer
@@ -85,45 +157,7 @@ export default function CredentialUpload() {
         description={staff ? `为 ${maskName(staff.name)} 上传资质文件并登记有效期` : '上传资质文件并登记有效期'}
         extra={<Button icon={<ArrowLeftOutlined />} onClick={() => navigate(`/staff/${id}`)}>返回人员详情</Button>}
       >
-        <Spin spinning={loading}>
-          <Card variant="borderless" className="staff-card">
-            <Alert
-              type="info"
-              showIcon
-              title="资质请求体为通用 object"
-              description="按现有 API 约定提交 credential_type、valid_until、file_urls。Swagger 未提供 OCR、统一审核或服务授权联动接口，本页不展示这些模拟步骤。"
-            />
-            <Form form={form} layout="vertical">
-              <Form.Item name="credential_type" label="资质类型" rules={[{ required: true, whitespace: true, message: '请输入资质类型' }]}>
-                <Input placeholder="如：护士执业证书" maxLength={100} />
-              </Form.Item>
-              <Form.Item name="valid_until" label="有效期至" rules={[{ required: true, message: '请选择有效期' }]}>
-                <DatePicker />
-              </Form.Item>
-              <Form.Item label="资质文件" required>
-                <Upload
-                  multiple
-                  fileList={fileList}
-                  customRequest={customRequest}
-                  onChange={({ fileList: nextFiles }) => setFileList(nextFiles)}
-                  onRemove={(file) => {
-                    setUploadedUrls((prev) => {
-                      const next = { ...prev }
-                      delete next[file.uid]
-                      return next
-                    })
-                  }}
-                >
-                  <Button icon={<UploadOutlined />} loading={uploading}>上传文件</Button>
-                </Upload>
-              </Form.Item>
-            </Form>
-            <div className="staff-detail__actions">
-              <Button onClick={() => navigate(`/staff/${id}`)}>取消</Button>
-              <Button type="primary" loading={submitting} disabled={uploading} onClick={submit}>保存资质</Button>
-            </div>
-          </Card>
-        </Spin>
+        {content}
       </PageContainer>
     </div>
   )

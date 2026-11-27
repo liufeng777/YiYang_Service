@@ -9,11 +9,9 @@ import {
   CheckOutlined,
   ClockCircleOutlined,
   CloseOutlined,
-  EnvironmentOutlined,
   ExclamationCircleFilled,
   FileTextOutlined,
   MedicineBoxOutlined,
-  PhoneOutlined,
   UserOutlined,
 } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -149,8 +147,8 @@ export default function OrderAuditDetail() {
       <PageContainer
         title="订单审核详情"
         description={order ? (
-          <span className="oa-detail__description">
-            订单号：{order.order_no || '-'}
+          <span >
+            订单号：<Button type="link" size="small">{order.order_no || '-'}</Button>
           </span>
         ) : '核对订单资料与健康信息'}
         extra={<Button color="primary" variant="outlined" icon={<ArrowLeftOutlined />} onClick={() => navigate('/order-audit')}>返回审核列表</Button>}
@@ -160,15 +158,13 @@ export default function OrderAuditDetail() {
             <>
               <section className="oa-card oa-summary">
                 <div className="oa-summary__main">
-                  <div className="oa-summary__eyebrow">服务订单</div>
                   <div className="oa-summary__title-row">
                     <h3>{textOrDash(order.service_name)}</h3>
                     <span className={`oa-status oa-status--${view}`}>{VIEW_TEXT[view]}</span>
                   </div>
-                  <div className="oa-summary__meta">
+                  {/* <div className="oa-summary__meta">
                     <span>{ORDER_STATUS_MAP[order.order_status] ?? '审核不通过'}</span>
-                    <span>订单编号 {order.order_no || '-'}</span>
-                  </div>
+                  </div> */}
                 </div>
                 <div className="oa-summary__amount">
                   <span>订单金额</span>
@@ -216,9 +212,15 @@ export default function OrderAuditDetail() {
                     <div className="oa-member">
                       <div className="oa-member__avatar"><UserOutlined /></div>
                       <div className="oa-member__identity">
-                        <strong><SensitiveText type="name" value={order.member_name} /></strong>
-                        <span>{genderText(order.member_gender)}</span>
-                        <span>{order.member_age != null ? `${order.member_age} 岁` : '年龄未提供'}</span>
+                        <div className='oa-member__identity-item'>
+                          <SensitiveText type="name" value={order.member_name} />
+                          <span>{genderText(order.member_gender)}</span>
+                          <span>{order.member_age != null ? `${order.member_age} 岁` : '年龄未提供'}</span>
+                          <SensitiveText type="phone" value={order.contact_phone} />
+                        </div>
+                        <div>
+                          <SensitiveText type="address" value={address} />
+                        </div>
                       </div>
                       <div className="oa-member__diseases">
                         <span>慢性疾病</span>
@@ -257,46 +259,9 @@ export default function OrderAuditDetail() {
                       <div className="oa-detail__inline-empty">暂无健康记录，请结合服务对象实际情况谨慎审核</div>
                     )}
                   </section>
-
-                  <section className="oa-card oa-section">
-                    <div className="oa-section__header">
-                      <div className="oa-section__heading">
-                        <FileTextOutlined />
-                        <h3>订单备注</h3>
-                      </div>
-                    </div>
-                    <p className="oa-detail__remark">{textOrDash(order.remark) === '-' ? '无订单备注' : order.remark}</p>
-                  </section>
                 </main>
 
                 <aside className="oa-detail__aside">
-                  <section className="oa-card oa-section">
-                    <div className="oa-section__heading"><FileTextOutlined /><h3>订单信息</h3></div>
-                    <dl className="oa-side-list">
-                      <div><dt>订单编号</dt><dd>{order.order_no || '-'}</dd></div>
-                      <div><dt>订单状态</dt><dd>{ORDER_STATUS_MAP[order.order_status] ?? '审核不通过'}</dd></div>
-                      <div><dt>承接机构</dt><dd>{textOrDash(order.institution_name)}</dd></div>
-                      <div><dt>订单金额</dt><dd className="oa-side-list__amount">{order.amount ? `¥ ${order.amount}` : '-'}</dd></div>
-                    </dl>
-                  </section>
-
-                  <section className="oa-card oa-section">
-                    <div className="oa-section__heading"><PhoneOutlined /><h3>联系与服务地址</h3></div>
-                    <div className="oa-contact">
-                      <div className="oa-contact__person">
-                        <strong><SensitiveText type="name" value={order.contact_name} /></strong>
-                        <span>联系人</span>
-                      </div>
-                      <div className="oa-contact__phone">
-                        <PhoneOutlined /><SensitiveText type="phone" value={order.contact_phone} />
-                      </div>
-                      <div className="oa-contact__address">
-                        <EnvironmentOutlined />
-                        <SensitiveText type="address" value={address} />
-                      </div>
-                    </div>
-                  </section>
-
                   <section className={`oa-card oa-section oa-audit oa-audit--${view}`}>
                     {view === 'pending' ? (
                       <>
@@ -318,6 +283,34 @@ export default function OrderAuditDetail() {
                       </div>
                     )}
                   </section>
+                  <section className="oa-card oa-section">
+                    <div className="oa-section__heading"><FileTextOutlined /><h3>订单信息</h3></div>
+                    <dl className="oa-side-list">
+                      <div><dt>订单编号</dt><dd>{order.order_no || '-'}</dd></div>
+                      <div><dt>订单状态</dt><dd>{ORDER_STATUS_MAP[order.order_status] ?? '审核不通过'}</dd></div>
+                      <div><dt>承接机构</dt><dd>{textOrDash(order.institution_name)}</dd></div>
+                      <div><dt>订单金额</dt><dd className="oa-side-list__amount">{order.amount ? `¥ ${order.amount}` : '-'}</dd></div>
+                      <div><dt>订单备注</dt><dd>{order.remark || '-'}</dd></div>
+                    </dl>
+                  </section>
+
+                  {/* <section className="oa-card oa-section">
+                    <div className="oa-section__heading"><PhoneOutlined /><h3>联系与服务地址</h3></div>
+                    <div className="oa-contact">
+                      <div className="oa-contact__item">
+                       <UserOutlined /><SensitiveText type="name" value={order.contact_name} />
+                      </div>
+                      <div className="oa-contact__item">
+                        <PhoneOutlined /><SensitiveText type="phone" value={order.contact_phone} />
+                      </div>
+                      <div className="oa-contact__item">
+                        <EnvironmentOutlined />
+                        <SensitiveText type="address" value={address} />
+                      </div>
+                    </div>
+                  </section> */}
+
+                  
                 </aside>
               </div>
             </>
