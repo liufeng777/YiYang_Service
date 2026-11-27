@@ -29,8 +29,11 @@ export const staffPermissions = [
   "schedule:edit", // 新增/编辑-排班/改派/取消
   "schedule:manage", // 管理-排班（删除）
   "order:view", // 查看-订单
-  "order:edit", // 确认/驳回/退款-订单
+  "order:edit", // 确认/驳回-订单
   "order:manage", // 管理-订单
+  "payment:view", // 查看-支付/退款
+  "payment:edit", // 编辑/一级审批-退款业务审批
+  "payment:manage", // 管理/二级审批-退款财务审批
   "work_order:view", // 查看-工单
   "work_order:edit", // 派发/提醒-工单
   "work_order:manage", // 管理-工单（改派/撤销）

@@ -8,6 +8,7 @@ import PageContainer from '@/components/PageContainer'
 import SensitiveText from '@/components/SensitiveText'
 import { activityApi } from '@/api'
 import type { ActivityItem, RegistrationItem } from '@/api/modules/activity'
+import { formatDateTime } from '@/utils'
 import './index.less'
 
 const STATUS_COLOR: Record<number, string> = { 1: 'blue', 2: 'green', 3: 'default' }
@@ -32,7 +33,7 @@ export default function ActivityContact() {
         activityApi.getActivityRegistrations(id, { page: 1, page_size: 100 }),
       ])
       setActivity(activityDetail)
-      setRegistration(registrationPage.list?.find((item) => String(item.id) === rid) ?? null)
+      setRegistration(registrationPage.list?.find((item) => String(item.registration_id) === rid) ?? null)
     } catch {
       // 错误提示由拦截器统一处理
     } finally {
@@ -100,24 +101,24 @@ export default function ActivityContact() {
                   </div>
                   <div className="ac-field">
                     <div className="ac-field__label">联系电话</div>
-                    <SensitiveText type="phone" value={registration.contact_phone} />
+                    <SensitiveText type="phone" value={registration.member_phone || registration.contact_phone} />
                   </div>
                   <div className="ac-field">
                     <div className="ac-field__label">参与人数</div>
-                    <div>{registration.participant_count}</div>
+                    <div>{registration.participant_count ?? '-'}</div>
                   </div>
                   <div className="ac-field">
                     <div className="ac-field__label">报名时间</div>
-                    <div>{registration.created_at}</div>
+                    <div>{registration.registered_at ? formatDateTime(registration.registered_at * 1000) : '-'}</div>
                   </div>
                   <div className="ac-field">
                     <div className="ac-field__label">报名编号</div>
-                    <div>{registration.id}</div>
+                    <div>{registration.registration_id ?? '-'}</div>
                   </div>
                 </div>
                 <div className="ac-field">
                   <div className="ac-field__label">报名备注</div>
-                  <div>{registration.remark}</div>
+                  <div>{registration.remark || '-'}</div>
                 </div>
               </div>
 
@@ -125,11 +126,11 @@ export default function ActivityContact() {
                 <div className="ac-card__header"><span className="ac-card__title">活动与可用操作</span></div>
                 <div className="ac-field">
                   <div className="ac-field__label">活动名称</div>
-                  <div>{activity?.title || activity?.activity_name}</div>
+                  <div>{activity?.title || activity?.activity_name || '-'}</div>
                 </div>
                 <div className="ac-field">
                   <div className="ac-field__label">活动地点</div>
-                  <div>{activity?.location || activity?.address}</div>
+                  <div>{activity?.location || activity?.address || '-'}</div>
                 </div>
                 <div className="ac-note-blue">
                   <div className="ac-note-blue__title">操作说明</div>

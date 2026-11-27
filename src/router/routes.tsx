@@ -32,6 +32,7 @@ import {
   BankOutlined,
   UserOutlined,
   TeamOutlined,
+  RollbackOutlined,
 } from '@ant-design/icons'
 import type { LazyExoticComponent, ComponentType } from 'react'
 
@@ -57,8 +58,14 @@ export const PERMISSIONS = {
   WARN_VIEW: 'warning:view',
   /** 服务工单 */
   WO_VIEW: 'work_order:view',
-  /** 订单审核（待确认订单） */
+  /** 订单审核（待确认订单）与退款查看 */
   ORDER_VIEW: 'order:view',
+  /** 订单审核操作 */
+  ORDER_EDIT: 'order:edit',
+  /** 支付编辑 / 一级退款业务审批 */
+  PAYMENT_EDIT: 'payment:edit',
+  /** 支付管理 / 二级退款财务审批 */
+  PAYMENT_MANAGE: 'payment:manage',
   /** 异常处理（派单/改派/催单） */
   WO_DISPATCH: 'work_order:edit',
   /** 健康活动（运营后台域，预留权限码） */
@@ -336,6 +343,27 @@ export const routes: RouteConfig[] = [
     ],
   },
   {
+    path: '/refund',
+    meta: {
+      title: '退款审批',
+      icon: <RollbackOutlined />,
+      group: '服务履约',
+      permissions: [PERMISSIONS.ORDER_VIEW],
+    },
+    children: [
+      {
+        path: '',
+        meta: { title: '退款审批' },
+        component: lazy(() => import('@/pages/refund/list')),
+      },
+      {
+        path: ':id',
+        meta: { title: '退款详情', hideInMenu: true },
+        component: lazy(() => import('@/pages/refund/detail')),
+      },
+    ],
+  },
+  {
     path: '/work-order',
     meta: {
       title: '服务工单',
@@ -367,6 +395,11 @@ export const routes: RouteConfig[] = [
         path: '',
         meta: { title: '健康活动' },
         component: lazy(() => import('@/pages/activity/index')),
+      },
+      {
+        path: ':id',
+        meta: { title: '活动详情', hideInMenu: true },
+        component: lazy(() => import('@/pages/activity/detail')),
       },
       {
         path: ':id/registrations',

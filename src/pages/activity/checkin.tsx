@@ -2,20 +2,22 @@
  * 健康活动 - 现场签到（设计稿：9.健康活动/现场签到.png）
  * 已对接：
  * - GET /activities/{id}（活动信息）
- * - GET /activities/{id}/registrations（默认过滤「待参加」，支持按手机号/姓名搜索）
+ * - GET /activities/{id}/registrations（默认展示全部状态，支持按手机号/姓名搜索）
  * - POST /activities/{id}/registrations/{rid}/checkin（签到）
  * - POST /activities/{id}/registrations（临时到场补登记 = 代报名后再签到）
  */
 import { useCallback, useEffect, useState } from 'react'
-import { Button, Card, Form, Input, InputNumber, Select, Table, App } from 'antd'
+import { Button, Card, Form, Input, InputNumber, Select, Table, App, Space } from 'antd'
 import Tag from '@/components/StatusTag'
-import { PlusOutlined } from '@ant-design/icons'
-import { useParams } from 'react-router-dom'
+import { ArrowLeftOutlined } from '@ant-design/icons'
+import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import FormDrawer from '@/components/FormDrawer'
 import SensitiveText from '@/components/SensitiveText'
 import { activityApi } from '@/api'
 import type { ActivityItem, RegistrationItem } from '@/api/modules/activity'
+import MemberSelect from './member-select'
+import { formatActivityDateTime } from './shared'
 
 const { REG_STATUS_MAP } = activityApi
 
@@ -25,8 +27,28 @@ const REG_TAG_COLOR: Record<number, string> = {
   3: 'default',
 }
 
+const GENDER_MAP: Record<number, string> = { 0: '性别未知', 1: '男', 2: '女' }
+
+/** 会员姓名 + 性别 / 年龄，便于签到现场核对身份。 */
+function MemberCell({ row }: { row: RegistrationItem }) {
+  const gender = Number(row.member_gender ?? 0)
+  const age = Number(row.member_age ?? 0)
+  const meta = [
+    gender === 1 || gender === 2 ? GENDER_MAP[gender] : '',
+    age > 0 ? `${age} 岁` : '',
+  ].filter(Boolean).join(' · ') || '-'
+
+  return (
+    <div>
+      <SensitiveText allowReveal={false} type="name" value={row.member_name || row.contact_name} />
+      <div className="text-secondary">{meta}</div>
+    </div>
+  )
+}
+
 export default function ActivityCheckin() {
   const { id = '' } = useParams()
+  const navigate = useNavigate()
   const { message } = App.useApp()
 
   const [activity, setActivity] = useState<ActivityItem | null>(null)
@@ -36,18 +58,14 @@ export default function ActivityCheckin() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [keyword, setKeyword] = useState('')
-  const [status, setStatus] = useState<number | undefined>(1) // 默认「待参加」
-  const [applied, setApplied] = useState<{ keyword: string; status?: number }>({
-    keyword: '',
-    status: 1,
-  })
+  const [status, setStatus] = useState<number | undefined>(undefined) // 默认「全部」
+  const [applied, setApplied] = useState<{ keyword: string; status?: number }>({ keyword: '' })
 
   /* 临时到场补登记弹窗 */
   const [regOpen, setRegOpen] = useState(false)
   const [regSaving, setRegSaving] = useState(false)
-  const [regForm, setRegForm] = useState({
-    contact_name: '',
-    contact_phone: '',
+  const [regForm, setRegForm] = useState<{ member_id?: number; participant_count: number }>({
+    member_id: undefined,
     participant_count: 1,
   })
 
@@ -87,31 +105,30 @@ export default function ActivityCheckin() {
     try {
       await activityApi.checkinRegistration(id, rid)
       message.success('签到成功')
-      load()
+      await load()
     } catch {
       /* 拦截器已提示 */
     }
   }
 
-  /** 临时到场补登记：代报名成功后立即签到 */
+  /** 临时到场补登记：选择健康会员后生成待参加报名记录。 */
   const onRegister = async () => {
-    if (!regForm.contact_name.trim() || !regForm.contact_phone.trim()) {
-      message.warning('请填写姓名与联系电话')
+    if (!regForm.member_id) {
+      message.warning('请选择健康会员')
       return
     }
     setRegSaving(true)
     try {
       await activityApi.registerActivity(id, {
-        contact_name: regForm.contact_name.trim(),
-        contact_phone: regForm.contact_phone.trim(),
+        member_id: regForm.member_id,
         participant_count: regForm.participant_count,
         remark: '现场临时到场补登记',
       })
       message.success('补登记成功，请在名单中完成签到')
       setRegOpen(false)
-      setRegForm({ contact_name: '', contact_phone: '', participant_count: 1 })
+      setRegForm({ member_id: undefined, participant_count: 1 })
       setPage(1)
-      load()
+      await load()
     } catch {
       /* 拦截器已提示 */
     } finally {
@@ -121,44 +138,71 @@ export default function ActivityCheckin() {
 
   const columns = [
     {
-      title: '会员 / 联系人',
-      key: 'name',
-      render: (_: unknown, row: RegistrationItem) => (
-        <SensitiveText allowReveal={false} type="name" value={row.member_name || row.contact_name} />
-      ),
+      title: '会员',
+      key: 'member',
+      width: 120,
+      render: (_: unknown, row: RegistrationItem) => <MemberCell row={row} />,
     },
     {
-      title: '联系电话', dataIndex: 'contact_phone', key: 'contact_phone', width: 160,
-      render: (value?: string) => <SensitiveText allowReveal={false} type="phone" value={value} />,
+      title: '联系电话',
+      key: 'member_phone',
+      width: 150,
+      render: (_: unknown, row: RegistrationItem) => (
+        <SensitiveText allowReveal={false} type="phone" value={row.member_phone || row.contact_phone} />
+      ),
     },
     {
       title: '参与人数',
       dataIndex: 'participant_count',
       key: 'participant_count',
       width: 90,
-      render: (v: number) => v ?? '-',
+      render: (v?: number) => v ?? '-',
     },
     {
       title: '状态',
       dataIndex: 'status',
       key: 'status',
       width: 90,
-      render: (v: number) => (
-        <Tag color={REG_TAG_COLOR[v] ?? 'default'}>{REG_STATUS_MAP[v] ?? v ?? '-'}</Tag>
+      render: (v?: number) => (
+        <Tag color={REG_TAG_COLOR[v ?? 0] ?? 'default'}>{REG_STATUS_MAP[v ?? 0] ?? v ?? '-'}</Tag>
       ),
+    },
+    {
+      title: '报名时间',
+      dataIndex: 'registered_at',
+      key: 'registered_at',
+      width: 160,
+      render: (v?: number) => formatActivityDateTime(v),
+    },
+    {
+      title: '签到时间',
+      dataIndex: 'signed_at',
+      key: 'signed_at',
+      width: 160,
+      render: (v?: number) => formatActivityDateTime(v),
+    },
+    {
+      title: '备注',
+      dataIndex: 'remark',
+      key: 'remark',
+      ellipsis: true,
+      render: (v?: string) => v || '-',
     },
     {
       title: '操作',
       key: 'action',
       width: 100,
-      render: (_: unknown, row: RegistrationItem) =>
-        row.status === 1 ? (
-          <Button size="small" type="primary" onClick={() => onCheckin(row.id)}>
-            签到
-          </Button>
-        ) : (
-          <span style={{ color: 'inherit' }}>-</span>
-        ),
+      render: (_: unknown, row: RegistrationItem) => {
+        if (row.status === 1) {
+          return (
+            <Button size="small" onClick={() => onCheckin(row.registration_id)}>
+              签到
+            </Button>
+          )
+        }
+        if (row.status === 2) return <span className="text-secondary">已签到</span>
+        return '-'
+      },
     },
   ]
 
@@ -167,9 +211,12 @@ export default function ActivityCheckin() {
       title={`现场签到${activity ? ` - ${activity.title ?? activity.activity_name ?? ''}` : ''}`}
       description="按报名名单或手机号完成签到，临时到场人员可补登记"
       extra={
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => setRegOpen(true)}>
-          临时到场补登记
-        </Button>
+        <Space>
+          <Button onClick={() => setRegOpen(true)}>
+            临时到场补登记
+          </Button>
+          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(`/health-activity/${id}`)}>返回活动详情</Button>
+        </Space>
       }
     >
       {/* 筛选区 */}
@@ -181,7 +228,7 @@ export default function ActivityCheckin() {
           allowClear
         />
         <Select
-          placeholder="状态：待参加"
+          placeholder="状态：全部"
           value={status}
           onChange={(v) => setStatus(v)}
           options={Object.entries(REG_STATUS_MAP).map(([value, label]) => ({
@@ -193,8 +240,8 @@ export default function ActivityCheckin() {
         <Button
           onClick={() => {
             setKeyword('')
-            setStatus(1)
-            setApplied({ keyword: '', status: 1 })
+            setStatus(undefined)
+            setApplied({ keyword: '' })
             setPage(1)
           }}
         >
@@ -213,11 +260,12 @@ export default function ActivityCheckin() {
 
       <Card variant="borderless" className="list-card table-fill">
         <Table<RegistrationItem>
-          rowKey="id"
+          rowKey="registration_id"
           columns={columns}
           dataSource={list}
           loading={loading}
           size="small"
+          scroll={{ x: 1080 }}
           pagination={{
             current: page,
             pageSize,
@@ -237,16 +285,10 @@ export default function ActivityCheckin() {
         onSubmit={onRegister} confirmLoading={regSaving} okText="补登记"
       >
         <Form layout="vertical">
-          <Form.Item label="姓名" required>
-            <Input
-              placeholder="姓名" value={regForm.contact_name}
-              onChange={(e) => setRegForm((f) => ({ ...f, contact_name: e.target.value }))}
-            />
-          </Form.Item>
-          <Form.Item label="联系电话" required>
-            <Input
-              placeholder="联系电话" value={regForm.contact_phone}
-              onChange={(e) => setRegForm((f) => ({ ...f, contact_phone: e.target.value }))}
+          <Form.Item label="健康会员" required>
+            <MemberSelect
+              value={regForm.member_id}
+              onChange={(memberId) => setRegForm((form) => ({ ...form, member_id: memberId }))}
             />
           </Form.Item>
           <Form.Item label="参与人数" required>

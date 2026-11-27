@@ -8,16 +8,17 @@
  * - POST /activities/{id}/registrations/{rid}/cancel（取消报名）
  */
 import { useCallback, useEffect, useState } from 'react'
-import { Button, Card, Form, Input, InputNumber, Popconfirm, Select, Table, App } from 'antd'
+import { Button, Card, Form, Input, InputNumber, Popconfirm, Select, Table, App, Space } from 'antd'
 import Tag from '@/components/StatusTag'
-import { PlusOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useNavigate, useParams } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
 import FormDrawer from '@/components/FormDrawer'
 import SensitiveText from '@/components/SensitiveText'
 import { activityApi } from '@/api'
 import type { ActivityItem, RegistrationItem } from '@/api/modules/activity'
-import { formatDateTime } from '@/utils'
+import MemberSelect from './member-select'
+import { formatActivityDateTime } from './shared'
 
 const { REG_STATUS_MAP } = activityApi
 
@@ -49,9 +50,8 @@ export default function ActivityRegistrations() {
   /* 代报名弹窗 */
   const [regOpen, setRegOpen] = useState(false)
   const [regSaving, setRegSaving] = useState(false)
-  const [regForm, setRegForm] = useState({
-    contact_name: '',
-    contact_phone: '',
+  const [regForm, setRegForm] = useState<{ member_id?: number; participant_count: number; remark: string }>({
+    member_id: undefined,
     participant_count: 1,
     remark: '',
   })
@@ -102,7 +102,7 @@ export default function ActivityRegistrations() {
     try {
       await activityApi.checkinRegistration(id, rid)
       message.success('签到成功')
-      load()
+      await load()
     } catch {
       /* 拦截器已提示 */
     }
@@ -113,7 +113,7 @@ export default function ActivityRegistrations() {
     try {
       await activityApi.cancelRegistration(id, rid)
       message.success('已取消报名')
-      load()
+      await load()
     } catch {
       /* 拦截器已提示 */
     }
@@ -121,23 +121,22 @@ export default function ActivityRegistrations() {
 
   /** 代报名 */
   const onRegister = async () => {
-    if (!regForm.contact_name.trim() || !regForm.contact_phone.trim()) {
-      message.warning('请填写联系人与联系电话')
+    if (!regForm.member_id) {
+      message.warning('请选择健康会员')
       return
     }
     setRegSaving(true)
     try {
       await activityApi.registerActivity(id, {
-        contact_name: regForm.contact_name.trim(),
-        contact_phone: regForm.contact_phone.trim(),
+        member_id: regForm.member_id,
         participant_count: regForm.participant_count,
         remark: regForm.remark.trim() || undefined,
       })
       message.success('代报名成功')
       setRegOpen(false)
-      setRegForm({ contact_name: '', contact_phone: '', participant_count: 1, remark: '' })
+      setRegForm({ member_id: undefined, participant_count: 1, remark: '' })
       setPage(1)
-      load()
+      await load()
     } catch {
       /* 拦截器已提示 */
     } finally {
@@ -147,15 +146,15 @@ export default function ActivityRegistrations() {
 
   const columns = [
     {
-      title: '会员 / 联系人',
+      title: '会员',
       key: 'name',
       render: (_: unknown, row: RegistrationItem) => (
-        <SensitiveText allowReveal={false} type="name" value={row.member_name || row.contact_name} />
+        <div className='table-cell'>
+          <strong><SensitiveText allowReveal={false} type="name" value={row.member_name || row.contact_name} /></strong>
+          <span className='table-cell__span'><SensitiveText allowReveal={false} type="phone" value={row.member_phone || row.contact_phone} /></span>
+        </div>
+        
       ),
-    },
-    {
-      title: '联系电话', dataIndex: 'contact_phone', key: 'contact_phone', width: 150,
-      render: (value?: string) => <SensitiveText allowReveal={false} type="phone" value={value} />,
     },
     {
       title: '参与人数',
@@ -175,10 +174,10 @@ export default function ActivityRegistrations() {
     },
     {
       title: '报名时间',
-      dataIndex: 'created_at',
-      key: 'created_at',
+      dataIndex: 'registered_at',
+      key: 'registered_at',
       width: 160,
-      render: (v: number) => (v ? formatDateTime(v * 1000) : '-'),
+      render: (v?: number) => formatActivityDateTime(v),
     },
     {
       title: '备注',
@@ -191,20 +190,20 @@ export default function ActivityRegistrations() {
       key: 'action',
       width: 160,
       render: (_: unknown, row: RegistrationItem) => (
-        <>
+        <Space>
           {row.status === 1 && (
-            <Button size="small" type="link" onClick={() => onCheckin(row.id)}>
+            <Button size="small" onClick={() => onCheckin(row.registration_id)}>
               签到
             </Button>
           )}
           {row.status !== 3 && (
-            <Popconfirm title="确认取消该报名？" onConfirm={() => onCancel(row.id)}>
-              <Button size="small" type="link" danger>
+            <Popconfirm title="确认取消该报名？" onConfirm={() => onCancel(row.registration_id)}>
+              <Button size="small" danger>
                 取消报名
               </Button>
             </Popconfirm>
           )}
-        </>
+        </Space>
       ),
     },
   ]
@@ -214,12 +213,13 @@ export default function ActivityRegistrations() {
       title={`报名名单${activity ? ` - ${activity.title ?? activity.activity_name ?? ''}` : ''}`}
       description="机构主动联系报名人，确认参与人、席位与需求"
       extra={
-        <>
+        <Space>
           <Button onClick={() => navigate(`/health-activity/${id}/check-in`)}>现场签到</Button>
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setRegOpen(true)}>
+          <Button onClick={() => setRegOpen(true)}>
             代报名
           </Button>
-        </>
+          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(`/health-activity/${id}`)}>返回活动详情</Button>
+        </Space>
       }
     >
       {/* 筛选区 */}
@@ -248,7 +248,7 @@ export default function ActivityRegistrations() {
 
       <Card variant="borderless" className="list-card table-fill">
         <Table<RegistrationItem>
-          rowKey="id"
+          rowKey="registration_id"
           columns={columns}
           dataSource={list}
           loading={loading}
@@ -272,16 +272,10 @@ export default function ActivityRegistrations() {
         onSubmit={onRegister} confirmLoading={regSaving} okText="确认报名"
       >
         <Form layout="vertical">
-          <Form.Item label="联系人姓名" required>
-            <Input
-              placeholder="联系人姓名" value={regForm.contact_name}
-              onChange={(e) => setRegForm((f) => ({ ...f, contact_name: e.target.value }))}
-            />
-          </Form.Item>
-          <Form.Item label="联系电话" required>
-            <Input
-              placeholder="联系电话" value={regForm.contact_phone}
-              onChange={(e) => setRegForm((f) => ({ ...f, contact_phone: e.target.value }))}
+          <Form.Item label="健康会员" required>
+            <MemberSelect
+              value={regForm.member_id}
+              onChange={(memberId) => setRegForm((form) => ({ ...form, member_id: memberId }))}
             />
           </Form.Item>
           <Form.Item label="参与人数" required>

@@ -1,20 +1,21 @@
-/**
- * 健康活动 - 活动列表（设计稿：9.健康活动/活动列表.png）
- * 已对接 GET /api/v1/staff/activities（分页列表）
- * 操作：报名名单（/health-activity/:id/registrations）、现场签到（/health-activity/:id/check-in）
- */
+/** 健康活动列表：按活动真实字段展示，并聚合各承接机构的报名统计。 */
 import { useCallback, useEffect, useState } from 'react'
-import { Button, Card, Table, Space } from 'antd'
-import Tag from '@/components/StatusTag'
+import { Button, Card, Space, Table, Tag } from 'antd'
+import type { ColumnsType } from 'antd/es/table'
 import { useNavigate } from 'react-router-dom'
 import PageContainer from '@/components/PageContainer'
+import StatusTag from '@/components/StatusTag'
 import { activityApi } from '@/api'
 import type { ActivityItem } from '@/api/modules/activity'
-import { formatDateTime } from '@/utils'
+import { formatActivityDate, getActivityStats } from './shared'
 
-/** Swagger 未定义活动状态枚举，展示原始状态值，避免前端猜测业务含义。 */
-function formatActivityTime(value?: number) {
-  return value == null ? '-' : formatDateTime(value * 1000, 'YYYY-MM-DD')
+/** 活动类型：1社区活动 / 2康养旅游 / 3健康课堂 / 4健康活动 / 5其他 */
+export const ActivityType = {
+  1: '社区活动',
+  2: '康养旅游',
+  3: '健康课堂',
+  4: '健康活动',
+  5: '其他'
 }
 
 export default function ActivityList() {
@@ -42,57 +43,66 @@ export default function ActivityList() {
     load()
   }, [load])
 
-  const columns = [
+  const columns: ColumnsType<ActivityItem> = [
     {
-      title: '活动名称',
+      title: '活动名称 / 简介',
       key: 'title',
-      render: (_: unknown, row: ActivityItem) => row.title ?? row.activity_name ?? '-',
-    },
-    {
-      title: '活动时间',
-      key: 'time',
-      render: (_: unknown, row: ActivityItem) => (
-        <span>
-          {formatActivityTime(row.start_date)} ~ {formatActivityTime(row.end_date)}
-        </span>
+      fixed: 'left',
+      render: (_, row) => (
+        <div className="table-cell">
+          <strong>{row.title}</strong>
+          <span className="table-cell__span">{row.location || '-'}</span>
+        </div>
       ),
     },
     {
-      title: '活动地点',
-      key: 'location',
-      render: (_: unknown, row: ActivityItem) => row.location ?? row.address ?? '-',
+      title: '活动时间 / 类型',
+      key: 'time',
+      render: (_, row) => (
+        <div>
+          <div style={{fontWeight: '500'}}>{`${formatActivityDate(row.start_date)} ~ ${formatActivityDate(row.end_date)}`}</div>
+          <Tag style={{display: 'inline-block'}}>{row.activity_type != null ? ActivityType[row.activity_type as keyof typeof ActivityType] ?? '-' : '-'}</Tag>
+        </div>
+      )
     },
     {
-      title: '报名情况',
-      key: 'quota',
-      render: (_: unknown, row: ActivityItem) =>
-        row.registered_count != null
-          ? `${row.registered_count}${row.quota != null ? ` / ${row.quota}` : ''} 人`
-          : '-',
+      title: '报名情况 / 适合人群',
+      key: 'registration',
+      render: (_, row) => {
+        const stats = getActivityStats(row)
+        return (
+          <div className="table-cell">
+            <strong>{stats.registeredCount} / {stats.maxParticipants} 人</strong>
+            <span className="table-cell__span">{row.target_crowd || '适用人群暂未填写'}</span>
+          </div>
+        )
+      },
     },
     {
-      title: '状态',
+      title: '活动状态',
       dataIndex: 'status',
       key: 'status',
-      render: (value?: number) => <Tag>{value != null ? `状态 ${value}` : '-'}</Tag>,
+      width: 100,
+      render: (value?: number) => (
+        <StatusTag color={value === 1 ? 'blue' : value === 2 ? 'green' : 'gray'}>
+          {value != null ? activityApi.ACTIVITY_STATUS_MAP[value] ?? `状态 ${value}` : '-'}
+        </StatusTag>
+      ),
     },
     {
       title: '操作',
       key: 'action',
-      width: 200,
-      render: (_: unknown, row: ActivityItem) => (
-        <Space>
-          <Button
-            size="small"
-            
-            onClick={() => navigate(`/health-activity/${row.id}/registrations`)}
-          >
+      width: 230,
+      fixed: 'right',
+      render: (_, row) => (
+        <Space wrap>
+          <Button size="small" onClick={() => navigate(`/health-activity/${row.id}`)}>
+            详情
+          </Button>
+          <Button size="small" onClick={() => navigate(`/health-activity/${row.id}/registrations`)}>
             报名名单
           </Button>
-          <Button
-            size="small"
-            onClick={() => navigate(`/health-activity/${row.id}/check-in`)}
-          >
+          <Button size="small" onClick={() => navigate(`/health-activity/${row.id}/check-in`)}>
             现场签到
           </Button>
         </Space>
@@ -118,7 +128,7 @@ export default function ActivityList() {
               setPageSize(nextPageSize)
             },
             showSizeChanger: true,
-            showTotal: (t) => `共 ${t} 条`,
+            showTotal: (value) => `共 ${value} 条`,
           }}
         />
       </Card>

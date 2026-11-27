@@ -288,3 +288,92 @@
     margin-top: @spacing-2xs;
   }
 }
+
+/* ===== 活动列表与详情 ===== */
+.ac-activity-cell {
+  display: flex;
+  align-items: center;
+  gap: @spacing-sm;
+  min-width: 0;
+
+  &__main {
+    min-width: 0;
+  }
+
+  &__name {
+    font-weight: @font-weight-body-medium;
+    margin-bottom: @spacing-2xs;
+  }
+}
+
+.ac-detail {
+  display: grid;
+  gap: @spacing-md;
+
+  &__hero {
+    display: grid;
+    grid-template-columns: minmax(240px, 360px) minmax(0, 1fr);
+    gap: @spacing-xl;
+    align-items: start;
+  }
+
+  &__cover {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: @radius-sm;
+    background: @color-bg-active;
+    color: @color-text-secondary;
+  }
+
+  &__content {
+    min-width: 0;
+  }
+
+  &__title {
+    .text-title-module();
+    margin: 0 0 @spacing-lg;
+  }
+}
+
+.ac-rich-text {
+  font-size: @font-size-body;
+  line-height: @line-height-body;
+  overflow-wrap: anywhere;
+
+  p {
+    margin: 0 0 @spacing-md;
+  }
+
+  ul,
+  ol {
+    margin: 0 0 @spacing-md;
+    padding-left: @spacing-xl;
+  }
+
+  li > p {
+    margin-bottom: @spacing-2xs;
+  }
+
+  > :last-child,
+  > span > :last-child {
+    margin-bottom: 0;
+  }
+
+  &__plain {
+    white-space: pre-wrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .ac-detail__hero {
+    grid-template-columns: 1fr;
+  }
+
+  .ac-contact {
+    grid-template-columns: 1fr;
+  }
+}
