@@ -148,6 +148,18 @@ export default function WorkOrderDetail() {
   /** 是否可派单 / 调整派单（待派单 / 待接单 / 待服务） */
   const canDispatch = detail ? [1, 2, 3].includes(detail.wo_status) : false
 
+  /* 排单板使用排单详情中的当前服务人员和计划起止时间，工单详情作为兜底。 */
+  const dispatchOrder = useMemo<WorkOrderDetail | null>(() => {
+    if (!detail) return null
+    return {
+      ...detail,
+      assigned_staff_id: schedule?.assigned_staff_id ?? schedule?.staff_id ?? detail.assigned_staff_id,
+      assigned_staff_name: schedule?.staff_name || detail.assigned_staff_name,
+      planned_start_at: schedule?.planned_start_at ?? detail.planned_start_at,
+      planned_stop_at: schedule?.planned_stop_at ?? detail.planned_stop_at,
+    }
+  }, [detail, schedule])
+
   return (
     <div className="wo-page">
       <PageContainer
@@ -379,11 +391,12 @@ export default function WorkOrderDetail() {
         </Spin>
       </PageContainer>
 
-      {/* 派单排单板（?dispatch=1 自动打开） */}
-      {detail && id && (
+      {/* 派单 / 改派排单板（?dispatch=1 自动打开），关闭后重置本次调整状态。 */}
+      {dispatchOpen && dispatchOrder && id && (
         <DispatchBoard
+          key={`${dispatchOrder.id}-${dispatchOrder.assigned_staff_id}-${dispatchOrder.planned_start_at ?? 0}`}
           open={dispatchOpen}
-          orders={[detail]}
+          orders={[dispatchOrder]}
           onClose={() => setDispatchOpen(false)}
           onDone={() => {
             setDispatchOpen(false)

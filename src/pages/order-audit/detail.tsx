@@ -223,10 +223,10 @@ export default function OrderAuditDetail() {
                           <SensitiveText type="address" value={address} />
                         </div>
                       </div>
-                      <div className="oa-member__diseases">
+                      {/* <div className="oa-member__diseases">
                         <span>慢性疾病</span>
                         <TagList values={order.member_chronic_disease} emptyText="暂无慢性疾病记录" />
-                      </div>
+                      </div> */}
                     </div>
 
                     <div className="oa-health-head">

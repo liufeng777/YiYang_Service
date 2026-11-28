@@ -56,6 +56,10 @@ function pointerMin(clientX: number, track: HTMLElement): number {
 const clampStart = (m: number, dur: number) =>
   Math.min(Math.max(m, BOARD_START), BOARD_END - dur)
 
+/** 待接单 / 待服务均为已派工单；是否改派不依赖详情是否返回 schedule_id。 */
+const isReassignOrder = (order: WorkOrderItem) =>
+  [2, 3].includes(Number(order.wo_status))
+
 export default function DispatchBoard({
   open,
   orders,
@@ -63,10 +67,10 @@ export default function DispatchBoard({
   onDone,
 }: {
   open: boolean
-  /** 真实待派工单 */
+  /** 真实待派工单或详情页传入的当前已派工单 */
   orders: WorkOrderItem[]
   onClose: () => void
-  /** 板上工单全部派完时回调（父级关闭并刷新列表） */
+  /** 板上工单全部派完或改派完成时回调（父级关闭并刷新） */
   onDone: () => void
 }) {
   const { message } = App.useApp()
@@ -78,15 +82,29 @@ export default function DispatchBoard({
   const [doneIds, setDoneIds] = useState<number[]>([])
   const [schedules, setSchedules] = useState<Map<number, BusyBlock[]>>(new Map())
   const [dateStr, setDateStr] = useState(() => {
-    const expectedAt = orders[0]?.expected_start_at
-    return expectedAt && dayjs(expectedAt * 1000).isAfter(dayjs())
-      ? dayjs(expectedAt * 1000).format('YYYY-MM-DD')
+    const first = orders[0]
+    const currentAt = first && isReassignOrder(first) ? first.planned_start_at : undefined
+    const expectedAt = first?.expected_start_at
+    const initialAt = currentAt || expectedAt
+    return initialAt && (currentAt || dayjs(initialAt * 1000).isAfter(dayjs()))
+      ? dayjs(initialAt * 1000).format('YYYY-MM-DD')
       : dayjs().format('YYYY-MM-DD')
   })
   /** 拖拽抓取点偏移（分钟）：落点 = 指针位置 - 偏移，块落在视觉位置 */
   const dragRef = useRef<{ id: number; offset: number } | null>(null)
+  /** 用户已主动调整的工单不被后续接口回包覆盖。 */
+  const adjustedOrderIdsRef = useRef<Set<number>>(new Set())
 
   const allOrders = orders
+  const reassignMode = allOrders.length > 0 && allOrders.every(isReassignOrder)
+  const reassignDate = reassignMode && allOrders[0]?.planned_start_at
+    ? dayjs(allOrders[0].planned_start_at! * 1000).format('YYYY-MM-DD')
+    : ''
+
+  /* 排单详情异步返回后，将看板切到当前派单日期；用户手动切换日期时不重复覆盖。 */
+  useEffect(() => {
+    if (open && reassignDate) setDateStr(reassignDate)
+  }, [open, reassignDate])
 
   /* 服务时长（分钟）→ 块长，吸附 30 分钟粒度，最小 1 格 */
   const durationOf = (o: WorkOrderItem) =>
@@ -100,13 +118,14 @@ export default function DispatchBoard({
     candidates.find((s) => s.id === o.expect_staff) ??
     candidates.find((s) => s.name && s.name === o.expect_staff_name)
 
-  /* 当前排班日期的工单：默认取客户期望日期，拖放后取方案日期（排除已派出） */
+  /* 当前排班日期的工单：改派取当前计划日期，新派单取客户期望日期，拖放后取方案日期。 */
   const dayOrders = useMemo(
     () =>
       allOrders.filter((o) => {
         if (doneIds.includes(o.id)) return false
-        const expectedDate = dayjs(o.expected_start_at * 1000).format('YYYY-MM-DD')
-        return (plans[o.id]?.date ?? expectedDate) === dateStr
+        const currentAt = isReassignOrder(o) ? o.planned_start_at : undefined
+        const defaultDate = dayjs((currentAt || o.expected_start_at) * 1000).format('YYYY-MM-DD')
+        return (plans[o.id]?.date ?? defaultDate) === dateStr
       }),
     [allOrders, plans, dateStr, doneIds],
   )
@@ -130,14 +149,27 @@ export default function DispatchBoard({
     staffApi
       .getStaffList({ page: 1, page_size: 100, status: 1, staff_type: 2 })
       .then((res) => {
-        setCandidates(res.list.map((staff) => ({
+        const nextCandidates: Candidate[] = res.list.map((staff) => ({
           id: staff.id,
           name: staff.name,
           position_name: staff.position_name || '-',
           title: staff.title || '',
           phone: staff.phone || '',
           upcoming_credential_expire: staff.upcoming_credential_expire,
-        })))
+        }))
+        /* 当前服务人员即使不在在职候选列表中，也保留其真实行以展示当前派单。 */
+        allOrders.filter(isReassignOrder).forEach((order) => {
+          if (!order.assigned_staff_id || nextCandidates.some((staff) => staff.id === order.assigned_staff_id)) return
+          nextCandidates.push({
+            id: order.assigned_staff_id,
+            name: order.assigned_staff_name || '当前服务人员',
+            position_name: '-',
+            title: '',
+            phone: '',
+            upcoming_credential_expire: false,
+          })
+        })
+        setCandidates(nextCandidates)
       })
       .catch(() => {
         // 错误提示由拦截器统一处理
@@ -146,7 +178,7 @@ export default function DispatchBoard({
       .finally(() => setLoading(false))
   }, [open])
 
-  /* 按当前日期读取各员工已有工单，用于占用时段展示与冲突提示。 */
+  /* 按当前日期读取各员工已有工单；相同 work_order_no 的记录就是当前改派工单。 */
   useEffect(() => {
     if (!open) return
     setLoading(true)
@@ -154,13 +186,44 @@ export default function DispatchBoard({
       .getOrdersByStaff(dateStr)
       .then((res) => {
         const next = new Map<number, BusyBlock[]>()
+        const matchedPlans: Array<{ order: WorkOrderItem; plan: Plan }> = []
+        const matchedStaff: Candidate[] = []
         res.list.forEach((staff) => {
           if (!staff.staff_id) return
           const blocks = (staff.work_orders ?? []).flatMap((item) => {
             const plannedStart = item.planned_start_at ? dayjs(item.planned_start_at * 1000) : null
+            /* 工单号与当前面板工单一致即为本单，不再受排单 ID 或状态字段完整性影响。 */
+            const currentOrder = allOrders.find((order) =>
+              order.work_order_no === item.work_order_no,
+            )
+            if (currentOrder) {
+              /* 当前改派单只渲染为可拖拽绿色方案块，不进入灰色占用块。 */
+              if (plannedStart) {
+                matchedPlans.push({
+                  order: currentOrder,
+                  plan: {
+                    staffId: staff.staff_id,
+                    startMin: clampStart(
+                      plannedStart.hour() * 60 + plannedStart.minute(),
+                      durationOf(currentOrder),
+                    ),
+                    date: plannedStart.format('YYYY-MM-DD'),
+                  },
+                })
+                matchedStaff.push({
+                  id: staff.staff_id,
+                  name: staff.staff_name || currentOrder.assigned_staff_name || '当前服务人员',
+                  position_name: '-',
+                  title: '',
+                  phone: '',
+                  upcoming_credential_expire: false,
+                })
+              }
+              return []
+            }
+
             const plannedStop = item.planned_stop_at ? dayjs(item.planned_stop_at * 1000) : null
             if (!plannedStart) return []
-
             const startMin = plannedStart.hour() * 60 + plannedStart.minute()
             const endMin = plannedStop
               ? plannedStop.hour() * 60 + plannedStop.minute()
@@ -177,6 +240,29 @@ export default function DispatchBoard({
           next.set(staff.staff_id, blocks)
         })
         setSchedules(next)
+        if (matchedStaff.length > 0) {
+          setCandidates((prev) => {
+            const nextCandidates = [...prev]
+            matchedStaff.forEach((staff) => {
+              if (!nextCandidates.some((candidate) => candidate.id === staff.id)) nextCandidates.push(staff)
+            })
+            return nextCandidates
+          })
+        }
+        if (matchedPlans.length > 0) {
+          setPlans((prev) => {
+            const nextPlans = { ...prev }
+            let changed = false
+            matchedPlans.forEach(({ order, plan }) => {
+              if (adjustedOrderIdsRef.current.has(order.id)) return
+              nextPlans[order.id] = plan
+              changed = true
+            })
+            return changed ? nextPlans : prev
+          })
+          const firstMatched = matchedPlans.find(({ order }) => !adjustedOrderIdsRef.current.has(order.id))
+          if (firstMatched && firstMatched.plan.date !== dateStr) setDateStr(firstMatched.plan.date)
+        }
       })
       .catch(() => {
         // 请求失败时不使用模拟工单，避免产生虚假冲突。
@@ -185,16 +271,33 @@ export default function DispatchBoard({
       .finally(() => setLoading(false))
   }, [open, dateStr])
 
-  /* 初始化默认方案：期望人员 + 期望时段；期望时间已过期时改取当前时间。
-     无期望人员 / 期望时间的工单进入待分配池（无期望时间时位置取 08:00） */
+  /* 初始化方案：改派单取当前服务人员 + 当前计划时段；新派单取期望人员 + 期望时段。
+     新派单期望时间已过期时改取当前时间；无期望人员 / 时间的工单进入待分配池。 */
   useEffect(() => {
-    if (!open || candidates.length === 0) return
+    if (!open) return
     setPlans((prev) => {
       const next = { ...prev }
       const now = dayjs()
       allOrders.forEach((o) => {
         if (next[o.id] || doneIds.includes(o.id)) return
         const exp = matchExpected(o)
+        if (isReassignOrder(o)) {
+          const staffId = o.assigned_staff_id || exp?.id
+          /* 缺少当前人员时等待 by-staff 的工单号匹配结果，不默认放进待分配池。 */
+          if (!staffId) return
+          const plannedAt = o.planned_start_at || o.expected_start_at
+          const planned = plannedAt ? dayjs(plannedAt * 1000) : null
+          const startMin = planned
+            ? clampStart(planned.hour() * 60 + planned.minute(), durationOf(o))
+            : BOARD_START
+          next[o.id] = {
+            staffId,
+            startMin,
+            date: planned?.format('YYYY-MM-DD') ?? dateStr,
+          }
+          return
+        }
+        if (candidates.length === 0) return
         const expectedAt = o.expected_start_at ? dayjs(o.expected_start_at * 1000) : null
         const expectedIsFuture = expectedAt?.isAfter(now) ?? false
         const defaultStartMin = expectedIsFuture
@@ -267,6 +370,7 @@ export default function DispatchBoard({
     const o = chipOrders.find((x) => x.id === orderId)
     if (!o) return
     if (staffId === POOL_STAFF_ID) {
+      adjustedOrderIdsRef.current.add(orderId)
       setPlans((prev) => ({ ...prev, [orderId]: { staffId, startMin, date: dateStr } }))
       return
     }
@@ -287,10 +391,11 @@ export default function DispatchBoard({
       message.warning(`${maskName(o.member_name)}：该时段已排「${maskName(others[0].member_name)}」的工单，请错开`)
       return
     }
+    adjustedOrderIdsRef.current.add(orderId)
     setPlans((prev) => ({ ...prev, [orderId]: { staffId, startMin, date: dateStr } }))
   }
 
-  /** 批量确认：提交所有无冲突且已分配的工单，其余留板 */
+  /** 批量确认：新工单调用派单接口，已有排单的工单调用改派接口。 */
   const onConfirm = async () => {
     if (okOrders.length === 0) return
     setSubmitting(true)
@@ -298,13 +403,23 @@ export default function DispatchBoard({
     for (const o of okOrders) {
       const p = plans[o.id]
       const startAt = dayjs(dateStr).startOf('day').add(p.startMin, 'minute').unix()
+      const stopAt = startAt + durationOf(o) * 60
       try {
-        await workOrderApi.dispatchWorkOrder(o.id, {
-          assigned_staff_id: p.staffId,
-          service_date: dateStr,
-          planned_start_at: startAt,
-          planned_stop_at: startAt + durationOf(o) * 60,
-        })
+        if (isReassignOrder(o)) {
+          await workOrderApi.reassignSchedule(o.schedule_id, {
+            new_staff_id: p.staffId,
+            reason: '通过派单面板调整服务人员或服务时间',
+            planned_start_at: startAt,
+            planned_stop_at: stopAt,
+          })
+        } else {
+          await workOrderApi.dispatchWorkOrder(o.id, {
+            assigned_staff_id: p.staffId,
+            service_date: dateStr,
+            planned_start_at: startAt,
+            planned_stop_at: stopAt,
+          })
+        }
         dispatched.push(o.id)
       } catch {
         // 单笔失败不中断批量，错误提示由拦截器统一处理
@@ -312,7 +427,7 @@ export default function DispatchBoard({
     }
     setSubmitting(false)
     if (dispatched.length > 0) {
-      /* 已派工单立即转为人员占用时段，继续给其他工单派单时仍可见且参与冲突校验。 */
+      /* 已派 / 已改派工单立即转为人员占用时段，继续调整其他工单时仍参与冲突校验。 */
       setSchedules((prev) => {
         const next = new Map(prev)
         dispatched.forEach((id) => {
@@ -340,7 +455,9 @@ export default function DispatchBoard({
         (o) => !doneIds.includes(o.id) && !dispatched.includes(o.id),
       ).length
       message.success(
-        `已派单 ${dispatched.length} 单，助手端同步收到任务${remain > 0 ? `，剩余 ${remain} 单待调整` : ''}`,
+        reassignMode
+          ? `已改派 ${dispatched.length} 单，服务人员与计划时间已更新`
+          : `已派单 ${dispatched.length} 单，助手端同步收到任务${remain > 0 ? `，剩余 ${remain} 单待调整` : ''}`,
       )
       if (remain === 0) onDone()
     }
@@ -395,30 +512,36 @@ export default function DispatchBoard({
   /** 工单块渲染（人员行与待分配池共用） */
   const renderPlanBlock = (o: WorkOrderItem, p: Plan, inPool: boolean, lane = 0) => {
     const conflict = !inPool && hasConflict(o)
+    const reassign = isReassignOrder(o)
+    const tooltipTitle = reassign
+      ? inPool
+        ? `${o.work_order_no} · 请先在上方选择新的派单日期，再将工单拖入目标人员的空闲时段`
+        : `${o.work_order_no} · 当前派单可直接拖拽调整服务人员或当天时段；如需修改派单日期，请先将工单拖入「待分配」，再选择日期并重新派单`
+      : `${o.work_order_no} · ${maskName(o.member_name)} · ${o.service_name}　期望：${o.expect_staff_name || '无'} ${fmtMin(expectedMinOf(o))}~${fmtMin(expectedMinOf(o) + durationOf(o))}　拖动或点选后点击空档调整`
     return (
-      <div
-        key={o.id}
-        className={`wo-board__plan ${
-          inPool ? 'wo-board__plan--pool' : conflict ? 'wo-board__plan--conflict' : ''
-        } ${o.id === selectedId ? 'wo-board__plan--selected' : ''}`}
-        style={
-          inPool
-            ? { ...rangePct(p.startMin, p.startMin + durationOf(o)), top: 6 + lane * 46, height: 40 }
-            : rangePct(p.startMin, p.startMin + durationOf(o))
-        }
-        draggable
-        onDragStart={(e) => onBlockDragStart(e, o, p.startMin)}
-        onClick={(e) => {
-          e.stopPropagation()
-          setSelectedId(o.id)
-        }}
-        title={`${o.work_order_no} · ${maskName(o.member_name)} · ${o.service_name}　期望：${o.expect_staff_name || '无'} ${fmtMin(expectedMinOf(o))}~${fmtMin(expectedMinOf(o) + durationOf(o))}　拖动或点选后点击空档调整`}
-      >
-        <span className="wo-board__plan-text">
-          <span className="wo-board__plan-no">{o.work_order_no}</span>
-          <span className="wo-board__plan-name">{maskName(o.member_name)}</span>
-        </span>
-      </div>
+      <Tooltip key={o.id} title={tooltipTitle} placement="topLeft">
+        <div
+          className={`wo-board__plan ${
+            inPool ? 'wo-board__plan--pool' : conflict ? 'wo-board__plan--conflict' : ''
+          } ${o.id === selectedId ? 'wo-board__plan--selected' : ''}`}
+          style={
+            inPool
+              ? { ...rangePct(p.startMin, p.startMin + durationOf(o)), top: 6 + lane * 46, height: 40 }
+              : rangePct(p.startMin, p.startMin + durationOf(o))
+          }
+          draggable
+          onDragStart={(e) => onBlockDragStart(e, o, p.startMin)}
+          onClick={(e) => {
+            e.stopPropagation()
+            setSelectedId(o.id)
+          }}
+        >
+          <span className="wo-board__plan-text">
+            <span className="wo-board__plan-no">{o.work_order_no}</span>
+            <span className="wo-board__plan-name">{maskName(o.member_name)}</span>
+          </span>
+        </div>
+      </Tooltip>
     )
   }
 
@@ -434,17 +557,26 @@ export default function DispatchBoard({
         <div style={{flex: 1}}>
           <div className="wo-modal__title">
             <div>
-              <span style={{marginRight: 20}}>{chipOrders.length > 1 ? `排单板 · 批量派单（${chipOrders.length} 单）` : '排单板 · 派单'}</span>
+              <span style={{marginRight: 20}}>
+                {reassignMode
+                  ? '排单板 · 调整派单'
+                  : chipOrders.length > 1
+                    ? `排单板 · 批量派单（${chipOrders.length} 单）`
+                    : '排单板 · 派单'}
+              </span>
               <DatePicker
                 value={dayjs(dateStr)}
                 onChange={(d) => d && setDateStr(d.format('YYYY-MM-DD'))}
+                disabled={reassignMode && poolOrders.length === 0}
                 allowClear={false}
               />
             </div>
             <Button type="text" icon={<CloseOutlined />} onClick={onClose} />
           </div>
           <div className="wo-modal__sub">
-            绿色 = 无冲突可派，红色 = 冲突，浅绿虚线框 = 客户期望位置；「待分配」栏拖入人员行完成分配
+            {reassignMode
+              ? '当前派单已载入对应服务人员与时段；如需修改日期，请先拖入「待分配」，再选择日期并重新派单'
+              : '绿色 = 无冲突可派，红色 = 冲突，浅绿虚线框 = 客户期望位置；「待分配」栏拖入人员行完成分配'}
           </div>
         </div>
       </div>
@@ -458,7 +590,7 @@ export default function DispatchBoard({
               className={`wo-board__chip ${
                 hasConflict(o)
                   ? 'wo-board__chip--conflict'
-                  : isExpectedPlan(o)
+                  : isReassignOrder(o) || isExpectedPlan(o)
                     ? 'wo-board__chip--ok'
                     : 'wo-board__chip--adjusted'
               } ${o.id === selectedId ? 'wo-board__chip--selected' : ''}`}
@@ -671,7 +803,7 @@ export default function DispatchBoard({
           (conflictCount === 0 ? (
             <span className="wo-board__banner wo-board__banner--ok">
               <CheckCircleFilled />
-              {dayOrders.length} 单均无冲突，可一键批量派单
+              {dayOrders.length} 单均无冲突，可{reassignMode ? '确认改派' : '一键批量派单'}
             </span>
           ) : (
             <span className="wo-board__banner wo-board__banner--conflict">
@@ -680,7 +812,7 @@ export default function DispatchBoard({
             </span>
           ))}
         <span className="wo-board__plan-summary">
-          共 {chipOrders.length} 单 · 待分配 {poolOrders.length} 单 · 冲突 {conflictCount} 单 · 可派 {okOrders.length} 单
+          共 {chipOrders.length} 单 · 待分配 {poolOrders.length} 单 · 冲突 {conflictCount} 单 · {reassignMode ? '可改派' : '可派'} {okOrders.length} 单
         </span>
         <Button onClick={onClose}>取消</Button>
         <Button
@@ -689,7 +821,7 @@ export default function DispatchBoard({
           loading={submitting}
           onClick={onConfirm}
         >
-          确认派单（{okOrders.length}）
+          {reassignMode ? '确认改派' : '确认派单'}（{okOrders.length}）
         </Button>
       </div>
     </Drawer>

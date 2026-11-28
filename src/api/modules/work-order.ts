@@ -29,6 +29,9 @@ export interface WorkOrderItem {
   schedule_id: number
   service_address: string
   service_id: number
+  /** 当前派单的计划起止时间（秒），已派工单详情或排单详情返回。 */
+  planned_start_at?: number
+  planned_stop_at?: number
   duration: number
   service_name: string
   wo_status: number
