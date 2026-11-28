@@ -8466,7 +8466,7 @@
           ],
           "properties": {
               "approve": {
-                  "description": "true-通过 false-拒绝，必填",
+                  "description": "true-通过 false-拒绝，必填（指针以兼容 false）",
                   "type": "boolean"
               },
               "opinion": {

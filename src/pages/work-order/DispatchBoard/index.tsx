@@ -128,7 +128,7 @@ export default function DispatchBoard({
     if (!open) return
     setLoading(true)
     staffApi
-      .getStaffList({ page: 1, page_size: 100, status: 1 })
+      .getStaffList({ page: 1, page_size: 100, status: 1, staff_type: 2 })
       .then((res) => {
         setCandidates(res.list.map((staff) => ({
           id: staff.id,
@@ -573,14 +573,9 @@ export default function DispatchBoard({
                       </Tooltip>
                     )}
                   </div>
-                  {/* <div className="wo-board__staff-sub">
+                  <div className="wo-board__staff-sub">
                     {c.position_name}
-                    {c.upcoming_credential_expire ? (
-                      <span className="status-tag status-tag--orange">资质临期</span>
-                    ) : (
-                      <span className="status-tag status-tag--green">可派</span>
-                    )}
-                  </div> */}
+                  </div>
                 </div>
                 <div
                   className="wo-board__track"

@@ -22,7 +22,6 @@ const {
   createAppointment,
   getAppointmentDetail,
   getAppointments,
-  updateAppointmentStatus,
   visitAppointment,
 } = appointmentApi
 import { formatDateTime } from '@/utils'
@@ -173,25 +172,25 @@ export default function AdmissionList() {
   }
 
   /** 状态回写（跟进结果） */
-  const onSaveStatus = async () => {
-    if (followId == null || nextStatus == null) {
-      message.warning('请选择预约状态')
-      return
-    }
-    setActing(true)
-    try {
-      await updateAppointmentStatus(followId, {
-        status: nextStatus,
-        remark: followRemark.trim() || undefined,
-      })
-      message.success('预约状态已更新')
-      load()
-    } catch {
-      /* 拦截器已提示 */
-    } finally {
-      setActing(false)
-    }
-  }
+  // const onSaveStatus = async () => {
+  //   if (followId == null || nextStatus == null) {
+  //     message.warning('请选择预约状态')
+  //     return
+  //   }
+  //   setActing(true)
+  //   try {
+  //     await updateAppointmentStatus(followId, {
+  //       status: nextStatus,
+  //       remark: followRemark.trim() || undefined,
+  //     })
+  //     message.success('预约状态已更新')
+  //     load()
+  //   } catch {
+  //     /* 拦截器已提示 */
+  //   } finally {
+  //     setActing(false)
+  //   }
+  // }
 
   /** 到院确认 */
   const onVisit = async () => {
@@ -436,7 +435,6 @@ export default function AdmissionList() {
             onChange={(e) => setForm((f) => ({ ...f, remark: e.target.value }))}
           />
         </div>
-        <div className="ad-note">一期仅登记意向与跟进，不处理床位、合同、费用和正式入住办理。</div>
       </Drawer>
 
       {/* 入住意向跟进抽屉 */}
@@ -458,11 +456,13 @@ export default function AdmissionList() {
               </div>
               <div className="ad-follow__member-sub">
                 预约到访：{formatAppointmentDate(followDetail.appointment_date)}
-                {followDetail.time_slot ? ` ${followDetail.time_slot}` : ''}　状态：
-                {APPOINTMENT_STATUS_MAP[followDetail.status ?? 0] ?? '-'}
+                {followDetail.time_slot ? ` ${followDetail.time_slot}` : ''}
               </div>
               <div className="ad-follow__member-sub">
-                服务意向：{followDetail.service_interest || '-'}
+                状态：{APPOINTMENT_STATUS_MAP[followDetail.status ?? 0] ?? '-'}
+              </div>
+              <div className="ad-follow__member-sub">
+                还有什么想了解的：{followDetail.service_interest || '-'}
               </div>
               {followDetail.remark && (
                 <div className="ad-follow__member-sub">备注：{followDetail.remark}</div>
@@ -499,9 +499,9 @@ export default function AdmissionList() {
               />
             </div>
             <div className="ad-drawer__footer" style={{ padding: 0 }}>
-              <Button type="primary" loading={acting} onClick={onSaveStatus}>
+              {/* <Button type="primary" loading={acting} onClick={onSaveStatus}>
                 保存状态
-              </Button>
+              </Button> */}
               <Button loading={acting} onClick={onVisit}>
                 确认到院
               </Button>
@@ -510,9 +510,6 @@ export default function AdmissionList() {
                   取消预约
                 </Button>
               </Popconfirm>
-            </div>
-            <div className="ad-note">
-              逐条跟进记录暂无独立接口，跟进内容将随状态回写或到院、取消操作一并提交。
             </div>
           </>
         )}
